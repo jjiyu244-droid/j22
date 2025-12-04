@@ -142,53 +142,17 @@ async function fetchAndApplyPrices() {
   }
 }
 
-// --- 로그인 / 회원 / 유저 상태 ---
-const STORAGE_KEY = 'novastake-demo-user';
-const USERS_KEY = 'novastake-demo-users';
+// --- 로그인 / 회원 / 유저 상태 (Firebase 기반) ---
+const firebase = window.__firebase || {};
+const auth = firebase.auth;
+const db = firebase.db;
+
 let currentUser = null;
 let userStakes = {
   BTC: 0,
   ETH: 0,
   XRP: 0,
 };
-let users = [];
-
-function loadUsersFromStorage() {
-  try {
-    const raw = localStorage.getItem(USERS_KEY);
-    if (!raw) return;
-    users = JSON.parse(raw) || [];
-  } catch {
-    users = [];
-  }
-}
-
-function saveUsersToStorage() {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
-function loadUserFromStorage() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    const parsed = JSON.parse(raw);
-    currentUser = parsed.user || null;
-    userStakes = parsed.stakes || userStakes;
-  } catch {
-    // ignore
-  }
-}
-
-function saveUserToStorage() {
-  if (!currentUser) return;
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify({
-      user: currentUser,
-      stakes: userStakes,
-    }),
-  );
-}
 
 function updateLoginUI() {
   const loginBtn = $('#loginBtn');

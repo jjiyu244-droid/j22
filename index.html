@@ -354,6 +354,61 @@
       </div>
     </div>
 
+    <!-- Firebase core (Auth/Firestore/Analytics) 초기화 -->
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js';
+      import { getAnalytics } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js';
+      import {
+        getAuth,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        signOut,
+        onAuthStateChanged,
+      } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js';
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        setDoc,
+        updateDoc,
+      } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js';
+
+      // Your web app's Firebase configuration
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: 'AIzaSyBvb8p8PFmeIh3ZVyWqWk1RQLBZyAUpfk4',
+        authDomain: 'j22j22.firebaseapp.com',
+        projectId: 'j22j22',
+        storageBucket: 'j22j22.firebasestorage.app',
+        messagingSenderId: '874202688810',
+        appId: '1:874202688810:web:d384f6ea7cc4dcfb0b4253',
+        measurementId: 'G-2BEJP8J1VT',
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      getAnalytics(app);
+
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // 나중에 Auth/Firestore 연동 시 재사용할 수 있도록 전역에 노출
+      window.__firebase = {
+        app,
+        auth,
+        db,
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        signOut,
+        onAuthStateChanged,
+        doc,
+        getDoc,
+        setDoc,
+        updateDoc,
+      };
+    </script>
+
     <script src="./script.js"></script>
   </body>
 </html>
