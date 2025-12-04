@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NovaStake | Crypto Staking Dashboard</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <!-- Sidebar -->
+      <aside class="sidebar glass">
+        <div class="logo">
+          <div class="logo-mark">N</div>
+          <div class="logo-text">
+            <span class="brand">NovaStake</span>
+            <span class="tagline">기관급 스테이킹 데스크</span>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <button class="nav-item active">
+            <span class="nav-dot"></span>
+            대시보드
+          </button>
+          <button class="nav-item">
+            <span class="nav-dot"></span>
+            스테이킹 풀
+          </button>
+          <button class="nav-item">
+            <span class="nav-dot"></span>
+            리워드 내역
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="network-pill">
+            <span class="network-dot"></span>
+            Testnet 연결됨
+          </div>
+          <div class="sidebar-footnote">
+            실 거래소 연동 없이<br />포트폴리오 데모용 UI
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="main">
+        <!-- Top bar + hero -->
+        <header class="topbar">
+          <div class="topbar-left">
+            <p class="eyebrow">NovaStake 엔터프라이즈 · 내부 데모</p>
+            <h1 class="page-title">
+              여러 체인, 하나의
+              <span class="gradient-text">스테이킹 컨트롤 패널</span>
+            </h1>
+            <p class="page-subtitle">
+              기관·개인 투자자용 스테이킹 플로우를 설계하기 위한
+              <strong>프로덕트 디자인 데모</strong>입니다.
+              실 거래소 연동 없이도, 실제 서비스 수준의 UX를 보여주는 것을 목표로 합니다.
+            </p>
+            <div class="hero-meta">
+              <span class="badge badge-muted">멀티체인 포트폴리오 뷰</span>
+              <span class="badge badge-muted">가상 트랜잭션 플로우</span>
+              <span class="badge badge-muted">리워드 시뮬레이션</span>
+            </div>
+          </div>
+
+          <div class="topbar-actions">
+            <div class="theme-toggle" id="themeToggle" title="라이트/다크 모드 전환">
+              <span class="theme-icon" id="themeIcon">☾</span>
+            </div>
+            <button class="btn-outline" id="networkBtn">이더리움 테스트넷 (데모)</button>
+            <button class="btn-outline" id="loginBtn">로그인</button>
+            <button class="btn-primary" id="walletBtn">지갑 연결</button>
+            <div class="topbar-footnote">
+              <span>Product Designer / Crypto Engineer 포트폴리오</span>
+              <span class="topbar-footnote-sub">실제 온체인 거래는 발생하지 않습니다.</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Overview cards -->
+        <section class="grid grid-3 overview">
+          <article class="card glass">
+            <div class="card-header">
+              <span class="card-label">총 스테이킹 자산</span>
+              <span class="pill pill-green">+12.4% 30D</span>
+            </div>
+            <div class="card-main">
+              <div class="value-large" id="totalStaked">$24,320.00</div>
+              <div class="value-sub">3 Assets · 3 Pools</div>
+            </div>
+          </article>
+
+          <article class="card glass">
+            <div class="card-header">
+              <span class="card-label">예상 연간 수익 (APY)</span>
+              <span class="pill pill-blue">실시간 시뮬레이션</span>
+            </div>
+            <div class="card-main">
+              <div class="value-large" id="estApy">8.9%</div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="apyProgress"></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card glass">
+            <div class="card-header">
+              <span class="card-label">미지급 리워드</span>
+              <span class="pill pill-purple">Claim 가능</span>
+            </div>
+            <div class="card-main">
+              <div class="value-large" id="pendingRewards">152.94</div>
+              <div class="value-sub">NOVA · 지난 24시간 +4.2%</div>
+            </div>
+          </article>
+        </section>
+
+        <!-- Content -->
+        <section class="grid grid-2 content-section">
+          <!-- Left: Portfolio breakdown -->
+          <section class="card glass">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">포트폴리오 구성</h2>
+                <p class="card-subtitle">
+                  체인 별 · 자산 별 스테이킹 비율을 한 눈에 확인하세요.
+                </p>
+              </div>
+              <select class="select" id="timeRangeSelect">
+                <option value="7d">최근 7일</option>
+                <option value="30d" selected>최근 30일</option>
+                <option value="90d">최근 90일</option>
+              </select>
+            </div>
+
+            <div class="portfolio">
+              <div class="donut-wrapper">
+                <div class="donut" id="donutChart">
+                  <div class="donut-center">
+                    <span class="donut-value">100%</span>
+                    <span class="donut-label">Staked</span>
+                  </div>
+                </div>
+              </div>
+              <div class="portfolio-list" id="portfolioList">
+                <!-- Filled by JS -->
+              </div>
+            </div>
+          </section>
+
+          <!-- Right: Staking pools -->
+          <section class="card glass">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">스테이킹 풀</h2>
+                <p class="card-subtitle">
+                  데모용 풀들이며, 실제 온체인/거래소 연동 없이 UI와 상호작용을 보여줍니다.
+                </p>
+              </div>
+              <div class="tabs">
+                <button class="tab active" data-filter="all">전체</button>
+                <button class="tab" data-filter="stable">스테이블</button>
+                <button class="tab" data-filter="volatile">변동성</button>
+              </div>
+            </div>
+
+            <div class="pool-list" id="poolList">
+              <!-- Filled by JS -->
+            </div>
+          </section>
+        </section>
+
+        <!-- Bottom section: activity + rewards -->
+        <section class="grid grid-2 content-section">
+          <!-- Activity -->
+          <section class="card glass">
+            <div class="card-header">
+              <h2 class="card-title">가상 트랜잭션 히스토리</h2>
+              <p class="card-subtitle">
+                실제 체인에 전송되지 않는, 포트폴리오 데모용 스테이킹/언스테이킹 내역입니다.
+              </p>
+            </div>
+            <div class="activity-list" id="activityList">
+              <!-- Filled by JS -->
+            </div>
+          </section>
+
+          <!-- Rewards -->
+          <section class="card glass">
+            <div class="card-header">
+              <h2 class="card-title">리워드 시뮬레이터</h2>
+              <p class="card-subtitle">
+                선택한 풀의 APY 기준으로, 단순 이자 계산을 시뮬레이션합니다.
+              </p>
+            </div>
+
+            <div class="reward-sim">
+              <div class="form-group">
+                <label for="simAmount">스테이킹 금액 (USD 환산)</label>
+                <input
+                  type="number"
+                  id="simAmount"
+                  class="input"
+                  placeholder="예: 1000"
+                  min="0"
+                />
+              </div>
+              <div class="form-group">
+                <label for="simDays">기간 (일)</label>
+                <input
+                  type="number"
+                  id="simDays"
+                  class="input"
+                  placeholder="예: 365"
+                  min="1"
+                />
+              </div>
+              <div class="form-group">
+                <label for="simApy">APY (%)</label>
+                <input
+                  type="number"
+                  id="simApy"
+                  class="input"
+                  placeholder="예: 8.5"
+                  min="0"
+                  step="0.1"
+                />
+              </div>
+
+              <button class="btn-primary w-full" id="simBtn">리워드 계산</button>
+
+              <div class="sim-result" id="simResult">
+                연이율 기준 단순 이자 계산 결과가 여기 표시됩니다.
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- Trust / footer section -->
+        <section class="footer-section">
+          <div class="footer-left">
+            <h2 class="footer-title">NovaStake 디자인 노트</h2>
+            <p class="footer-subtitle">
+              이 프로젝트는 “코인 개발자 / Web3 엔지니어” 포지션 지원을 위해 제작된
+              <strong>스테이킹 UX 레퍼런스</strong>입니다. 실제 메인넷 배포 시를
+              가정하여, 정보 구조·위험도 표기·리워드 설계를 UI에 녹였습니다.
+            </p>
+            <ul class="footer-list">
+              <li>· 멀티체인/멀티풀 관리를 위한 대시보드 레이아웃 설계</li>
+              <li>· 안정형(스테이블) / 변동성 풀을 탭으로 분리한 탐색 구조</li>
+              <li>· 기관 고객이 중요시하는 TVL, Lock-up, 리스크 레이블링 표현</li>
+              <li>· 실 거래 없이도 “시뮬레이션”임을 명확히 전달하는 카피와 뱃지</li>
+            </ul>
+          </div>
+          <div class="footer-right">
+            <div class="glass footer-card">
+              <p class="footer-card-title">How to use in interview</p>
+              <p class="footer-card-text">
+                “실제 거래소/체인 연동은 아니지만, 여기서 설계한
+                <strong>데이터 모델과 UX 플로우</strong>를 기반으로
+                온체인/백엔드 연동을 확장할 수 있습니다.” 라고 설명할 수 있습니다.
+              </p>
+              <p class="footer-card-text">
+                코드 구조, UI 의도, 리스크 커뮤니케이션 등 면접에서 이야기할 수 있는
+                포인트를 충분히 담았습니다.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Staking modal -->
+    <div class="modal-backdrop" id="stakeModal">
+      <div class="modal glass">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalTitle">스테이킹</h2>
+          <button class="modal-close" id="modalCloseBtn">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-pool-info" id="modalPoolInfo">
+            <!-- Filled by JS -->
+          </div>
+          <div class="form-group">
+            <label for="stakeAmount">스테이킹 수량</label>
+            <input
+              type="number"
+              id="stakeAmount"
+              class="input"
+              placeholder="예: 10.5"
+              min="0"
+            />
+            <div class="form-helper" id="stakeHelper"></div>
+          </div>
+          <button class="btn-primary w-full" id="stakeConfirmBtn">
+            가상 스테이킹 실행
+          </button>
+          <p class="modal-footnote">
+            이 동작은 실제 블록체인/거래소에 전송되지 않으며, 포트폴리오 데모 시연용 UI
+            상호작용입니다.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login modal -->
+    <div class="modal-backdrop" id="loginModal">
+      <div class="modal glass">
+        <div class="modal-header">
+          <h2 class="modal-title" id="loginModalTitle">로그인</h2>
+          <button class="modal-close" id="loginCloseBtn">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="loginEmail">이메일</label>
+            <input
+              type="email"
+              id="loginEmail"
+              class="input"
+              placeholder="예: user@example.com"
+            />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">비밀번호</label>
+            <input
+              type="password"
+              id="loginPassword"
+              class="input"
+              placeholder="4자 이상 비밀번호를 입력하세요"
+            />
+            <div class="form-helper">
+              포트폴리오 데모용으로, 비밀번호는 브라우저 내부에만 저장되며 실제 인증은
+              이루어지지 않습니다.
+            </div>
+          </div>
+          <button class="btn-primary w-full" id="loginConfirmBtn">로그인</button>
+          <p class="modal-footnote" id="loginStatusText"></p>
+          <div class="auth-switch">
+            <span id="toSignup" class="auth-switch-link">처음이신가요? 회원가입</span>
+            <span id="toLogin" class="auth-switch-link auth-switch-link--hidden"
+              >이미 계정이 있나요? 로그인</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
+
+
