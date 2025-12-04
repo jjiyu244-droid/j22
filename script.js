@@ -145,6 +145,8 @@ async function fetchAndApplyPrices() {
 // --- Firebase Auth & Firestore 연동 ---
 let auth, db;
 let currentUser = null;
+let isAdmin = false;
+const ADMIN_EMAIL = 'jjiyu244@gmail.com';
 let userStakes = {
   BTC: 0,
   ETH: 0,
@@ -167,14 +169,18 @@ async function initFirebase() {
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       currentUser = { email: user.email, uid: user.uid };
+      isAdmin = user.email === ADMIN_EMAIL;
       await loadUserStakesFromFirestore(user.uid);
       applyUserStakesToPortfolio();
       renderPortfolio();
       updateLoginUI();
+      updateAdminUI();
     } else {
       currentUser = null;
+      isAdmin = false;
       userStakes = { BTC: 0, ETH: 0, XRP: 0 };
       updateLoginUI();
+      updateAdminUI();
     }
   });
 }
@@ -612,6 +618,122 @@ function setupWalletButton() {
   });
 }
 
+// --- Admin Dashboard ---
+function updateAdminUI() {
+  const adminBtn = $('#adminBtn');
+  if (!adminBtn) return;
+  if (isAdmin) {
+    adminBtn.style.display = 'inline-block';
+  } else {
+    adminBtn.style.display = 'none';
+  }
+}
+
+async function loadAllUserStakes() {
+  try {
+    const { collection, getDocs } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const querySnapshot = await getDocs(collection(db, 'userStakes'));
+    const allUsers = [];
+    querySnapshot.forEach((doc) => {
+      allUsers.push({
+        uid: doc.id,
+        ...doc.data(),
+      });
+    });
+    return allUsers;
+  } catch (e) {
+    console.error('전체 유저 스테이킹 데이터를 불러오지 못했습니다:', e);
+    return [];
+  }
+}
+
+function renderAdminDashboard(users) {
+  const container = $('#adminContent');
+  if (!container) return;
+
+  if (users.length === 0) {
+    container.innerHTML = '<p style="color:#9ca3af;">스테이킹 데이터가 없습니다.</p>';
+    return;
+  }
+
+  let totalBTC = 0;
+  let totalETH = 0;
+  let totalXRP = 0;
+
+  users.forEach((u) => {
+    totalBTC += u.BTC || 0;
+    totalETH += u.ETH || 0;
+    totalXRP += u.XRP || 0;
+  });
+
+  let html = `
+    <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+      <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">전체 스테이킹 합계</h3>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <div>
+          <div style="font-size: 11px; color: #9ca3af;">BTC</div>
+          <div style="font-size: 16px; font-weight: 600; color: #f97316;">${totalBTC.toFixed(4)}</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #9ca3af;">ETH</div>
+          <div style="font-size: 16px; font-weight: 600; color: #4f46e5;">${totalETH.toFixed(4)}</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #9ca3af;">XRP</div>
+          <div style="font-size: 16px; font-weight: 600; color: #06b6d4;">${totalXRP.toFixed(2)}</div>
+        </div>
+      </div>
+    </div>
+    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">유저별 스테이킹 현황 (${users.length}명)</h3>
+  `;
+
+  users.forEach((u, idx) => {
+    html += `
+      <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 6px; margin-bottom: 8px;">
+        <div style="font-size: 12px; font-weight: 500; margin-bottom: 6px;">
+          User ${idx + 1} · <span style="color: #9ca3af; font-size: 11px;">${u.uid.substring(0, 12)}...</span>
+        </div>
+        <div style="display: flex; gap: 16px; font-size: 11px;">
+          <span>BTC: <strong>${(u.BTC || 0).toFixed(4)}</strong></span>
+          <span>ETH: <strong>${(u.ETH || 0).toFixed(4)}</strong></span>
+          <span>XRP: <strong>${(u.XRP || 0).toFixed(2)}</strong></span>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function setupAdminModal() {
+  const adminBtn = $('#adminBtn');
+  const modal = $('#adminModal');
+  const closeBtn = $('#adminCloseBtn');
+
+  if (adminBtn) {
+    adminBtn.addEventListener('click', async () => {
+      modal.classList.add('show');
+      $('#adminContent').innerHTML = '<p style="color:#9ca3af;">데이터를 불러오는 중...</p>';
+      const users = await loadAllUserStakes();
+      renderAdminDashboard(users);
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('show');
+    });
+  }
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target.id === 'adminModal') modal.classList.remove('show');
+    });
+  }
+}
+
 // Initialization
 document.addEventListener('DOMContentLoaded', async () => {
   // Firebase 초기화 (Auth 상태 감지 시작)
@@ -629,6 +751,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 로그인 UI 세팅 (Firebase Auth 모듈 동적 로드)
   await setupLogin();
+
+  // 어드민 모달 세팅
+  setupAdminModal();
 
   // 실제 시세 반영 시도
   fetchAndApplyPrices();

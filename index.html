@@ -77,6 +77,7 @@
               <span class="theme-icon" id="themeIcon">☾</span>
             </div>
             <button class="btn-outline" id="networkBtn">이더리움 테스트넷 (데모)</button>
+            <button class="btn-outline" id="adminBtn" style="display:none;">🔐 어드민</button>
             <button class="btn-outline" id="loginBtn">로그인</button>
             <button class="btn-primary" id="walletBtn">지갑 연결</button>
             <div class="topbar-footnote">
@@ -349,6 +350,24 @@
             <span id="toLogin" class="auth-switch-link auth-switch-link--hidden"
               >이미 계정이 있나요? 로그인</span
             >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Dashboard Modal -->
+    <div class="modal-backdrop" id="adminModal">
+      <div class="modal glass" style="max-width: 900px;">
+        <div class="modal-header">
+          <h2 class="modal-title">🔐 어드민 대시보드</h2>
+          <button class="modal-close" id="adminCloseBtn">✕</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size: 13px; color: #9ca3af; margin-bottom: 16px;">
+            전체 유저의 스테이킹 데이터를 조회합니다. (Firestore 기반)
+          </p>
+          <div id="adminContent" style="max-height: 400px; overflow-y: auto;">
+            <!-- Filled by JS -->
           </div>
         </div>
       </div>
