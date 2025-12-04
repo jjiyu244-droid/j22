@@ -142,17 +142,77 @@ async function fetchAndApplyPrices() {
   }
 }
 
-// --- 로그인 / 회원 / 유저 상태 (Firebase 기반) ---
-const firebase = window.__firebase || {};
-const auth = firebase.auth;
-const db = firebase.db;
-
+// --- Firebase Auth & Firestore 연동 ---
+let auth, db;
 let currentUser = null;
 let userStakes = {
   BTC: 0,
   ETH: 0,
   XRP: 0,
 };
+
+// Firebase 모듈 가져오기 (index.html에서 window.__firebase로 노출)
+async function initFirebase() {
+  if (!window.__firebase) {
+    console.warn('Firebase가 아직 로드되지 않았습니다.');
+    return;
+  }
+  auth = window.__firebase.auth;
+  db = window.__firebase.db;
+
+  // Auth 상태 변화 감지
+  const { onAuthStateChanged } = await import(
+    'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js'
+  );
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUser = { email: user.email, uid: user.uid };
+      await loadUserStakesFromFirestore(user.uid);
+      applyUserStakesToPortfolio();
+      renderPortfolio();
+      updateLoginUI();
+    } else {
+      currentUser = null;
+      userStakes = { BTC: 0, ETH: 0, XRP: 0 };
+      updateLoginUI();
+    }
+  });
+}
+
+// Firestore에서 유저 스테이킹 데이터 불러오기
+async function loadUserStakesFromFirestore(uid) {
+  try {
+    const { doc, getDoc } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const docRef = doc(db, 'userStakes', uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      userStakes.BTC = data.BTC || 0;
+      userStakes.ETH = data.ETH || 0;
+      userStakes.XRP = data.XRP || 0;
+    } else {
+      userStakes = { BTC: 0, ETH: 0, XRP: 0 };
+    }
+  } catch (e) {
+    console.error('Firestore에서 데이터를 불러오지 못했습니다:', e);
+  }
+}
+
+// Firestore에 유저 스테이킹 데이터 저장
+async function saveUserStakesToFirestore() {
+  if (!currentUser || !currentUser.uid) return;
+  try {
+    const { doc, setDoc } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const docRef = doc(db, 'userStakes', currentUser.uid);
+    await setDoc(docRef, userStakes);
+  } catch (e) {
+    console.error('Firestore에 데이터를 저장하지 못했습니다:', e);
+  }
+}
 
 function updateLoginUI() {
   const loginBtn = $('#loginBtn');
@@ -173,7 +233,7 @@ function applyUserStakesToPortfolio() {
   });
 }
 
-function setupLogin() {
+async function setupLogin() {
   const loginBtn = $('#loginBtn');
   const modal = $('#loginModal');
   const closeBtn = $('#loginCloseBtn');
@@ -184,10 +244,12 @@ function setupLogin() {
   const toLogin = $('#toLogin');
   let mode = 'login'; // 'login' | 'signup'
 
-  loadUsersFromStorage();
-  loadUserFromStorage();
-  applyUserStakesToPortfolio();
-  updateLoginUI();
+  // Firebase Auth 모듈 동적 import
+  const {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+  } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
 
   const setMode = (nextMode) => {
     mode = nextMode;
@@ -208,13 +270,17 @@ function setupLogin() {
   };
 
   if (loginBtn) {
-    loginBtn.addEventListener('click', () => {
+    loginBtn.addEventListener('click', async () => {
       if (currentUser) {
         // 로그아웃
-        currentUser = null;
-        userStakes = { BTC: 0, ETH: 0, XRP: 0 };
-        localStorage.removeItem(STORAGE_KEY);
-        window.location.reload();
+        try {
+          await signOut(auth);
+          currentUser = null;
+          userStakes = { BTC: 0, ETH: 0, XRP: 0 };
+          window.location.reload();
+        } catch (e) {
+          console.error('로그아웃 실패:', e);
+        }
         return;
       }
       statusText.textContent = '';
@@ -236,7 +302,7 @@ function setupLogin() {
   }
 
   if (confirmBtn) {
-    confirmBtn.addEventListener('click', () => {
+    confirmBtn.addEventListener('click', async () => {
       const email = $('#loginEmail').value.trim();
       const password = $('#loginPassword').value.trim();
       if (!email || !password) {
@@ -245,43 +311,40 @@ function setupLogin() {
       }
 
       if (mode === 'signup') {
-        if (password.length < 4) {
-          statusText.textContent = '비밀번호는 4자 이상으로 설정해주세요.';
+        if (password.length < 6) {
+          statusText.textContent = 'Firebase는 비밀번호 6자 이상을 요구합니다.';
           return;
         }
-        const exists = users.find((u) => u.email === email);
-        if (exists) {
-          statusText.textContent = '이미 가입된 이메일입니다. 로그인 모드로 전환합니다.';
-          setMode('login');
-          return;
+        try {
+          await createUserWithEmailAndPassword(auth, email, password);
+          statusText.textContent = '회원가입 및 로그인 완료. 창이 자동으로 닫힙니다.';
+          setTimeout(() => {
+            $('#loginModal').classList.remove('show');
+          }, 700);
+        } catch (error) {
+          if (error.code === 'auth/email-already-in-use') {
+            statusText.textContent = '이미 가입된 이메일입니다. 로그인 모드로 전환합니다.';
+            setMode('login');
+          } else {
+            statusText.textContent = `회원가입 실패: ${error.message}`;
+          }
         }
-        users.push({ email, password });
-        saveUsersToStorage();
-        currentUser = { email };
-        saveUserToStorage();
-        updateLoginUI();
-        statusText.textContent = '회원가입 및 로그인 완료. 창이 자동으로 닫힙니다.';
-        setTimeout(() => {
-          $('#loginModal').classList.remove('show');
-        }, 700);
       } else {
-        if (!users.length) {
-          statusText.textContent =
-            '등록된 계정이 없습니다. 먼저 회원가입을 진행해주세요.';
-          return;
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          statusText.textContent = '로그인 되었습니다. 창이 자동으로 닫힙니다.';
+          setTimeout(() => {
+            $('#loginModal').classList.remove('show');
+          }, 700);
+        } catch (error) {
+          if (error.code === 'auth/user-not-found') {
+            statusText.textContent = '등록된 계정이 없습니다. 먼저 회원가입을 진행해주세요.';
+          } else if (error.code === 'auth/wrong-password') {
+            statusText.textContent = '비밀번호가 올바르지 않습니다.';
+          } else {
+            statusText.textContent = `로그인 실패: ${error.message}`;
+          }
         }
-        const found = users.find((u) => u.email === email && u.password === password);
-        if (!found) {
-          statusText.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.';
-          return;
-        }
-        currentUser = { email };
-        saveUserToStorage();
-        updateLoginUI();
-        statusText.textContent = '로그인 되었습니다. 창이 자동으로 닫힙니다.';
-        setTimeout(() => {
-          $('#loginModal').classList.remove('show');
-        }, 700);
       }
     });
   }
@@ -440,7 +503,7 @@ function openStakeModal(poolId) {
     </div>
   `;
   $('#stakeAmount').value = '';
-  $('#stakeHelper').textContent = '이 값은 실제 체인에 반영되지 않습니다.';
+  $('#stakeHelper').textContent = 'Firebase Auth 로그인 시 Firestore에 저장됩니다.';
 
   $('#stakeModal').classList.add('show');
 }
@@ -466,7 +529,7 @@ function setupStakeModal() {
     }
   });
 
-  $('#stakeConfirmBtn').addEventListener('click', () => {
+  $('#stakeConfirmBtn').addEventListener('click', async () => {
     const amount = parseFloat($('#stakeAmount').value || '0');
     const helper = $('#stakeHelper');
     if (!currentPool) return;
@@ -479,16 +542,16 @@ function setupStakeModal() {
 
     if (!currentUser) {
       helper.classList.remove('text-danger');
-      helper.textContent = '로그인 후에만 스테이킹 수량이 대시보드에 반영됩니다.';
+      helper.textContent = '로그인 후에만 스테이킹 수량이 Firestore에 저장됩니다.';
       return;
     }
 
     helper.classList.remove('text-danger');
-    helper.textContent = `가상으로 ${currentPool.name} 풀에 ${amount} ${currentPool.symbol}를 스테이킹했다고 가정합니다.`;
+    helper.textContent = `${currentPool.name} 풀에 ${amount} ${currentPool.symbol}를 스테이킹합니다.`;
 
     // 유저별 스테이킹 수량 업데이트
     userStakes[currentPool.symbol] = (userStakes[currentPool.symbol] || 0) + amount;
-    saveUserToStorage();
+    await saveUserStakesToFirestore();
 
     // 포트폴리오/요약 수치 갱신
     applyUserStakesToPortfolio();
@@ -497,7 +560,7 @@ function setupStakeModal() {
     // prepend virtual activity
     activity.unshift({
       type: '스테이킹',
-      status: '시뮬레이션',
+      status: 'Firestore 저장',
       time: '방금 전',
       desc: currentPool.name,
       amount: `+${amount} ${currentPool.symbol}`,
@@ -507,7 +570,7 @@ function setupStakeModal() {
     renderActivity();
 
     // light feedback
-    $('#stakeConfirmBtn').textContent = '완료 (데모)';
+    $('#stakeConfirmBtn').textContent = '완료 (Firebase)';
     setTimeout(() => {
       $('#stakeConfirmBtn').textContent = '가상 스테이킹 실행';
       closeStakeModal();
@@ -534,10 +597,9 @@ function setupThemeToggle() {
 
   toggle.addEventListener('click', () => {
     dark = !dark;
-    document.body.style.background =
-      dark
-        ? 'radial-gradient(circle at top, #1e293b 0, #020617 55%, #000 100%)'
-        : 'radial-gradient(circle at top, #e5e7eb 0, #e2e8f0 40%, #cbd5f5 100%)';
+    document.body.style.background = dark
+      ? 'radial-gradient(circle at top, #1e293b 0, #020617 55%, #000 100%)'
+      : 'radial-gradient(circle at top, #e5e7eb 0, #e2e8f0 40%, #cbd5f5 100%)';
     icon.textContent = dark ? '☾' : '☀';
   });
 }
@@ -551,8 +613,10 @@ function setupWalletButton() {
 }
 
 // Initialization
-document.addEventListener('DOMContentLoaded', () => {
-  setupLogin();
+document.addEventListener('DOMContentLoaded', async () => {
+  // Firebase 초기화 (Auth 상태 감지 시작)
+  await initFirebase();
+
   renderPortfolio();
   renderPools();
   renderActivity();
@@ -562,8 +626,10 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabs();
   setupThemeToggle();
   setupWalletButton();
+
+  // 로그인 UI 세팅 (Firebase Auth 모듈 동적 로드)
+  await setupLogin();
+
   // 실제 시세 반영 시도
   fetchAndApplyPrices();
 });
-
-
