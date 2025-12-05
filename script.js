@@ -371,10 +371,11 @@ function renderPortfolio() {
   portfolioData.forEach((item) => {
     const el = document.createElement('div');
     el.className = 'portfolio-item';
+    const iconUrl = `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@latest/svg/color/${item.symbol.toLowerCase()}.svg`;
     el.innerHTML = `
       <div class="token-info">
-        <div class="token-icon" style="background:${item.bg};color:${item.color}">
-          ${item.label ? item.label[0] : item.symbol[0]}
+        <div class="token-icon" style="background:${item.bg};padding:8px;">
+          <img src="${iconUrl}" alt="${item.symbol}" style="width:100%;height:100%;object-fit:contain;" />
         </div>
         <div class="token-meta">
           <span class="token-symbol">${item.label || item.symbol}</span>
@@ -400,10 +401,11 @@ function renderPools(filter = 'all') {
     .forEach((pool) => {
       const el = document.createElement('div');
       el.className = 'pool-card';
+      const iconUrl = `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@latest/svg/color/${pool.symbol.toLowerCase()}.svg`;
       el.innerHTML = `
         <div class="pool-main">
-          <div class="token-icon" style="background:rgba(148,163,184,0.2);color:#e5e7eb">
-            ${pool.symbol[0]}
+          <div class="token-icon" style="background:rgba(148,163,184,0.2);padding:8px;">
+            <img src="${iconUrl}" alt="${pool.symbol}" style="width:100%;height:100%;object-fit:contain;" />
           </div>
           <div>
             <div class="pool-apr">${pool.name}</div>
