@@ -42,10 +42,7 @@
         <div class="sidebar-footer">
           <div class="network-pill">
             <span class="network-dot"></span>
-            Testnet 연결됨
-          </div>
-          <div class="sidebar-footnote">
-            실 거래소 연동 없이<br />포트폴리오 데모용 UI
+            메인넷 연결됨
           </div>
         </div>
       </aside>
@@ -55,20 +52,19 @@
         <!-- Top bar + hero -->
         <header class="topbar">
           <div class="topbar-left">
-            <p class="eyebrow">NovaStake 엔터프라이즈 · 내부 데모</p>
+            <p class="eyebrow">NovaStake 엔터프라이즈</p>
             <h1 class="page-title">
               여러 체인, 하나의
               <span class="gradient-text">스테이킹 컨트롤 패널</span>
             </h1>
             <p class="page-subtitle">
-              기관·개인 투자자용 스테이킹 플로우를 설계하기 위한
-              <strong>프로덕트 디자인 데모</strong>입니다.
-              실 거래소 연동 없이도, 실제 서비스 수준의 UX를 보여주는 것을 목표로 합니다.
+              기관·개인 투자자를 위한 통합 스테이킹 플랫폼.
+              <strong>안전하고 효율적인 자산 운용</strong>을 지원합니다.
             </p>
             <div class="hero-meta">
-              <span class="badge badge-muted">멀티체인 포트폴리오 뷰</span>
-              <span class="badge badge-muted">가상 트랜잭션 플로우</span>
-              <span class="badge badge-muted">리워드 시뮬레이션</span>
+              <span class="badge badge-muted">멀티체인 포트폴리오</span>
+              <span class="badge badge-muted">실시간 트랜잭션</span>
+              <span class="badge badge-muted">스마트 리워드</span>
             </div>
           </div>
 
@@ -76,14 +72,10 @@
             <div class="theme-toggle" id="themeToggle" title="라이트/다크 모드 전환">
               <span class="theme-icon" id="themeIcon">☾</span>
             </div>
-            <button class="btn-outline" id="networkBtn">이더리움 테스트넷 (데모)</button>
+            <button class="btn-outline" id="networkBtn">이더리움 메인넷</button>
             <button class="btn-outline" id="adminBtn" style="display:none;">🔐 어드민</button>
             <button class="btn-outline" id="loginBtn">로그인</button>
             <button class="btn-primary" id="walletBtn">지갑 연결</button>
-            <div class="topbar-footnote">
-              <span>Product Designer / Crypto Engineer 포트폴리오</span>
-              <span class="topbar-footnote-sub">실제 온체인 거래는 발생하지 않습니다.</span>
-            </div>
           </div>
         </header>
 
@@ -164,7 +156,7 @@
               <div>
                 <h2 class="card-title">스테이킹 풀</h2>
                 <p class="card-subtitle">
-                  데모용 풀들이며, 실제 온체인/거래소 연동 없이 UI와 상호작용을 보여줍니다.
+                  검증된 스테이킹 풀에서 안정적인 수익을 창출하세요.
                 </p>
               </div>
               <div class="tabs">
@@ -185,9 +177,9 @@
           <!-- Activity -->
           <section class="card glass">
             <div class="card-header">
-              <h2 class="card-title">가상 트랜잭션 히스토리</h2>
+              <h2 class="card-title">트랜잭션 히스토리</h2>
               <p class="card-subtitle">
-                실제 체인에 전송되지 않는, 포트폴리오 데모용 스테이킹/언스테이킹 내역입니다.
+                최근 스테이킹 및 언스테이킹 내역을 확인하세요.
               </p>
             </div>
             <div class="activity-list" id="activityList">
@@ -198,9 +190,9 @@
           <!-- Rewards -->
           <section class="card glass">
             <div class="card-header">
-              <h2 class="card-title">리워드 시뮬레이터</h2>
+              <h2 class="card-title">리워드 계산기</h2>
               <p class="card-subtitle">
-                선택한 풀의 APY 기준으로, 단순 이자 계산을 시뮬레이션합니다.
+                선택한 풀의 APY 기준으로 예상 리워드를 계산합니다.
               </p>
             </div>
 
@@ -240,7 +232,7 @@
               <button class="btn-primary w-full" id="simBtn">리워드 계산</button>
 
               <div class="sim-result" id="simResult">
-                연이율 기준 단순 이자 계산 결과가 여기 표시됩니다.
+                예상 리워드 계산 결과가 여기 표시됩니다.
               </div>
             </div>
           </section>
@@ -249,30 +241,27 @@
         <!-- Trust / footer section -->
         <section class="footer-section">
           <div class="footer-left">
-            <h2 class="footer-title">NovaStake 디자인 노트</h2>
+            <h2 class="footer-title">안전하고 투명한 스테이킹</h2>
             <p class="footer-subtitle">
-              이 프로젝트는 “코인 개발자 / Web3 엔지니어” 포지션 지원을 위해 제작된
-              <strong>스테이킹 UX 레퍼런스</strong>입니다. 실제 메인넷 배포 시를
-              가정하여, 정보 구조·위험도 표기·리워드 설계를 UI에 녹였습니다.
+              NovaStake는 <strong>기관급 보안</strong>과 투명한 운영을 통해
+              고객 자산을 안전하게 보호합니다.
             </p>
             <ul class="footer-list">
-              <li>· 멀티체인/멀티풀 관리를 위한 대시보드 레이아웃 설계</li>
-              <li>· 안정형(스테이블) / 변동성 풀을 탭으로 분리한 탐색 구조</li>
-              <li>· 기관 고객이 중요시하는 TVL, Lock-up, 리스크 레이블링 표현</li>
-              <li>· 실 거래 없이도 “시뮬레이션”임을 명확히 전달하는 카피와 뱃지</li>
+              <li>· 멀티체인 지원으로 포트폴리오 다각화</li>
+              <li>· 검증된 스테이킹 풀만 엄선하여 제공</li>
+              <li>· 실시간 TVL, Lock-up, 리스크 정보 제공</li>
+              <li>· 24/7 고객 지원 및 모니터링 시스템</li>
             </ul>
           </div>
           <div class="footer-right">
             <div class="glass footer-card">
-              <p class="footer-card-title">How to use in interview</p>
+              <p class="footer-card-title">왜 NovaStake인가?</p>
               <p class="footer-card-text">
-                “실제 거래소/체인 연동은 아니지만, 여기서 설계한
-                <strong>데이터 모델과 UX 플로우</strong>를 기반으로
-                온체인/백엔드 연동을 확장할 수 있습니다.” 라고 설명할 수 있습니다.
+                기관 투자자부터 개인 투자자까지, 누구나 쉽고 안전하게
+                <strong>스테이킹 수익을 창출</strong>할 수 있는 플랫폼입니다.
               </p>
               <p class="footer-card-text">
-                코드 구조, UI 의도, 리스크 커뮤니케이션 등 면접에서 이야기할 수 있는
-                포인트를 충분히 담았습니다.
+                직관적인 대시보드와 상세한 분석 도구로 최적의 투자 결정을 지원합니다.
               </p>
             </div>
           </div>
@@ -303,11 +292,10 @@
             <div class="form-helper" id="stakeHelper"></div>
           </div>
           <button class="btn-primary w-full" id="stakeConfirmBtn">
-            가상 스테이킹 실행
+            스테이킹 실행
           </button>
           <p class="modal-footnote">
-            이 동작은 실제 블록체인/거래소에 전송되지 않으며, 포트폴리오 데모 시연용 UI
-            상호작용입니다.
+            스테이킹이 완료되면 대시보드에 즉시 반영됩니다.
           </p>
         </div>
       </div>

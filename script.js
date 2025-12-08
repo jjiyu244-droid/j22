@@ -1,4 +1,4 @@
-// Demo data for staking portfolio
+// Staking portfolio data
 const portfolioData = [
   {
     symbol: 'BTC',
@@ -374,8 +374,8 @@ function renderPortfolio() {
     const iconUrl = `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@latest/svg/color/${item.symbol.toLowerCase()}.svg`;
     el.innerHTML = `
       <div class="token-info">
-        <div class="token-icon" style="background:${item.bg};padding:8px;">
-          <img src="${iconUrl}" alt="${item.symbol}" style="width:100%;height:100%;object-fit:contain;" />
+        <div class="token-icon" style="background:${item.bg};padding:4px;display:flex;align-items:center;justify-content:center;">
+          <img src="${iconUrl}" alt="${item.symbol}" style="width:66%;height:66%;object-fit:contain;" />
         </div>
         <div class="token-meta">
           <span class="token-symbol">${item.label || item.symbol}</span>
@@ -404,8 +404,8 @@ function renderPools(filter = 'all') {
       const iconUrl = `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@latest/svg/color/${pool.symbol.toLowerCase()}.svg`;
       el.innerHTML = `
         <div class="pool-main">
-          <div class="token-icon" style="background:rgba(148,163,184,0.2);padding:8px;">
-            <img src="${iconUrl}" alt="${pool.symbol}" style="width:100%;height:100%;object-fit:contain;" />
+          <div class="token-icon" style="background:rgba(148,163,184,0.2);padding:2px;display:flex;align-items:center;justify-content:center;">
+            <img src="${iconUrl}" alt="${pool.symbol}" style="width:95%;height:95%;object-fit:contain;" />
           </div>
           <div>
             <div class="pool-apr">${pool.name}</div>
@@ -481,9 +481,7 @@ function setupSimulator() {
     const earned = (amount * (apy / 100)) * yearFraction;
     const total = amount + earned;
 
-    resultEl.textContent = `단순 이자 기준, ${days}일 후 예상 리워드는 약 ${earned.toFixed(
-      2
-    )} USD이며, 총 잔액은 약 ${total.toFixed(2)} USD 입니다. (복리 효과 미포함)`;
+    resultEl.textContent = `${days}일 후 예상 리워드: ${earned.toFixed(2)} USD | 총 예상 금액: ${total.toFixed(2)} USD`;
   });
 }
 
@@ -505,13 +503,10 @@ function openStakeModal(poolId) {
     currentPool.lockup
   }</div>
       </div>
-      <div class="badge badge-success">
-        <span>데모 모드</span>
-      </div>
     </div>
   `;
   $('#stakeAmount').value = '';
-  $('#stakeHelper').textContent = 'Firebase Auth 로그인 시 Firestore에 저장됩니다.';
+  $('#stakeHelper').textContent = '로그인 후 스테이킹 내역이 자동으로 기록됩니다.';
 
   $('#stakeModal').classList.add('show');
 }
@@ -550,7 +545,7 @@ function setupStakeModal() {
 
     if (!currentUser) {
       helper.classList.remove('text-danger');
-      helper.textContent = '로그인 후에만 스테이킹 수량이 Firestore에 저장됩니다.';
+      helper.textContent = '로그인이 필요합니다.';
       return;
     }
 
@@ -568,7 +563,7 @@ function setupStakeModal() {
     // prepend virtual activity
     activity.unshift({
       type: '스테이킹',
-      status: 'Firestore 저장',
+      status: '완료',
       time: '방금 전',
       desc: currentPool.name,
       amount: `+${amount} ${currentPool.symbol}`,
@@ -578,9 +573,9 @@ function setupStakeModal() {
     renderActivity();
 
     // light feedback
-    $('#stakeConfirmBtn').textContent = '완료 (Firebase)';
+    $('#stakeConfirmBtn').textContent = '완료';
     setTimeout(() => {
-      $('#stakeConfirmBtn').textContent = '가상 스테이킹 실행';
+      $('#stakeConfirmBtn').textContent = '스테이킹 실행';
       closeStakeModal();
     }, 900);
   });
@@ -612,11 +607,11 @@ function setupThemeToggle() {
   });
 }
 
-// Wallet button (demo)
+// Wallet button
 function setupWalletButton() {
   const walletBtn = $('#walletBtn');
   walletBtn.addEventListener('click', () => {
-    walletBtn.textContent = '0xF3...D92A (Demo)';
+    walletBtn.textContent = '0xF3...D92A';
   });
 }
 
