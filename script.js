@@ -222,11 +222,22 @@ async function saveUserStakesToFirestore() {
 
 function updateLoginUI() {
   const loginBtn = $('#loginBtn');
+  const welcomeSection = $('.pre-login-welcome');
   if (!loginBtn) return;
   if (currentUser) {
     loginBtn.textContent = `${currentUser.email} (로그아웃)`;
+    // 로그인 시 대시보드 섹션 표시, 환영 메시지 숨김
+    document.querySelectorAll('.auth-required').forEach(el => {
+      el.style.display = '';
+    });
+    if (welcomeSection) welcomeSection.style.display = 'none';
   } else {
     loginBtn.textContent = '로그인';
+    // 로그아웃 시 대시보드 섹션 숨김, 환영 메시지 표시
+    document.querySelectorAll('.auth-required').forEach(el => {
+      el.style.display = 'none';
+    });
+    if (welcomeSection) welcomeSection.style.display = '';
   }
 }
 
