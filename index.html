@@ -25,17 +25,21 @@
         </div>
 
         <nav class="nav">
-          <button class="nav-item active">
+          <button class="nav-item active" data-page="dashboard">
             <span class="nav-dot"></span>
             대시보드
           </button>
-          <button class="nav-item">
+          <button class="nav-item" data-page="pools">
             <span class="nav-dot"></span>
             스테이킹 풀
           </button>
-          <button class="nav-item">
+          <button class="nav-item" data-page="rewards">
             <span class="nav-dot"></span>
             리워드 내역
+          </button>
+          <button class="nav-item" data-page="signup">
+            <span class="nav-dot"></span>
+            회원가입
           </button>
         </nav>
 
@@ -246,8 +250,171 @@
           </section>
         </section>
 
+        <!-- 리워드 내역 페이지 -->
+        <section class="page-section" id="rewards-page" style="display:none;">
+          <div class="card glass" style="margin-bottom:32px;">
+            <div class="card-header">
+              <h2 class="card-title">리워드 내역</h2>
+              <p class="card-subtitle">
+                스테이킹을 통해 받은 모든 리워드 내역을 확인하세요.
+              </p>
+            </div>
+          </div>
+
+          <!-- 리워드 통계 카드 -->
+          <div class="grid grid-3" style="margin-bottom:32px;">
+            <article class="card glass">
+              <div class="card-header">
+                <span class="card-label">총 리워드 수령액</span>
+              </div>
+              <div class="value-group">
+                <h3 class="card-value" id="totalRewardsUSD">$0</h3>
+              </div>
+            </article>
+            <article class="card glass">
+              <div class="card-header">
+                <span class="card-label">이번 달 리워드</span>
+              </div>
+              <div class="value-group">
+                <h3 class="card-value" id="monthRewardsUSD">$0</h3>
+              </div>
+            </article>
+            <article class="card glass">
+              <div class="card-header">
+                <span class="card-label">평균 APY</span>
+              </div>
+              <div class="value-group">
+                <h3 class="card-value" id="avgAPY">0%</h3>
+              </div>
+            </article>
+          </div>
+
+          <!-- 리워드 내역 테이블 -->
+          <section class="card glass">
+            <div class="card-header">
+              <h2 class="card-title">상세 내역</h2>
+              <div style="display:flex;gap:12px;">
+                <select class="input" id="rewardFilterCoin" style="width:150px;">
+                  <option value="all">모든 코인</option>
+                  <option value="BTC">비트코인 (BTC)</option>
+                  <option value="ETH">이더리움 (ETH)</option>
+                  <option value="XRP">리플 (XRP)</option>
+                </select>
+                <select class="input" id="rewardFilterPeriod" style="width:150px;">
+                  <option value="all">전체 기간</option>
+                  <option value="week">최근 1주일</option>
+                  <option value="month">최근 1개월</option>
+                  <option value="year">최근 1년</option>
+                </select>
+              </div>
+            </div>
+            <div class="rewards-table">
+              <table style="width:100%;border-collapse:collapse;">
+                <thead>
+                  <tr style="border-bottom:1px solid var(--border);text-align:left;">
+                    <th style="padding:16px;font-weight:600;color:var(--text-muted);">날짜</th>
+                    <th style="padding:16px;font-weight:600;color:var(--text-muted);">코인</th>
+                    <th style="padding:16px;font-weight:600;color:var(--text-muted);">수량</th>
+                    <th style="padding:16px;font-weight:600;color:var(--text-muted);">USD 환산</th>
+                    <th style="padding:16px;font-weight:600;color:var(--text-muted);">APY</th>
+                    <th style="padding:16px;font-weight:600;color:var(--text-muted);">상태</th>
+                  </tr>
+                </thead>
+                <tbody id="rewardsTableBody">
+                  <!-- Filled by JS -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <!-- 회원가입 페이지 -->
+        <section class="page-section" id="signup-page" style="display:none;">
+          <div class="card glass" style="max-width:600px;margin:0 auto;">
+            <div class="card-header" style="text-align:center;margin-bottom:32px;">
+              <h2 class="card-title" style="font-size:32px;margin-bottom:12px;">회원가입</h2>
+              <p class="card-subtitle">
+                코어위브 스테이킹에 오신 것을 환영합니다!<br/>
+                아래 정보를 입력하여 계정을 생성하세요.
+              </p>
+            </div>
+
+            <form id="signupForm" style="padding:0 24px 24px;">
+              <div class="form-group" style="margin-bottom:24px;">
+                <label for="signupEmail" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">이메일</label>
+                <input
+                  type="email"
+                  id="signupEmail"
+                  class="input"
+                  placeholder="example@email.com"
+                  required
+                  style="width:100%;"
+                />
+              </div>
+
+              <div class="form-group" style="margin-bottom:24px;">
+                <label for="signupPassword" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">비밀번호</label>
+                <input
+                  type="password"
+                  id="signupPassword"
+                  class="input"
+                  placeholder="최소 6자 이상"
+                  required
+                  style="width:100%;"
+                />
+                <small style="display:block;margin-top:6px;color:var(--text-muted);font-size:13px;">
+                  영문, 숫자를 포함하여 6자 이상 입력하세요.
+                </small>
+              </div>
+
+              <div class="form-group" style="margin-bottom:24px;">
+                <label for="signupPasswordConfirm" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">비밀번호 확인</label>
+                <input
+                  type="password"
+                  id="signupPasswordConfirm"
+                  class="input"
+                  placeholder="비밀번호를 다시 입력하세요"
+                  required
+                  style="width:100%;"
+                />
+              </div>
+
+              <div class="form-group" style="margin-bottom:24px;">
+                <label for="signupName" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">이름 (선택)</label>
+                <input
+                  type="text"
+                  id="signupName"
+                  class="input"
+                  placeholder="홍길동"
+                  style="width:100%;"
+                />
+              </div>
+
+              <div class="form-group" style="margin-bottom:32px;">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                  <input type="checkbox" id="signupAgree" required />
+                  <span style="font-size:14px;color:var(--text);">
+                    <a href="#" style="color:#6366f1;text-decoration:underline;">이용약관</a> 및 
+                    <a href="#" style="color:#6366f1;text-decoration:underline;">개인정보처리방침</a>에 동의합니다.
+                  </span>
+                </label>
+              </div>
+
+              <button type="submit" class="btn-primary w-full" style="padding:16px;font-size:16px;font-weight:600;">
+                회원가입
+              </button>
+
+              <p style="text-align:center;margin-top:24px;color:var(--text-muted);font-size:14px;">
+                이미 계정이 있으신가요? 
+                <button type="button" class="link-btn" id="goToLogin" style="color:#6366f1;font-weight:600;background:none;border:none;cursor:pointer;text-decoration:underline;">
+                  로그인
+                </button>
+              </p>
+            </form>
+          </div>
+        </section>
+
         <!-- Trust / footer section -->
-        <section class="footer-section">
           <div class="footer-left">
             <h2 class="footer-title">안전하고 투명한 스테이킹</h2>
             <p class="footer-subtitle">

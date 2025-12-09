@@ -95,6 +95,82 @@ let activity = [
   },
 ];
 
+// 리워드 내역 데이터
+const rewardsHistory = [
+  {
+    date: '2024-12-09',
+    coin: 'BTC',
+    coinName: '비트코인',
+    amount: 0.0015,
+    usd: 142.5,
+    apy: 3.2,
+    status: 'success',
+  },
+  {
+    date: '2024-12-08',
+    coin: 'ETH',
+    coinName: '이더리움',
+    amount: 0.025,
+    usd: 85.3,
+    apy: 6.8,
+    status: 'success',
+  },
+  {
+    date: '2024-12-08',
+    coin: 'XRP',
+    coinName: '리플',
+    amount: 15.5,
+    usd: 25.8,
+    apy: 5.4,
+    status: 'success',
+  },
+  {
+    date: '2024-12-07',
+    coin: 'BTC',
+    coinName: '비트코인',
+    amount: 0.0012,
+    usd: 114.0,
+    apy: 3.2,
+    status: 'success',
+  },
+  {
+    date: '2024-12-07',
+    coin: 'ETH',
+    coinName: '이더리움',
+    amount: 0.022,
+    usd: 75.1,
+    apy: 6.8,
+    status: 'success',
+  },
+  {
+    date: '2024-12-06',
+    coin: 'XRP',
+    coinName: '리플',
+    amount: 14.2,
+    usd: 23.6,
+    apy: 5.4,
+    status: 'success',
+  },
+  {
+    date: '2024-12-06',
+    coin: 'BTC',
+    coinName: '비트코인',
+    amount: 0.0013,
+    usd: 123.5,
+    apy: 3.2,
+    status: 'success',
+  },
+  {
+    date: '2024-12-05',
+    coin: 'ETH',
+    coinName: '이더리움',
+    amount: 0.028,
+    usd: 95.6,
+    apy: 6.8,
+    status: 'pending',
+  },
+];
+
 const $ = (selector) => document.querySelector(selector);
 
 function formatUSD(num) {
@@ -743,6 +819,222 @@ function setupAdminModal() {
 }
 
 // Initialization
+// 페이지 전환 함수
+function setupPageNavigation() {
+  const navItems = document.querySelectorAll('.nav-item[data-page]');
+  const rewardsPage = document.getElementById('rewards-page');
+  const signupPage = document.getElementById('signup-page');
+  const footerSection = document.querySelector('.footer-section');
+  const contentSection = document.querySelector('.content-section');
+  const overview = document.querySelector('.overview');
+  const preLoginWelcome = document.querySelector('.pre-login-welcome');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const page = item.getAttribute('data-page');
+      
+      // 네비게이션 활성화 상태 변경
+      navItems.forEach(nav => nav.classList.remove('active'));
+      item.classList.add('active');
+
+      // 모든 페이지 숨기기
+      if (rewardsPage) rewardsPage.style.display = 'none';
+      if (signupPage) signupPage.style.display = 'none';
+      if (footerSection) footerSection.style.display = 'none';
+      if (contentSection) contentSection.style.display = 'none';
+      if (overview) overview.style.display = 'none';
+      if (preLoginWelcome) preLoginWelcome.style.display = 'none';
+
+      // 선택한 페이지 표시
+      if (page === 'dashboard') {
+        // 로그인 여부에 따라 표시
+        if (currentUser) {
+          if (overview) overview.style.display = 'grid';
+          if (contentSection) contentSection.style.display = 'grid';
+        } else {
+          if (preLoginWelcome) preLoginWelcome.style.display = 'block';
+        }
+        if (footerSection) footerSection.style.display = 'grid';
+      } else if (page === 'pools') {
+        // 스테이킹 풀만 표시
+        if (contentSection) {
+          contentSection.style.display = 'grid';
+          const poolCards = contentSection.querySelectorAll('.card');
+          poolCards.forEach((card, idx) => {
+            card.style.display = idx === 1 ? 'block' : 'none'; // 두 번째 카드만 표시 (스테이킹 풀)
+          });
+        }
+      } else if (page === 'rewards') {
+        if (rewardsPage) {
+          rewardsPage.style.display = 'block';
+          renderRewardsPage();
+        }
+      } else if (page === 'signup') {
+        if (signupPage) signupPage.style.display = 'block';
+      }
+    });
+  });
+}
+
+// 리워드 페이지 렌더링
+function renderRewardsPage() {
+  // 총 리워드 계산
+  const totalRewards = rewardsHistory.reduce((sum, r) => sum + r.usd, 0);
+  const thisMonth = new Date().getMonth();
+  const monthRewards = rewardsHistory
+    .filter(r => new Date(r.date).getMonth() === thisMonth)
+    .reduce((sum, r) => sum + r.usd, 0);
+  
+  const avgAPY = (rewardsHistory.reduce((sum, r) => sum + r.apy, 0) / rewardsHistory.length).toFixed(1);
+
+  // 통계 업데이트
+  document.getElementById('totalRewardsUSD').textContent = formatUSD(totalRewards);
+  document.getElementById('monthRewardsUSD').textContent = formatUSD(monthRewards);
+  document.getElementById('avgAPY').textContent = avgAPY + '%';
+
+  // 테이블 렌더링
+  renderRewardsTable(rewardsHistory);
+
+  // 필터 이벤트 설정
+  const coinFilter = document.getElementById('rewardFilterCoin');
+  const periodFilter = document.getElementById('rewardFilterPeriod');
+
+  if (coinFilter && periodFilter) {
+    const applyFilters = () => {
+      let filtered = [...rewardsHistory];
+
+      // 코인 필터
+      const selectedCoin = coinFilter.value;
+      if (selectedCoin !== 'all') {
+        filtered = filtered.filter(r => r.coin === selectedCoin);
+      }
+
+      // 기간 필터
+      const selectedPeriod = periodFilter.value;
+      const now = new Date();
+      if (selectedPeriod === 'week') {
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        filtered = filtered.filter(r => new Date(r.date) >= weekAgo);
+      } else if (selectedPeriod === 'month') {
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        filtered = filtered.filter(r => new Date(r.date) >= monthAgo);
+      } else if (selectedPeriod === 'year') {
+        const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        filtered = filtered.filter(r => new Date(r.date) >= yearAgo);
+      }
+
+      renderRewardsTable(filtered);
+    };
+
+    coinFilter.addEventListener('change', applyFilters);
+    periodFilter.addEventListener('change', applyFilters);
+  }
+}
+
+// 리워드 테이블 렌더링
+function renderRewardsTable(rewards) {
+  const tbody = document.getElementById('rewardsTableBody');
+  if (!tbody) return;
+
+  const coinIcons = {
+    BTC: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png',
+    ETH: 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
+    XRP: 'https://cryptologos.cc/logos/xrp-xrp-logo.png',
+  };
+
+  tbody.innerHTML = rewards.map(reward => `
+    <tr>
+      <td style="color:var(--text);">${reward.date}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <img src="${coinIcons[reward.coin]}" alt="${reward.coin}" style="width:24px;height:24px;object-fit:contain;" />
+          <span style="font-weight:600;color:var(--text);">${reward.coinName} (${reward.coin})</span>
+        </div>
+      </td>
+      <td style="font-weight:600;color:var(--accent-2);">+${reward.amount} ${reward.coin}</td>
+      <td style="color:var(--text);">${formatUSD(reward.usd)}</td>
+      <td style="color:var(--text);">${reward.apy}%</td>
+      <td>
+        <span class="reward-status ${reward.status}">
+          ${reward.status === 'success' ? '수령 완료' : '처리 중'}
+        </span>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// 회원가입 폼 처리
+function setupSignupForm() {
+  const signupForm = document.getElementById('signupForm');
+  const goToLoginBtn = document.getElementById('goToLogin');
+
+  if (goToLoginBtn) {
+    goToLoginBtn.addEventListener('click', () => {
+      document.getElementById('loginBtn').click();
+    });
+  }
+
+  if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+      const name = document.getElementById('signupName').value;
+      const agree = document.getElementById('signupAgree').checked;
+
+      // 유효성 검사
+      if (password !== passwordConfirm) {
+        alert('비밀번호가 일치하지 않습니다.');
+        return;
+      }
+
+      if (password.length < 6) {
+        alert('비밀번호는 최소 6자 이상이어야 합니다.');
+        return;
+      }
+
+      if (!agree) {
+        alert('이용약관 및 개인정보처리방침에 동의해주세요.');
+        return;
+      }
+
+      try {
+        // Firebase Auth 사용
+        if (firebaseAuth) {
+          const { createUserWithEmailAndPassword, updateProfile } = await import(
+            'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
+          );
+
+          const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+          
+          // 이름 업데이트
+          if (name) {
+            await updateProfile(userCredential.user, { displayName: name });
+          }
+
+          alert('회원가입이 완료되었습니다! 로그인해주세요.');
+          
+          // 대시보드로 이동
+          document.querySelector('.nav-item[data-page="dashboard"]').click();
+        }
+      } catch (error) {
+        console.error('회원가입 오류:', error);
+        if (error.code === 'auth/email-already-in-use') {
+          alert('이미 사용 중인 이메일입니다.');
+        } else if (error.code === 'auth/invalid-email') {
+          alert('올바른 이메일 형식이 아닙니다.');
+        } else if (error.code === 'auth/weak-password') {
+          alert('비밀번호가 너무 약합니다.');
+        } else {
+          alert('회원가입 중 오류가 발생했습니다: ' + error.message);
+        }
+      }
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   // Firebase 초기화 (Auth 상태 감지 시작)
   await initFirebase();
@@ -756,6 +1048,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupTabs();
   setupThemeToggle();
   setupWalletButton();
+  setupPageNavigation();
+  setupSignupForm();
 
   // 로그인 UI 세팅 (Firebase Auth 모듈 동적 로드)
   await setupLogin();

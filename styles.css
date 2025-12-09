@@ -844,6 +844,83 @@ body {
   color: var(--danger);
 }
 
+/* 페이지 섹션 */
+.page-section {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 리워드 테이블 */
+.rewards-table {
+  overflow-x: auto;
+  margin-top: 24px;
+}
+
+.rewards-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rewards-table th {
+  padding: 16px;
+  font-weight: 600;
+  color: var(--text-soft);
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 14px;
+}
+
+.rewards-table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 14px;
+}
+
+.rewards-table tbody tr:hover {
+  background: var(--accent-soft);
+}
+
+.reward-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.reward-status.success {
+  background: rgba(34, 197, 94, 0.1);
+  color: #16a34a;
+}
+
+.reward-status.pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.link-btn:hover {
+  text-decoration: underline !important;
+}
+
 .footer-section {
   margin-top: 10px;
   padding: 10px 4px 0;
