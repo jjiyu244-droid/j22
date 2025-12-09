@@ -34,12 +34,12 @@ body {
 }
 
 .app {
-  display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
-  max-width: 1440px;
-  margin: 24px auto;
-  padding: 12px;
-  gap: 18px;
+  display: flex;
+  flex-direction: column;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0;
+  gap: 0;
 }
 
 .glass {
@@ -57,10 +57,132 @@ body {
 }
 
 .sidebar {
-  padding: 20px 18px 18px;
+  display: none;
+}
+
+/* Top Navigation Bar */
+.top-navbar {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(139, 92, 246, 0.95));
+  border-radius: 0;
+  border: none;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-horizontal .logo-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 20px;
+  color: white;
+}
+
+.logo-horizontal .logo-text {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 2px;
+}
+
+.logo-horizontal .brand {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.logo-horizontal .tagline {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.nav-horizontal {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  justify-content: center;
+  margin: 0 40px;
+}
+
+.nav-item-horizontal {
+  padding: 10px 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-pill);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-item-horizontal:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.nav-item-horizontal.active {
+  background: white;
+  color: var(--accent);
+  border-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-actions .btn-outline {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 13px;
+  padding: 8px 16px;
+}
+
+.navbar-actions .btn-outline:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.navbar-actions .btn-primary {
+  font-size: 13px;
+  padding: 8px 20px;
+}
+
+.navbar-actions .theme-toggle {
+  background: rgba(255, 255, 255, 0.15);
+  width: 36px;
+  height: 36px;
+}
+
+.main-content {
+  flex: 1;
+  padding: 0;
+  background: transparent;
 }
 
 .logo {
@@ -177,10 +299,15 @@ body {
   line-height: 1.5;
 }
 
-.main {
+.main,
+.main-content {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding: 32px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .topbar {

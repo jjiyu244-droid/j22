@@ -821,7 +821,7 @@ function setupAdminModal() {
 // Initialization
 // 페이지 전환 함수
 function setupPageNavigation() {
-  const navItems = document.querySelectorAll('.nav-item[data-page]');
+  const navItems = document.querySelectorAll('.nav-item-horizontal[data-page]');
   const rewardsPage = document.getElementById('rewards-page');
   const signupPage = document.getElementById('signup-page');
   const footerSection = document.querySelector('.footer-section');
@@ -1017,7 +1017,7 @@ function setupSignupForm() {
           alert('회원가입이 완료되었습니다! 로그인해주세요.');
           
           // 대시보드로 이동
-          document.querySelector('.nav-item[data-page="dashboard"]').click();
+          document.querySelector('.nav-item-horizontal[data-page="dashboard"]').click();
         }
       } catch (error) {
         console.error('회원가입 오류:', error);

@@ -14,58 +14,49 @@
   </head>
   <body>
     <div class="app">
-      <!-- Sidebar -->
-      <aside class="sidebar glass">
-        <div class="logo">
-          <div class="logo-mark">N</div>
-          <div class="logo-text">
-            <span class="brand">NovaStake</span>
-            <span class="tagline">기관급 스테이킹 데스크</span>
+      <!-- Top Navigation Bar -->
+      <header class="top-navbar glass">
+        <div class="navbar-container">
+          <div class="logo-horizontal">
+            <div class="logo-mark">N</div>
+            <div class="logo-text">
+              <span class="brand">NovaStake</span>
+              <span class="tagline">기관급 스테이킹 데스크</span>
+            </div>
+          </div>
+
+          <nav class="nav-horizontal">
+            <button class="nav-item-horizontal active" data-page="dashboard">
+              대시보드
+            </button>
+            <button class="nav-item-horizontal" data-page="pools">
+              스테이킹 풀
+            </button>
+            <button class="nav-item-horizontal" data-page="rewards">
+              리워드 내역
+            </button>
+            <button class="nav-item-horizontal" data-page="signup">
+              회원가입
+            </button>
+          </nav>
+
+          <div class="navbar-actions">
+            <div class="theme-toggle" id="themeToggle" title="라이트/다크 모드 전환">
+              <span class="theme-icon" id="themeIcon">☾</span>
+            </div>
+            <button class="btn-outline" id="networkBtn">이더리움 메인넷</button>
+            <button class="btn-outline" id="adminBtn" style="display:none;">🔐 어드민</button>
+            <button class="btn-outline" id="loginBtn">로그인</button>
+            <button class="btn-primary" id="walletBtn">지갑 연결</button>
           </div>
         </div>
+      </header>
 
-        <nav class="nav">
-          <button class="nav-item active" data-page="dashboard">
-            <span class="nav-dot"></span>
-            대시보드
-          </button>
-          <button class="nav-item" data-page="pools">
-            <span class="nav-dot"></span>
-            스테이킹 풀
-          </button>
-          <button class="nav-item" data-page="rewards">
-            <span class="nav-dot"></span>
-            리워드 내역
-          </button>
-          <button class="nav-item" data-page="signup">
-            <span class="nav-dot"></span>
-            회원가입
-          </button>
-        </nav>
-
-        <div class="sidebar-footer">
-          <div class="network-pill">
-            <span class="network-dot"></span>
-            메인넷 연결됨
-          </div>
-        </div>
-      </aside>
-
-      <!-- Main -->
-      <main class="main">
-        <!-- Top bar -->
-        <header class="topbar" style="display:flex;justify-content:flex-end;padding:24px 32px;gap:12px;">
-          <div class="theme-toggle" id="themeToggle" title="라이트/다크 모드 전환">
-            <span class="theme-icon" id="themeIcon">☾</span>
-          </div>
-          <button class="btn-outline" id="networkBtn">이더리움 메인넷</button>
-          <button class="btn-outline" id="adminBtn" style="display:none;">🔐 어드민</button>
-          <button class="btn-outline" id="loginBtn">로그인</button>
-          <button class="btn-primary" id="walletBtn">지갑 연결</button>
-        </header>
+      <!-- Main Content -->
+      <main class="main-content">
 
         <!-- 로그인 전 환영 히어로 -->
-        <section class="card glass pre-login-welcome" style="position:relative;padding:48px;margin-bottom:32px;min-height:480px;overflow:hidden;">
+        <section class="card glass pre-login-welcome" style="position:relative;padding:48px;margin:0;min-height:480px;overflow:hidden;border-radius:0 0 var(--radius-lg) var(--radius-lg);border-top:none;">
           <div style="max-width:580px;">
             <p style="font-size:14px;font-weight:600;color:#a855f7;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">코어위브 스테이킹</p>
             <h1 style="font-size:48px;font-weight:700;line-height:1.2;margin-bottom:24px;">
