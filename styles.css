@@ -1211,9 +1211,9 @@ body {
     justify-content: center !important;
   }
 
-  .person-circle {
-    width: 300px !important;
-    height: 300px !important;
+  .person-image img {
+    max-width: 300px !important;
+    height: auto !important;
   }
 
   /* CoreWeave 로고 모바일 조정 */
