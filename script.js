@@ -407,10 +407,21 @@ async function setupLogin() {
       const email = username.includes('@') ? username : `${username}@corestaker.com`;
 
       if (mode === 'signup') {
-        if (password.length < 6) {
-          statusText.textContent = 'Firebase는 비밀번호 6자 이상을 요구합니다.';
+        if (password.length < 15) {
+          statusText.textContent = '비밀번호는 최소 15자 이상이어야 합니다.';
           return;
         }
+        
+        // 비밀번호 복잡도 검사: 숫자와 대소문자 중 2가지 이상 조합
+        const hasNumber = /[0-9]/.test(password);
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasLowerCase = /[a-z]/.test(password);
+        const complexityCount = [hasNumber, hasUpperCase, hasLowerCase].filter(Boolean).length;
+        if (complexityCount < 2) {
+          statusText.textContent = '비밀번호는 숫자와 대소문자 중 2가지 이상을 조합해야 합니다.';
+          return;
+        }
+        
         try {
           await createUserWithEmailAndPassword(auth, email, password);
           statusText.textContent = '회원가입 및 로그인 완료. 창이 자동으로 닫힙니다.';
@@ -436,7 +447,7 @@ async function setupLogin() {
           }, 700);
         } catch (error) {
           if (error.code === 'auth/user-not-found') {
-            statusText.textContent = '등록된 계정이 없습니다. 먼저 회원가입을 진행해주세요.';
+            statusText.textContent = '등록된 사용자명이 없습니다. 먼저 회원가입을 진행해주세요.';
           } else if (error.code === 'auth/wrong-password') {
             statusText.textContent = '비밀번호가 올바르지 않습니다.';
           } else {
