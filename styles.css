@@ -62,10 +62,10 @@ body {
 
 /* Top Navigation Bar */
 .top-navbar {
-  background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+  background: linear-gradient(135deg, #0059E6 0%, #004DB8 100%);
   border-radius: 0;
   border: none;
-  box-shadow: 0 4px 20px rgba(0, 102, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 89, 230, 0.2);
   backdrop-filter: blur(20px);
   position: sticky;
   top: 0;
