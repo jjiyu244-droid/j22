@@ -845,6 +845,7 @@ function setupPageNavigation() {
       if (overview) overview.style.display = 'none';
       if (preLoginWelcome) preLoginWelcome.style.display = 'none';
 
+
       // 선택한 페이지 표시
       if (page === 'dashboard') {
         // 로그인 여부에 따라 표시
@@ -871,6 +872,23 @@ function setupPageNavigation() {
         }
       } else if (page === 'signup') {
         if (signupPage) signupPage.style.display = 'block';
+        // 회원가입 페이지에서는 메인 콘텐츠 모두 숨김
+        if (preLoginWelcome) preLoginWelcome.style.display = 'none';
+        // 모든 content-section 숨김 (스테이킹 풀, 리워드 계산기, Features 포함)
+        document.querySelectorAll('.content-section').forEach(section => {
+          section.style.display = 'none';
+        });
+        if (overview) overview.style.display = 'none';
+        if (footerSection) footerSection.style.display = 'none';
+      } else {
+        // 다른 페이지로 돌아올 때 메인 콘텐츠 다시 표시 (dashboard일 때만)
+        if (page === 'dashboard') {
+          if (preLoginWelcome && !currentUser) preLoginWelcome.style.display = 'block';
+          if (contentSection && currentUser) contentSection.style.display = 'grid';
+          // Features 섹션 다시 표시
+          const featuresSection = document.querySelector('.content-section:has(.grid.grid-4)');
+          if (featuresSection && !currentUser) featuresSection.style.display = 'block';
+        }
       }
     });
   });
