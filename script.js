@@ -1216,14 +1216,17 @@ async function fetchCryptoNews() {
     }
   } catch (e) {
     console.error("뉴스 불러오기 실패:", e);
-    const newsContainer = document.getElementById("crypto-news-container");
     if (newsContainer) {
       newsContainer.innerHTML = `
         <div style="padding:24px;text-align:center;color:#ef4444;">
           <div style="margin-bottom:12px;">뉴스를 불러올 수 없습니다.</div>
-          <div style="font-size:12px;">API 연결에 문제가 발생했습니다.</div>
+          <div style="font-size:12px;">에러: ${e.message}</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:8px;">서버리스 함수가 배포되었는지 확인해주세요.</div>
         </div>
       `;
+    }
+    if (updateTime) {
+      updateTime.textContent = "오류 발생";
     }
   }
 }
