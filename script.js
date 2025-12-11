@@ -396,12 +396,15 @@ async function setupLogin() {
 
   if (confirmBtn) {
     confirmBtn.addEventListener('click', async () => {
-      const email = $('#loginEmail').value.trim();
+      const username = $('#loginEmail').value.trim();
       const password = $('#loginPassword').value.trim();
-      if (!email || !password) {
-        statusText.textContent = '이메일과 비밀번호를 모두 입력해주세요.';
+      if (!username || !password) {
+        statusText.textContent = '사용자명과 비밀번호를 모두 입력해주세요.';
         return;
       }
+      
+      // 사용자명을 이메일 형식으로 변환 (Firebase Auth는 이메일 기반)
+      const email = username.includes('@') ? username : `${username}@corestaker.com`;
 
       if (mode === 'signup') {
         if (password.length < 6) {
@@ -996,20 +999,42 @@ function setupSignupForm() {
     signupForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const email = document.getElementById('signupEmail').value;
+      const username = document.getElementById('signupUsername').value.trim();
       const password = document.getElementById('signupPassword').value;
       const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
       const name = document.getElementById('signupName').value;
       const agree = document.getElementById('signupAgree').checked;
 
-      // 유효성 검사
+      // 사용자명 유효성 검사 (영문, 숫자, 언더스코어만)
+      if (!/^[A-Za-z0-9_]+$/.test(username)) {
+        alert('사용자명은 영문, 숫자, 언더스코어(_)만 사용 가능합니다.');
+        return;
+      }
+
+      if (username.length < 3) {
+        alert('사용자명은 최소 3자 이상이어야 합니다.');
+        return;
+      }
+
+      // 비밀번호 유효성 검사
       if (password !== passwordConfirm) {
         alert('비밀번호가 일치하지 않습니다.');
         return;
       }
 
-      if (password.length < 6) {
-        alert('비밀번호는 최소 6자 이상이어야 합니다.');
+      if (password.length < 15) {
+        alert('비밀번호는 최소 15자 이상이어야 합니다.');
+        return;
+      }
+
+      // 비밀번호 복잡도 검사: 숫자와 대소문자 중 2가지 이상 조합
+      const hasNumber = /[0-9]/.test(password);
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      
+      const complexityCount = [hasNumber, hasUpperCase, hasLowerCase].filter(Boolean).length;
+      if (complexityCount < 2) {
+        alert('비밀번호는 숫자와 대소문자 중 2가지 이상을 조합해야 합니다.');
         return;
       }
 
@@ -1019,11 +1044,14 @@ function setupSignupForm() {
       }
 
       try {
-        // Firebase Auth 사용
+        // Firebase Auth 사용 (사용자명을 이메일 형식으로 변환)
         if (firebaseAuth) {
           const { createUserWithEmailAndPassword, updateProfile } = await import(
             'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
           );
+
+          // 사용자명을 이메일 형식으로 변환 (Firebase Auth는 이메일 기반)
+          const email = `${username}@corestaker.com`;
 
           const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
           
@@ -1040,11 +1068,11 @@ function setupSignupForm() {
       } catch (error) {
         console.error('회원가입 오류:', error);
         if (error.code === 'auth/email-already-in-use') {
-          alert('이미 사용 중인 이메일입니다.');
+          alert('이미 사용 중인 사용자명입니다.');
         } else if (error.code === 'auth/invalid-email') {
-          alert('올바른 이메일 형식이 아닙니다.');
+          alert('올바른 사용자명 형식이 아닙니다.');
         } else if (error.code === 'auth/weak-password') {
-          alert('비밀번호가 너무 약합니다.');
+          alert('비밀번호가 요구사항을 만족하지 않습니다. 15자 이상, 숫자와 대소문자 중 2가지 이상 조합이 필요합니다.');
         } else {
           alert('회원가입 중 오류가 발생했습니다: ' + error.message);
         }
