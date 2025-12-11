@@ -1136,12 +1136,33 @@ async function fetchCryptoPrices() {
   }
 }
 
-// 5초마다 시세 업데이트
-if (typeof setInterval !== 'undefined') {
+// 코인 시세 업데이트 (최적화: 30초마다, 페이지가 활성화되어 있을 때만)
+let priceUpdateInterval = null;
+let newsUpdateInterval = null;
+
+function startPriceUpdates() {
   // 페이지 로드 시 즉시 실행
   fetchCryptoPrices();
-  // 5초마다 업데이트
-  setInterval(fetchCryptoPrices, 5000);
+  // 30초마다 업데이트 (5초 → 30초로 변경하여 API 호출 감소)
+  if (priceUpdateInterval) clearInterval(priceUpdateInterval);
+  priceUpdateInterval = setInterval(fetchCryptoPrices, 30000);
+}
+
+// 페이지 가시성 API: 탭이 비활성화되면 업데이트 중지
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // 탭이 비활성화되면 업데이트 중지
+    if (priceUpdateInterval) clearInterval(priceUpdateInterval);
+    if (newsUpdateInterval) clearInterval(newsUpdateInterval);
+  } else {
+    // 탭이 활성화되면 즉시 업데이트하고 다시 시작
+    startPriceUpdates();
+    startNewsUpdates();
+  }
+});
+
+if (typeof setInterval !== 'undefined') {
+  startPriceUpdates();
 }
 
 // 실시간 코인 뉴스 가져오기 (Vercel 서버리스 프록시 사용)
@@ -1247,10 +1268,15 @@ function getTimeAgo(date) {
   return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
 }
 
-// 30초마다 뉴스 업데이트
-if (typeof setInterval !== 'undefined') {
+// 뉴스 업데이트 (최적화: 5분마다, 페이지가 활성화되어 있을 때만)
+function startNewsUpdates() {
   // 페이지 로드 시 즉시 실행
   fetchCryptoNews();
-  // 30초마다 업데이트
-  setInterval(fetchCryptoNews, 30000);
+  // 5분마다 업데이트 (30초 → 5분으로 변경하여 API 호출 대폭 감소)
+  if (newsUpdateInterval) clearInterval(newsUpdateInterval);
+  newsUpdateInterval = setInterval(fetchCryptoNews, 300000); // 5분 = 300,000ms
+}
+
+if (typeof setInterval !== 'undefined') {
+  startNewsUpdates();
 }
