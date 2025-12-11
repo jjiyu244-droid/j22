@@ -9,9 +9,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    // CoinGecko News API - 올바른 엔드포인트 사용
-    // page 파라미터 없이 기본 요청
-    const url = "https://api.coingecko.com/api/v3/news?x_cg_demo_api_key=CG-demo";
+    // CoinGecko News API는 이제 인증이 필요하므로
+    // 대안: CryptoCompare News API 사용 (무료, 인증 불필요)
+    const url = "https://min-api.cryptocompare.com/data/v2/news/?lang=EN";
     
     const response = await fetch(url, {
       method: 'GET',
@@ -23,25 +23,32 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("CoinGecko API Error:", response.status, errorText);
-      throw new Error(`CoinGecko API returned ${response.status}: ${errorText}`);
+      console.error("News API Error:", response.status, errorText);
+      throw new Error(`News API returned ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
     
     // 응답 데이터 검증
     if (!data) {
-      throw new Error("Empty response from CoinGecko API");
+      throw new Error("Empty response from News API");
     }
     
-    // data 필드가 없을 수도 있으므로 유연하게 처리
-    if (data.data && Array.isArray(data.data)) {
-      res.status(200).json(data);
-    } else if (Array.isArray(data)) {
-      // 배열로 직접 반환되는 경우
-      res.status(200).json({ data: data });
+    // CryptoCompare 형식을 CoinGecko 형식으로 변환
+    if (data.Data && Array.isArray(data.Data)) {
+      const convertedData = {
+        data: data.Data.slice(0, 10).map(item => ({
+          id: item.id || Math.random().toString(),
+          title: item.title || "No title",
+          url: item.url || "#",
+          source: item.source || "Unknown",
+          published_at: item.published_on || Math.floor(Date.now() / 1000),
+          description: item.body || item.description || ""
+        }))
+      };
+      res.status(200).json(convertedData);
     } else {
-      throw new Error("Invalid response format from CoinGecko API");
+      throw new Error("Invalid response format from News API");
     }
   } catch (err) {
     console.error("News API error:", err);
