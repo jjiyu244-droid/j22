@@ -469,6 +469,16 @@ body {
   padding: 16px 16px 18px;
 }
 
+.feature-card {
+  padding: 24px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
 .card-header {
   display: flex;
   align-items: flex-start;
