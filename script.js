@@ -1144,25 +1144,14 @@ if (typeof setInterval !== 'undefined') {
   setInterval(fetchCryptoPrices, 5000);
 }
 
-// 실시간 코인 뉴스 가져오기
+// 실시간 코인 뉴스 가져오기 (Vercel 서버리스 프록시 사용)
 async function fetchCryptoNews() {
-  // 여러 API 옵션 시도 (CryptoPanic, NewsAPI 등)
-  const apis = [
-    // 옵션 1: CryptoPanic 공개 API (API 키 불필요)
-    "https://cryptopanic.com/api/v1/posts/?auth_token=YOUR_API_KEY&public=true&filter=hot",
-    // 옵션 2: NewsAPI (무료, API 키 필요하지만 공개 키 사용 가능)
-    "https://newsapi.org/v2/everything?q=cryptocurrency+bitcoin+ethereum&sortBy=publishedAt&language=en&apiKey=YOUR_API_KEY",
-    // 옵션 3: CoinGecko 뉴스 (제한적)
-    "https://api.coingecko.com/api/v3/news"
-  ];
-
   try {
-    // CoinGecko 뉴스 API 사용 (무료, API 키 불필요)
-    const url = "https://api.coingecko.com/api/v3/news";
-    const res = await fetch(url);
+    // Vercel 서버리스 함수를 통해 API 호출 (CORS 해결)
+    const res = await fetch("/api/news");
     
     if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+      throw new Error(`API returned ${res.status}`);
     }
     
     const data = await res.json();
