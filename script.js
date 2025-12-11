@@ -1094,6 +1094,33 @@ function setupSignupForm() {
   }
 }
 
+// FAQ 아코디언 기능
+function setupFAQ() {
+  const faqItems = document.querySelectorAll('.faq-item');
+  
+  faqItems.forEach(item => {
+    const question = item.querySelector('.faq-question');
+    
+    question.addEventListener('click', () => {
+      const isActive = item.classList.contains('active');
+      
+      // 다른 모든 FAQ 항목 닫기
+      faqItems.forEach(otherItem => {
+        if (otherItem !== item) {
+          otherItem.classList.remove('active');
+        }
+      });
+      
+      // 현재 항목 토글
+      if (isActive) {
+        item.classList.remove('active');
+      } else {
+        item.classList.add('active');
+      }
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   // Firebase 초기화 (Auth 상태 감지 시작)
   await initFirebase();
@@ -1109,6 +1136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupWalletButton();
   setupPageNavigation();
   setupSignupForm();
+  setupFAQ();
 
   // 로그인 UI 세팅 (Firebase Auth 모듈 동적 로드)
   await setupLogin();
