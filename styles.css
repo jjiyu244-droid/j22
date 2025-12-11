@@ -1133,9 +1133,15 @@ body {
 }
 
 .person-image img {
-  /* 초록색 글로우 및 프린지 제거 */
+  /* 초록색 글로우 및 프린지 완전 제거 */
   image-rendering: -webkit-optimize-contrast;
   image-rendering: crisp-edges;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+  will-change: transform;
+  transform-style: preserve-3d;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   -webkit-transform: translateZ(0);
