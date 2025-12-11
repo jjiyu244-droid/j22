@@ -1060,3 +1060,71 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 실제 시세 반영 시도
   fetchAndApplyPrices();
 });
+
+// 실시간 코인 시세 가져오기
+async function fetchCryptoPrices() {
+  const url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,cardano,polkadot,avalanche-2,polygon,chainlink,uniswap,cosmos&vs_currencies=usd&include_24hr_change=true";
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const tbody = document.getElementById("crypto-body");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    const coins = {
+      bitcoin: { name: "Bitcoin", symbol: "BTC" },
+      ethereum: { name: "Ethereum", symbol: "ETH" },
+      solana: { name: "Solana", symbol: "SOL" },
+      cardano: { name: "Cardano", symbol: "ADA" },
+      "polkadot": { name: "Polkadot", symbol: "DOT" },
+      "avalanche-2": { name: "Avalanche", symbol: "AVAX" },
+      polygon: { name: "Polygon", symbol: "MATIC" },
+      chainlink: { name: "Chainlink", symbol: "LINK" },
+      uniswap: { name: "Uniswap", symbol: "UNI" },
+      cosmos: { name: "Cosmos", symbol: "ATOM" }
+    };
+
+    Object.keys(coins).forEach(id => {
+      if (!data[id]) return;
+      
+      const coin = coins[id];
+      const price = data[id].usd.toLocaleString('en-US', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      });
+      const change = data[id].usd_24h_change ? data[id].usd_24h_change.toFixed(2) : "0.00";
+      const changeClass = parseFloat(change) >= 0 ? "positive" : "negative";
+      const changeSign = parseFloat(change) >= 0 ? "+" : "";
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><span class="crypto-symbol">${coin.symbol}</span> <span style="color:#94a3b8;font-size:14px;">${coin.name}</span></td>
+        <td style="text-align:right;"><span class="crypto-price">$${price}</span></td>
+        <td style="text-align:right;"><span class="price-change ${changeClass}">${changeSign}${change}%</span></td>
+      `;
+      tbody.appendChild(row);
+    });
+
+  } catch (e) {
+    console.error("가격 불러오기 실패:", e);
+    const tbody = document.getElementById("crypto-body");
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="3" style="padding:24px;text-align:center;color:#ef4444;">시세를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</td>
+        </tr>
+      `;
+    }
+  }
+}
+
+// 5초마다 시세 업데이트
+if (typeof setInterval !== 'undefined') {
+  // 페이지 로드 시 즉시 실행
+  fetchCryptoPrices();
+  // 5초마다 업데이트
+  setInterval(fetchCryptoPrices, 5000);
+}
