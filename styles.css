@@ -1357,5 +1357,123 @@ body {
   font-size: 14px;
 }
 
+/* 실시간 코인 뉴스 스타일 */
+.crypto-news {
+  margin-top: 48px;
+}
+
+.news-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.news-item {
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.news-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.news-item-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.news-source {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6366f1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  background: #eef2ff;
+  border-radius: 4px;
+}
+
+.news-time {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.news-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.news-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.news-title a:hover {
+  color: #6366f1;
+}
+
+.news-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.news-sentiment {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.news-sentiment.positive {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.news-sentiment.negative {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.news-sentiment.neutral {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+@media (max-width: 768px) {
+  .crypto-news {
+    margin-top: 32px !important;
+    padding: 24px !important;
+  }
+  .crypto-news h2 {
+    font-size: 24px !important;
+  }
+  .news-item {
+    padding: 16px;
+  }
+  .news-title {
+    font-size: 14px;
+  }
+}
+
 
 

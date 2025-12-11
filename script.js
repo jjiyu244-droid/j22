@@ -1149,3 +1149,120 @@ if (typeof setInterval !== 'undefined') {
   // 5초마다 업데이트
   setInterval(fetchCryptoPrices, 5000);
 }
+
+// 실시간 코인 뉴스 가져오기
+async function fetchCryptoNews() {
+  // 여러 API 옵션 시도 (CryptoPanic, NewsAPI 등)
+  const apis = [
+    // 옵션 1: CryptoPanic 공개 API (API 키 불필요)
+    "https://cryptopanic.com/api/v1/posts/?auth_token=YOUR_API_KEY&public=true&filter=hot",
+    // 옵션 2: NewsAPI (무료, API 키 필요하지만 공개 키 사용 가능)
+    "https://newsapi.org/v2/everything?q=cryptocurrency+bitcoin+ethereum&sortBy=publishedAt&language=en&apiKey=YOUR_API_KEY",
+    // 옵션 3: CoinGecko 뉴스 (제한적)
+    "https://api.coingecko.com/api/v3/news"
+  ];
+
+  try {
+    // CoinGecko 뉴스 API 사용 (무료, API 키 불필요)
+    const url = "https://api.coingecko.com/api/v3/news";
+    const res = await fetch(url);
+    
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    
+    const data = await res.json();
+    const newsContainer = document.getElementById("crypto-news-container");
+    const updateTime = document.getElementById("news-update-time");
+    
+    if (!newsContainer) return;
+
+    if (data.data && data.data.length > 0) {
+      newsContainer.innerHTML = "";
+      
+      // 최대 10개 뉴스만 표시
+      const newsItems = data.data.slice(0, 10);
+      
+      newsItems.forEach(news => {
+        const newsItem = document.createElement("div");
+        newsItem.className = "news-item";
+        
+        // 날짜 포맷팅
+        const date = new Date(news.published_at * 1000);
+        const timeAgo = getTimeAgo(date);
+        
+        // 뉴스 제목과 링크
+        const title = news.title || "제목 없음";
+        const url = news.url || "#";
+        const source = news.source || "Unknown";
+        
+        newsItem.innerHTML = `
+          <div class="news-item-header">
+            <span class="news-source">${source}</span>
+            <span class="news-time">${timeAgo}</span>
+          </div>
+          <div class="news-title">
+            <a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>
+          </div>
+          ${news.description ? `<div style="font-size:14px;color:#64748b;line-height:1.6;margin-top:8px;">${news.description.substring(0, 150)}...</div>` : ''}
+        `;
+        
+        newsItem.addEventListener('click', (e) => {
+          if (e.target.tagName !== 'A') {
+            window.open(url, '_blank', 'noopener,noreferrer');
+          }
+        });
+        
+        newsContainer.appendChild(newsItem);
+      });
+      
+      // 업데이트 시간 표시
+      if (updateTime) {
+        const now = new Date();
+        updateTime.textContent = `마지막 업데이트: ${now.toLocaleTimeString('ko-KR')}`;
+      }
+    } else {
+      newsContainer.innerHTML = `
+        <div style="padding:24px;text-align:center;color:#94a3b8;">
+          <div style="margin-bottom:12px;">뉴스를 불러올 수 없습니다.</div>
+          <div style="font-size:12px;">잠시 후 다시 시도해주세요.</div>
+        </div>
+      `;
+    }
+  } catch (e) {
+    console.error("뉴스 불러오기 실패:", e);
+    const newsContainer = document.getElementById("crypto-news-container");
+    if (newsContainer) {
+      newsContainer.innerHTML = `
+        <div style="padding:24px;text-align:center;color:#ef4444;">
+          <div style="margin-bottom:12px;">뉴스를 불러올 수 없습니다.</div>
+          <div style="font-size:12px;">API 연결에 문제가 발생했습니다.</div>
+        </div>
+      `;
+    }
+  }
+}
+
+// 시간 경과 표시 함수
+function getTimeAgo(date) {
+  const now = new Date();
+  const diff = now - date;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  
+  if (minutes < 1) return "방금 전";
+  if (minutes < 60) return `${minutes}분 전`;
+  if (hours < 24) return `${hours}시간 전`;
+  if (days < 7) return `${days}일 전`;
+  
+  return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+}
+
+// 30초마다 뉴스 업데이트
+if (typeof setInterval !== 'undefined') {
+  // 페이지 로드 시 즉시 실행
+  fetchCryptoNews();
+  // 30초마다 업데이트
+  setInterval(fetchCryptoNews, 30000);
+}
