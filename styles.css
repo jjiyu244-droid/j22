@@ -1196,6 +1196,7 @@ body {
 
   .pools-rewards-container {
     grid-template-columns: 1fr !important;
+    gap: 16px !important;
   }
 
   .pool-card {
