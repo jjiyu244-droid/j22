@@ -1148,6 +1148,15 @@ body {
 
   .person-image {
     right: 20px;
+    height: 500px !important;
+  }
+
+  .pre-login-welcome > div:last-child {
+    right: 100px !important;
+  }
+
+  .pre-login-welcome > div:last-child img {
+    width: 250px !important;
   }
 }
 
@@ -1206,9 +1215,17 @@ body {
     justify-content: center !important;
   }
 
+  .person-image {
+    height: 400px !important;
+  }
+
   .person-image img {
-    max-width: 300px !important;
-    height: auto !important;
+    max-width: 100% !important;
+    height: 120% !important;
+  }
+
+  .pre-login-welcome > div:last-child {
+    display: none !important;
   }
 
   /* CoreWeave 로고 모바일 조정 */
