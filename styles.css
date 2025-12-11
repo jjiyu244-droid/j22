@@ -1132,6 +1132,16 @@ body {
   z-index: 10;
 }
 
+.person-image img {
+  /* 초록색 글로우 및 프린지 제거 */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
 /* Responsive */
 @media (max-width: 1080px) {
   .app {
