@@ -1248,6 +1248,87 @@ body {
   .pre-login-welcome > div:last-child {
     display: none !important;
   }
+  .price-table {
+    margin-top: 32px !important;
+    padding: 24px !important;
+  }
+  .price-table h2 {
+    font-size: 24px !important;
+  }
+  #crypto-table th,
+  #crypto-table td {
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* 실시간 코인 시세표 스타일 */
+.price-table {
+  margin-top: 48px;
+}
+
+#crypto-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#crypto-table th {
+  padding: 16px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#crypto-table th:last-child,
+#crypto-table td:last-child {
+  text-align: right;
+}
+
+#crypto-table th:nth-child(2),
+#crypto-table td:nth-child(2) {
+  text-align: right;
+}
+
+#crypto-table td {
+  padding: 16px;
+  font-size: 16px;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+#crypto-table tbody tr:hover {
+  background-color: #f8fafc;
+  transition: background-color 0.2s;
+}
+
+#crypto-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.price-change {
+  font-weight: 600;
+}
+
+.price-change.positive {
+  color: #00c46c;
+}
+
+.price-change.negative {
+  color: #ff4d4d;
+}
+
+.crypto-symbol {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.crypto-price {
+  font-weight: 600;
+  color: #1e293b;
+  font-family: 'Poppins', sans-serif;
 }
 
 
