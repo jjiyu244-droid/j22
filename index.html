@@ -125,7 +125,7 @@
         </section>
 
         <!-- Content -->
-        <section class="grid grid-2 content-section">
+        <section class="grid grid-3 content-section">
           <!-- Left: Portfolio breakdown (로그인 후에만 표시) -->
           <section class="card glass auth-required" style="display:none;">
             <div class="card-header">
@@ -157,7 +157,7 @@
             </div>
           </section>
 
-          <!-- Right: Staking pools -->
+          <!-- Center: Staking pools -->
           <section class="card glass">
             <div class="card-header">
               <div>
@@ -177,24 +177,8 @@
               <!-- Filled by JS -->
             </div>
           </section>
-        </section>
 
-        <!-- Bottom section: activity + rewards -->
-        <section class="grid grid-2 content-section">
-          <!-- Activity (로그인 후에만 표시) -->
-          <section class="card glass auth-required" style="display:none;">
-            <div class="card-header">
-              <h2 class="card-title">트랜잭션 히스토리</h2>
-              <p class="card-subtitle">
-                최근 스테이킹 및 언스테이킹 내역을 확인하세요.
-              </p>
-            </div>
-            <div class="activity-list" id="activityList">
-              <!-- Filled by JS -->
-            </div>
-          </section>
-
-          <!-- Rewards -->
+          <!-- Right: Rewards Calculator -->
           <section class="card glass">
             <div class="card-header">
               <h2 class="card-title">리워드 계산기</h2>
@@ -241,6 +225,22 @@
               <div class="sim-result" id="simResult">
                 예상 리워드 계산 결과가 여기 표시됩니다.
               </div>
+            </div>
+          </section>
+        </section>
+
+        <!-- Bottom section: activity -->
+        <section class="content-section">
+          <!-- Activity (로그인 후에만 표시) -->
+          <section class="card glass auth-required" style="display:none;">
+            <div class="card-header">
+              <h2 class="card-title">트랜잭션 히스토리</h2>
+              <p class="card-subtitle">
+                최근 스테이킹 및 언스테이킹 내역을 확인하세요.
+              </p>
+            </div>
+            <div class="activity-list" id="activityList">
+              <!-- Filled by JS -->
             </div>
           </section>
         </section>
