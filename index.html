@@ -125,7 +125,7 @@
         </section>
 
         <!-- Content -->
-        <section class="grid grid-3 content-section">
+        <section class="grid grid-2 content-section">
           <!-- Left: Portfolio breakdown (로그인 후에만 표시) -->
           <section class="card glass auth-required" style="display:none;">
             <div class="card-header">
@@ -157,76 +157,79 @@
             </div>
           </section>
 
-          <!-- Center: Staking pools -->
-          <section class="card glass">
-            <div class="card-header">
-              <div>
-                <h2 class="card-title">스테이킹 풀</h2>
+          <!-- Right: Staking Pools and Rewards Calculator Container -->
+          <div class="pools-rewards-container" style="max-width:100%;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+            <!-- Staking pools -->
+            <section class="card glass">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">스테이킹 풀</h2>
+                  <p class="card-subtitle">
+                    검증된 스테이킹 풀에서 안정적인 수익을 창출하세요.
+                  </p>
+                </div>
+                <div class="tabs">
+                  <button class="tab active" data-filter="all">전체</button>
+                  <button class="tab" data-filter="stable">스테이블</button>
+                  <button class="tab" data-filter="volatile">변동성</button>
+                </div>
+              </div>
+
+              <div class="pool-list" id="poolList">
+                <!-- Filled by JS -->
+              </div>
+            </section>
+
+            <!-- Rewards Calculator -->
+            <section class="card glass">
+              <div class="card-header">
+                <h2 class="card-title">리워드 계산기</h2>
                 <p class="card-subtitle">
-                  검증된 스테이킹 풀에서 안정적인 수익을 창출하세요.
+                  선택한 풀의 APY 기준으로 예상 리워드를 계산합니다.
                 </p>
               </div>
-              <div class="tabs">
-                <button class="tab active" data-filter="all">전체</button>
-                <button class="tab" data-filter="stable">스테이블</button>
-                <button class="tab" data-filter="volatile">변동성</button>
-              </div>
-            </div>
 
-            <div class="pool-list" id="poolList">
-              <!-- Filled by JS -->
-            </div>
-          </section>
+              <div class="reward-sim">
+                <div class="form-group">
+                  <label for="simAmount">스테이킹 금액 (USD 환산)</label>
+                  <input
+                    type="number"
+                    id="simAmount"
+                    class="input"
+                    placeholder="예: 1000"
+                    min="0"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="simDays">기간 (일)</label>
+                  <input
+                    type="number"
+                    id="simDays"
+                    class="input"
+                    placeholder="예: 365"
+                    min="1"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="simApy">APY (%)</label>
+                  <input
+                    type="number"
+                    id="simApy"
+                    class="input"
+                    placeholder="예: 8.5"
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
 
-          <!-- Right: Rewards Calculator -->
-          <section class="card glass">
-            <div class="card-header">
-              <h2 class="card-title">리워드 계산기</h2>
-              <p class="card-subtitle">
-                선택한 풀의 APY 기준으로 예상 리워드를 계산합니다.
-              </p>
-            </div>
+                <button class="btn-primary w-full" id="simBtn">리워드 계산</button>
 
-            <div class="reward-sim">
-              <div class="form-group">
-                <label for="simAmount">스테이킹 금액 (USD 환산)</label>
-                <input
-                  type="number"
-                  id="simAmount"
-                  class="input"
-                  placeholder="예: 1000"
-                  min="0"
-                />
+                <div class="sim-result" id="simResult">
+                  예상 리워드 계산 결과가 여기 표시됩니다.
+                </div>
               </div>
-              <div class="form-group">
-                <label for="simDays">기간 (일)</label>
-                <input
-                  type="number"
-                  id="simDays"
-                  class="input"
-                  placeholder="예: 365"
-                  min="1"
-                />
-              </div>
-              <div class="form-group">
-                <label for="simApy">APY (%)</label>
-                <input
-                  type="number"
-                  id="simApy"
-                  class="input"
-                  placeholder="예: 8.5"
-                  min="0"
-                  step="0.1"
-                />
-              </div>
-
-              <button class="btn-primary w-full" id="simBtn">리워드 계산</button>
-
-              <div class="sim-result" id="simResult">
-                예상 리워드 계산 결과가 여기 표시됩니다.
-              </div>
-            </div>
-          </section>
+            </section>
+          </div>
         </section>
 
         <!-- Bottom section: activity -->

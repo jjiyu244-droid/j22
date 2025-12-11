@@ -1194,6 +1194,10 @@ body {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .pools-rewards-container {
+    grid-template-columns: 1fr !important;
+  }
+
   .pool-card {
     grid-template-columns: minmax(0, 1fr);
   }
