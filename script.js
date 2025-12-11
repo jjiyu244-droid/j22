@@ -1146,19 +1146,21 @@ if (typeof setInterval !== 'undefined') {
 
 // 실시간 코인 뉴스 가져오기 (Vercel 서버리스 프록시 사용)
 async function fetchCryptoNews() {
+  const newsContainer = document.getElementById("crypto-news-container");
+  const updateTime = document.getElementById("news-update-time");
+  
+  if (!newsContainer) return;
+
   try {
     // Vercel 서버리스 함수를 통해 API 호출 (CORS 해결)
     const res = await fetch("/api/news");
     
     if (!res.ok) {
-      throw new Error(`API returned ${res.status}`);
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || `API returned ${res.status}`);
     }
     
     const data = await res.json();
-    const newsContainer = document.getElementById("crypto-news-container");
-    const updateTime = document.getElementById("news-update-time");
-    
-    if (!newsContainer) return;
 
     if (data.data && data.data.length > 0) {
       newsContainer.innerHTML = "";
