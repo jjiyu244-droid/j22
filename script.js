@@ -1061,19 +1061,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   fetchAndApplyPrices();
 });
 
-// 실시간 코인 시세 가져오기
+// 실시간 코인 시세 가져오기 (Vercel 서버리스 프록시 사용)
 async function fetchCryptoPrices() {
-  const priceUrl = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,cardano,polkadot,avalanche-2,polygon,chainlink,uniswap,cosmos&vs_currencies=usd&include_24hr_change=true";
-  const imageUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,cardano,polkadot,avalanche-2,polygon,chainlink,uniswap,cosmos&order=market_cap_desc&per_page=10&page=1&sparkline=false";
-
   try {
-    const [priceRes, imageRes] = await Promise.all([
-      fetch(priceUrl),
-      fetch(imageUrl)
-    ]);
+    // Vercel 서버리스 함수를 통해 API 호출 (CORS 해결)
+    const res = await fetch("/api/prices");
     
-    const priceData = await priceRes.json();
-    const imageData = await imageRes.json();
+    if (!res.ok) {
+      throw new Error(`API returned ${res.status}`);
+    }
+    
+    const data = await res.json();
+    const priceData = data.prices;
+    const imageMap = data.images;
 
     const tbody = document.getElementById("crypto-body");
     if (!tbody) return;
@@ -1092,12 +1092,6 @@ async function fetchCryptoPrices() {
       uniswap: { name: "Uniswap", symbol: "UNI" },
       cosmos: { name: "Cosmos", symbol: "ATOM" }
     };
-
-    // 이미지 데이터를 id로 매핑
-    const imageMap = {};
-    imageData.forEach(coin => {
-      imageMap[coin.id] = coin.image;
-    });
 
     Object.keys(coins).forEach(id => {
       if (!priceData[id]) return;
