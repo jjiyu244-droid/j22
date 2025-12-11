@@ -1188,7 +1188,7 @@ body {
 
   /* 모바일에서 동그라미 크기 조정 */
   .pre-login-welcome {
-    padding: 32px 24px !important;
+    padding: 60px 24px !important;
     min-height: auto !important;
   }
 
