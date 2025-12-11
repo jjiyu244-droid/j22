@@ -1063,11 +1063,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // 실시간 코인 시세 가져오기
 async function fetchCryptoPrices() {
-  const url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,cardano,polkadot,avalanche-2,polygon,chainlink,uniswap,cosmos&vs_currencies=usd&include_24hr_change=true";
+  const priceUrl = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,cardano,polkadot,avalanche-2,polygon,chainlink,uniswap,cosmos&vs_currencies=usd&include_24hr_change=true";
+  const imageUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,cardano,polkadot,avalanche-2,polygon,chainlink,uniswap,cosmos&order=market_cap_desc&per_page=10&page=1&sparkline=false";
 
   try {
-    const res = await fetch(url);
-    const data = await res.json();
+    const [priceRes, imageRes] = await Promise.all([
+      fetch(priceUrl),
+      fetch(imageUrl)
+    ]);
+    
+    const priceData = await priceRes.json();
+    const imageData = await imageRes.json();
 
     const tbody = document.getElementById("crypto-body");
     if (!tbody) return;
@@ -1087,21 +1093,36 @@ async function fetchCryptoPrices() {
       cosmos: { name: "Cosmos", symbol: "ATOM" }
     };
 
+    // 이미지 데이터를 id로 매핑
+    const imageMap = {};
+    imageData.forEach(coin => {
+      imageMap[coin.id] = coin.image;
+    });
+
     Object.keys(coins).forEach(id => {
-      if (!data[id]) return;
+      if (!priceData[id]) return;
       
       const coin = coins[id];
-      const price = data[id].usd.toLocaleString('en-US', { 
+      const price = priceData[id].usd.toLocaleString('en-US', { 
         minimumFractionDigits: 2, 
         maximumFractionDigits: 2 
       });
-      const change = data[id].usd_24h_change ? data[id].usd_24h_change.toFixed(2) : "0.00";
+      const change = priceData[id].usd_24h_change ? priceData[id].usd_24h_change.toFixed(2) : "0.00";
       const changeClass = parseFloat(change) >= 0 ? "positive" : "negative";
       const changeSign = parseFloat(change) >= 0 ? "+" : "";
+      const coinImage = imageMap[id] || "";
 
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td><span class="crypto-symbol">${coin.symbol}</span> <span style="color:#94a3b8;font-size:14px;">${coin.name}</span></td>
+        <td>
+          <div class="crypto-name-container">
+            ${coinImage ? `<img src="${coinImage}" alt="${coin.symbol}" class="crypto-icon" />` : ''}
+            <div class="crypto-name-text">
+              <span class="crypto-symbol">${coin.symbol}</span>
+              <span class="crypto-name">${coin.name}</span>
+            </div>
+          </div>
+        </td>
         <td style="text-align:right;"><span class="crypto-price">$${price}</span></td>
         <td style="text-align:right;"><span class="price-change ${changeClass}">${changeSign}${change}%</span></td>
       `;

@@ -1331,5 +1331,31 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
+/* 코인 아이콘 및 이름 컨테이너 */
+.crypto-name-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.crypto-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.crypto-name-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.crypto-name {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
 
 
