@@ -419,8 +419,10 @@ async function setupLogin() {
           }, 700);
         } catch (error) {
           if (error.code === 'auth/email-already-in-use') {
-            statusText.textContent = '이미 가입된 이메일입니다. 로그인 모드로 전환합니다.';
+            statusText.textContent = '이미 사용 중인 사용자명입니다. 로그인 모드로 전환합니다.';
             setMode('login');
+          } else if (error.code === 'auth/weak-password') {
+            statusText.textContent = '비밀번호가 요구사항을 만족하지 않습니다. 15자 이상, 숫자와 대소문자 중 2가지 이상 조합이 필요합니다.';
           } else {
             statusText.textContent = `회원가입 실패: ${error.message}`;
           }
