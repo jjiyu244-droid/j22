@@ -1120,7 +1120,7 @@ body {
   display: none;
 }
 
-/* Person Circle Styles */
+/* Person Image Styles */
 .person-image {
   position: absolute;
   top: 0;
@@ -1130,14 +1130,6 @@ body {
   align-items: flex-end;
   justify-content: center;
   z-index: 10;
-}
-
-.person-circle {
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-  box-shadow: 0 25px 50px rgba(99, 102, 241, 0.3);
 }
 
 /* Responsive */
