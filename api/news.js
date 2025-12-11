@@ -9,29 +9,40 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = "https://api.coingecko.com/api/v3/news";
+    // CoinGecko News API - 올바른 엔드포인트 사용
+    // page 파라미터 없이 기본 요청
+    const url = "https://api.coingecko.com/api/v3/news?x_cg_demo_api_key=CG-demo";
     
-    // User-Agent 헤더 추가 (일부 API가 요구)
     const response = await fetch(url, {
+      method: 'GET',
       headers: {
-        'User-Agent': 'Mozilla/5.0',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       }
     });
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error("CoinGecko API Error:", response.status, errorText);
       throw new Error(`CoinGecko API returned ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
     
     // 응답 데이터 검증
-    if (!data || !data.data) {
-      throw new Error("Invalid response format from CoinGecko API");
+    if (!data) {
+      throw new Error("Empty response from CoinGecko API");
     }
     
-    res.status(200).json(data);
+    // data 필드가 없을 수도 있으므로 유연하게 처리
+    if (data.data && Array.isArray(data.data)) {
+      res.status(200).json(data);
+    } else if (Array.isArray(data)) {
+      // 배열로 직접 반환되는 경우
+      res.status(200).json({ data: data });
+    } else {
+      throw new Error("Invalid response format from CoinGecko API");
+    }
   } catch (err) {
     console.error("News API error:", err);
     res.status(500).json({ 
