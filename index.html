@@ -4,6 +4,40 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>모든 지갑은 코어위브와 함께</title>
+    <script>
+      // Firebase Analytics IndexedDB 경고 필터링 (페이지 로드 최초에 실행)
+      (function() {
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        const filterMessage = (args) => {
+          const message = args.map(arg => {
+            if (typeof arg === 'string') return arg;
+            if (arg && typeof arg.toString === 'function') return arg.toString();
+            return JSON.stringify(arg);
+          }).join(' ');
+          
+          return message.includes('Analytics') && 
+                 (message.includes('IndexedDB') || 
+                  message.includes('indexeddb-unavailable') ||
+                  message.includes('analytics/indexeddb-unavailable'));
+        };
+        
+        console.error = function(...args) {
+          if (filterMessage(args)) {
+            return; // Analytics IndexedDB 경고 무시
+          }
+          originalError.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+          if (filterMessage(args)) {
+            return; // Analytics IndexedDB 경고 무시
+          }
+          originalWarn.apply(console, args);
+        };
+      })();
+    </script>
     <link rel="stylesheet" href="./styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,12 +51,12 @@
       <!-- Top Navigation Bar -->
       <header class="top-navbar glass">
         <div class="navbar-container">
-          <a href="#" class="logo-horizontal" style="text-decoration:none;cursor:pointer;" onclick="event.preventDefault(); if (window.navigateToPage) { window.navigateToPage('dashboard'); } else { document.querySelector('.nav-item-horizontal[data-page=\"dashboard\"]')?.click(); }">
-            <div class="logo-mark" style="background:transparent;padding:0;display:flex;align-items:center;justify-content:center;overflow:visible;height:40px;width:40px;position:relative;">
-              <img src="./sim.png" alt="CoreWeave Logo" style="width:85px;height:85px;object-fit:contain;object-position:top center;filter:brightness(0) invert(1);position:absolute;top:calc(50% + 5px);left:50%;transform:translate(-50%, -50%) translateZ(0) scale(1);clip-path:inset(0 0 40% 0);image-rendering:smooth;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;image-rendering:pixelated;image-rendering:auto;transform-style:preserve-3d;" />
+          <a href="/" class="logo-horizontal" id="logoLink" onclick="if(window.handleLogoClick) { window.handleLogoClick(event); return false; }" style="text-decoration:none;cursor:pointer;">
+            <div class="logo-mark" style="background:transparent;padding:0;display:flex;align-items:center;justify-content:center;overflow:visible;height:40px;width:40px;position:relative;cursor:pointer;">
+              <img src="./sim.png" alt="CoreWeave Logo" style="width:85px;height:85px;object-fit:contain;object-position:top center;filter:brightness(0) invert(1);position:absolute;top:calc(50% + 5px);left:50%;transform:translate(-50%, -50%) translateZ(0) scale(1);clip-path:inset(0 0 40% 0);image-rendering:smooth;image-rendering:-webkit-optimize-contrast;image-rendering:crisp-edges;image-rendering:pixelated;image-rendering:auto;transform-style:preserve-3d;pointer-events:none;" />
             </div>
-            <div class="logo-text">
-              <span class="brand">CoreWeave</span>
+            <div class="logo-text" style="cursor:pointer;">
+              <span class="brand" style="cursor:pointer;">CoreWeave</span>
             </div>
           </a>
 
@@ -36,7 +70,8 @@
             <button class="nav-item-horizontal" data-page="rewards">
               리워드 내역
             </button>
-            <button class="nav-item-horizontal" data-page="signup">
+            <!-- 회원가입 버튼: 로그인 시 자동으로 숨김 처리됨 -->
+            <button class="nav-item-horizontal" data-page="signup" id="signupNavBtn">
               회원가입
             </button>
           </nav>
@@ -506,8 +541,8 @@
           </div>
         </section>
 
-        <!-- 회원가입 페이지 -->
-        <section class="page-section" id="signup-page" style="display:none;">
+        <!-- 회원가입 페이지 (비활성화: Firebase 콘솔에서 직접 계정 생성 필요) -->
+        <section class="page-section" id="signup-page" style="display:none !important;">
           <div class="card glass" style="max-width:600px;margin:0 auto;">
             <div class="card-header" style="text-align:center;margin-bottom:32px;">
               <h2 class="card-title" style="font-size:32px;margin-bottom:12px;">회원가입</h2>
@@ -667,12 +702,13 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label for="loginEmail">사용자명</label>
+            <label for="loginEmail">아이디 또는 이메일 주소</label>
             <input
               type="text"
               id="loginEmail"
               class="input"
-              placeholder="사용자명을 입력하세요"
+              placeholder="아이디 입력 (예: jjiu153) 또는 이메일 주소 (예: user@example.com)"
+              autocomplete="username"
             />
           </div>
           <div class="form-group">
@@ -683,19 +719,16 @@
               class="input"
               placeholder="4자 이상 비밀번호를 입력하세요"
             />
-            <div class="form-helper">
-              포트폴리오 데모용으로, 비밀번호는 브라우저 내부에만 저장되며 실제 인증은
-              이루어지지 않습니다.
+            <div class="form-helper" id="loginHelper">
+              <strong>로그인 방법:</strong><br/>
+              • 일반 계정: 아이디만 입력 (예: jjiu153) - 자동으로 @temp.com이 추가됩니다<br/>
+              • 관리자 계정: 이메일 주소 입력 (예: jjiyu244@gmail.com)<br/>
+              <small style="color: #64748b;">Firebase 콘솔에서 생성한 비밀번호를 입력해주세요.</small>
             </div>
           </div>
           <button class="btn-primary w-full" id="loginConfirmBtn">로그인</button>
           <p class="modal-footnote" id="loginStatusText"></p>
-          <div class="auth-switch">
-            <span id="toSignup" class="auth-switch-link">처음이신가요? 회원가입</span>
-            <span id="toLogin" class="auth-switch-link auth-switch-link--hidden"
-              >이미 계정이 있나요? 로그인</span
-            >
-          </div>
+          <!-- 회원가입 비활성화: Firebase 콘솔에서 직접 계정 생성 필요 (회원가입 링크 제거됨) -->
         </div>
       </div>
     </div>
@@ -722,7 +755,8 @@
     <script type="module">
       // Import the functions you need from the SDKs you need
       import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js';
-      import { getAnalytics } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js';
+      // Analytics 비활성화 (IndexedDB 경고 방지)
+      // import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js';
       import {
         getAuth,
         createUserWithEmailAndPassword,
@@ -739,7 +773,7 @@
       } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js';
 
       // Your web app's Firebase configuration
-      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      // measurementId 제거 (Analytics 비활성화)
       const firebaseConfig = {
         apiKey: 'AIzaSyBvb8p8PFmeIh3ZVyWqWk1RQLBZyAUpfk4',
         authDomain: 'j22j22.firebaseapp.com',
@@ -747,12 +781,16 @@
         storageBucket: 'j22j22.firebasestorage.app',
         messagingSenderId: '874202688810',
         appId: '1:874202688810:web:d384f6ea7cc4dcfb0b4253',
-        measurementId: 'G-2BEJP8J1VT',
+        // measurementId: 'G-2BEJP8J1VT', // Analytics 비활성화
       };
 
       // Initialize Firebase
       const app = initializeApp(firebaseConfig);
-      getAnalytics(app);
+      
+      // Analytics 완전 비활성화 (IndexedDB 경고 방지)
+      // Analytics는 사용하지 않으므로 초기화하지 않음
+      // measurementId도 firebaseConfig에서 제거됨
+      // 경고 필터링은 <head>에서 페이지 로드 시점에 이미 설정됨
 
       const auth = getAuth(app);
       const db = getFirestore(app);

@@ -161,6 +161,7 @@ async function initFirebase() {
   }
   auth = window.__firebase.auth;
   db = window.__firebase.db;
+  window.__firebaseInitialized = true; // Firebase 초기화 완료 플래그
 
   // Auth 상태 변화 감지
   const { onAuthStateChanged } = await import(
@@ -178,7 +179,17 @@ async function initFirebase() {
       updateAdminUI();
       
       // URL 기반 라우팅 처리 (Firebase 초기화 후)
-      handleURLRouting();
+      // 단, 어드민 페이지인 경우 일반 계정이면 자동으로 대시보드로 이동 (알림 없이)
+      const currentPath = window.location.pathname;
+      if ((currentPath === '/admin' || currentPath === '/admin/') && !isAdmin) {
+        // 일반 계정이 어드민 URL에 있으면 조용히 대시보드로 이동
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, '', '/');
+        }
+        navigateToPage('dashboard');
+      } else {
+        handleURLRouting();
+      }
       
       // 리워드 페이지가 현재 표시 중이면 리워드 렌더링
       const rewardsPage = document.getElementById('rewards-page');
@@ -193,7 +204,13 @@ async function initFirebase() {
       updateLoginUI();
       updateAdminUI();
       
-      // URL 기반 라우팅 처리
+      // 로그아웃 시 URL 기반 라우팅 처리 (어드민 페이지에서 로그아웃한 경우 대시보드로)
+      const path = window.location.pathname;
+      if (path === '/admin' || path === '/admin/') {
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, '', '/');
+        }
+      }
       handleURLRouting();
       
       // 리워드 페이지가 현재 표시 중이면 빈 상태 표시
@@ -268,25 +285,50 @@ async function saveUserStakesToFirestore() {
 // 리워드 데이터 관리
 let userRewards = []; // 승인된 리워드 내역
 
-// Firestore에서 유저 리워드 데이터 불러오기
+// Firestore에서 유저 리워드 데이터 불러오기 (최적화)
 async function loadUserRewardsFromFirestore(uid) {
-  try {
-    const { collection, query, where, getDocs, orderBy } = await import(
-      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
-    );
-    const rewardsRef = collection(db, 'rewards');
-    const q = query(rewardsRef, where('userId', '==', uid), orderBy('approvedAt', 'desc'));
-    const querySnapshot = await getDocs(q);
+  if (!db || !uid) {
     userRewards = [];
-    querySnapshot.forEach((doc) => {
-      userRewards.push({
+    return;
+  }
+  
+  try {
+    // Firestore 모듈 동적 import (한 번만)
+    const firestoreModule = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+    const { collection, query, where, getDocs, orderBy } = firestoreModule;
+    
+    const rewardsRef = collection(db, 'rewards');
+    
+    // orderBy 없이 먼저 시도 (인덱스 불필요)
+    let q = query(rewardsRef, where('userId', '==', uid));
+    
+    try {
+      // orderBy를 시도 (인덱스가 있다면)
+      q = query(rewardsRef, where('userId', '==', uid), orderBy('approvedAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      userRewards = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
+      }));
+    } catch (indexError) {
+      // 인덱스가 없으면 orderBy 없이 조회 후 클라이언트에서 정렬
+      console.warn('Firestore 인덱스 없음, 클라이언트 정렬 사용');
+      const querySnapshot = await getDocs(q);
+      userRewards = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      
+      // 클라이언트에서 날짜순 정렬
+      userRewards.sort((a, b) => {
+        const dateA = a.approvedAt?.toDate ? a.approvedAt.toDate() : new Date(0);
+        const dateB = b.approvedAt?.toDate ? b.approvedAt.toDate() : new Date(0);
+        return dateB.getTime() - dateA.getTime(); // 최신순
       });
-    });
+    }
   } catch (e) {
-    console.error('Firestore에서 리워드 데이터를 불러오지 못했습니다:', e);
-    userRewards = [];
+    console.error('Firestore 리워드 데이터 로드 실패:', e.message || e);
+    userRewards = []; // 에러 시 빈 배열로 초기화
   }
 }
 
@@ -315,10 +357,24 @@ async function approveRewardForUser(userId, approvedAmount, symbol, apy) {
 function updateLoginUI() {
   const loginBtn = $('#loginBtn');
   if (!loginBtn) return;
+  
+  // 로그인 버튼 텍스트 업데이트
   if (currentUser) {
-    loginBtn.textContent = `${currentUser.email} (로그아웃)`;
+    // 이메일에서 @ 앞부분만 표시 (일반 계정은 @temp.com 제거)
+    const displayEmail = currentUser.email.replace('@temp.com', '').split('@')[0];
+    loginBtn.textContent = `${displayEmail} (로그아웃)`;
   } else {
     loginBtn.textContent = '로그인';
+  }
+  
+  // 회원가입 버튼 표시/숨김 처리
+  const signupBtn = document.querySelector('.nav-item-horizontal[data-page="signup"]');
+  if (signupBtn) {
+    if (currentUser) {
+      signupBtn.style.display = 'none'; // 로그인 시 숨김
+    } else {
+      signupBtn.style.display = ''; // 로그아웃 시 표시
+    }
   }
 }
 
@@ -332,6 +388,7 @@ function applyUserStakesToPortfolio() {
 }
 
 async function setupLogin() {
+  console.log('setupLogin 함수 시작');
   const loginBtn = $('#loginBtn');
   const modal = $('#loginModal');
   const closeBtn = $('#loginCloseBtn');
@@ -342,12 +399,25 @@ async function setupLogin() {
   const toLogin = $('#toLogin');
   let mode = 'login'; // 'login' | 'signup'
 
+  console.log('DOM 요소 확인:', {
+    loginBtn: !!loginBtn,
+    modal: !!modal,
+    confirmBtn: !!confirmBtn,
+    statusText: !!statusText
+  });
+
   // Firebase Auth 모듈 동적 import
-  const {
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    signOut,
-  } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
+  let signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword;
+  try {
+    const authModule = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
+    signInWithEmailAndPassword = authModule.signInWithEmailAndPassword;
+    signOut = authModule.signOut;
+    createUserWithEmailAndPassword = authModule.createUserWithEmailAndPassword;
+    console.log('Firebase Auth 모듈 로드 완료');
+  } catch (err) {
+    console.error('Firebase Auth 모듈 로드 실패:', err);
+    return;
+  }
 
   const setMode = (nextMode) => {
     mode = nextMode;
@@ -356,14 +426,16 @@ async function setupLogin() {
       titleEl.textContent = '로그인';
       confirmBtn.textContent = '로그인';
       statusText.textContent = '';
-      toSignup.classList.remove('auth-switch-link--hidden');
-      toLogin.classList.add('auth-switch-link--hidden');
+      // 회원가입 링크 숨기기 (비활성화)
+      if (toSignup) {
+        toSignup.classList.add('auth-switch-link--hidden');
+      }
+      if (toLogin) {
+        toLogin.classList.add('auth-switch-link--hidden');
+      }
     } else {
-      titleEl.textContent = '회원가입';
-      confirmBtn.textContent = '회원가입 완료';
-      statusText.textContent = '';
-      toSignup.classList.add('auth-switch-link--hidden');
-      toLogin.classList.remove('auth-switch-link--hidden');
+      // 회원가입 모드는 더 이상 사용하지 않음
+      setMode('login');
     }
   };
 
@@ -399,60 +471,216 @@ async function setupLogin() {
     });
   }
 
-  if (confirmBtn) {
-    confirmBtn.addEventListener('click', async () => {
-      const email = $('#loginEmail').value.trim();
-      const password = $('#loginPassword').value.trim();
-      if (!email || !password) {
-        statusText.textContent = '이메일과 비밀번호를 모두 입력해주세요.';
+  // 로그인 핸들러 함수 - 최적화된 버전
+  const handleLogin = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    // 상태 초기화
+    if (statusText) {
+      statusText.textContent = '';
+    }
+    
+    // auth 객체 가져오기 - 더 안전한 방법
+    const getAuthInstance = () => {
+      if (auth && auth.app) return auth;
+      if (window.__firebase && window.__firebase.auth && window.__firebase.auth.app) {
+        return window.__firebase.auth;
+      }
+      return null;
+    };
+    
+    const currentAuth = getAuthInstance();
+    if (!currentAuth) {
+      const errorMsg = 'Firebase Auth가 초기화되지 않았습니다. 페이지를 새로고침해주세요.';
+      console.error(errorMsg);
+      if (statusText) {
+        statusText.textContent = errorMsg;
+      }
+      return;
+    }
+    
+    // 입력 필드 가져오기
+    const emailInput = $('#loginEmail');
+    const passwordInput = $('#loginPassword');
+    
+    if (!emailInput || !passwordInput) {
+      console.error('로그인 입력 필드를 찾을 수 없습니다.');
+      if (statusText) {
+        statusText.textContent = '로그인 폼을 찾을 수 없습니다. 페이지를 새로고침해주세요.';
+      }
+      return;
+    }
+    
+    // 입력 값 가져오기 및 검증
+    let email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+    
+    // 빈 값 체크
+    if (!email || !password) {
+      if (statusText) {
+        statusText.textContent = '아이디(또는 이메일)와 비밀번호를 모두 입력해주세요.';
+      }
+      return;
+    }
+    
+    // 이메일 형식 검증 및 변환
+    email = email.toLowerCase().trim();
+    
+    // 일반 아이디 형식 체크 (소문자, 숫자, 언더스코어, 하이픈만 허용)
+    const isGeneralId = /^[a-z0-9_-]+$/.test(email) && !email.includes('@');
+    
+    if (isGeneralId) {
+      // 일반 아이디 형식인 경우 @temp.com 도메인 추가
+      email = `${email}@temp.com`;
+      console.log('일반 아이디를 이메일 형식으로 변환:', email);
+    } else {
+      // 이메일 형식인지 확인
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        if (statusText) {
+          statusText.textContent = '유효한 아이디(소문자, 숫자) 또는 이메일 주소를 입력해주세요.';
+        }
         return;
       }
+    }
+    
+    // input 필드에 최종 이메일 반영
+    emailInput.value = email;
+    
+    // 비밀번호 길이 체크 (Firebase 최소 6자)
+    if (password.length < 6) {
+      if (statusText) {
+        statusText.textContent = '비밀번호는 최소 6자 이상이어야 합니다.';
+      }
+      return;
+    }
 
-      if (mode === 'signup') {
-        if (password.length < 6) {
-          statusText.textContent = 'Firebase는 비밀번호 6자 이상을 요구합니다.';
-          return;
+    // 회원가입 모드 체크 (현재 비활성화)
+    if (mode === 'signup') {
+      if (statusText) {
+        statusText.textContent = '회원가입은 현재 비활성화되어 있습니다. Firebase 콘솔에서 계정을 생성해주세요.';
+      }
+      return;
+    }
+    
+    // 로그인 시도
+    try {
+      if (statusText) {
+        statusText.textContent = '로그인 중...';
+      }
+      
+      // signInWithEmailAndPassword 함수 확인
+      if (typeof signInWithEmailAndPassword !== 'function') {
+        throw new Error('로그인 함수를 불러올 수 없습니다. 페이지를 새로고침해주세요.');
+      }
+      
+      // Firebase 로그인 API 호출
+      const result = await signInWithEmailAndPassword(currentAuth, email, password);
+      console.log('로그인 성공:', result.user?.email);
+      
+      // 성공 메시지 및 모달 닫기
+      if (statusText) {
+        statusText.textContent = '로그인 되었습니다.';
+      }
+      setTimeout(() => {
+        const modal = $('#loginModal');
+        if (modal) {
+          modal.classList.remove('show');
         }
-        try {
-          await createUserWithEmailAndPassword(auth, email, password);
-          statusText.textContent = '회원가입 및 로그인 완료. 창이 자동으로 닫힙니다.';
-          setTimeout(() => {
-            $('#loginModal').classList.remove('show');
-          }, 700);
-        } catch (error) {
-          if (error.code === 'auth/email-already-in-use') {
-            statusText.textContent = '이미 가입된 이메일입니다. 로그인 모드로 전환합니다.';
-            setMode('login');
-          } else {
-            statusText.textContent = `회원가입 실패: ${error.message}`;
-          }
-        }
+      }, 500);
+    } catch (error) {
+      // 에러 로깅
+      console.error('로그인 에러:', {
+        code: error.code,
+        message: error.message,
+        email: email,
+        authInitialized: !!currentAuth
+      });
+      
+      // 사용자 친화적 에러 메시지
+      if (!statusText) return;
+      
+      let errorMessage = '';
+      const errorCode = error.code || '';
+      const errorMsg = error.message || '';
+      
+      // 400 Bad Request 에러 처리
+      if (errorCode.includes('400') || errorMsg.includes('400') || errorMsg.includes('Bad Request')) {
+        errorMessage = `로그인 요청이 실패했습니다 (400 에러).<br/><br/>
+          <strong>필수 확인 사항:</strong><br/>
+          1. Firebase 콘솔 → Authentication → Sign-in method<br/>
+          &nbsp;&nbsp;→ <strong>Email/Password</strong>가 <strong>활성화</strong>되어 있는지 확인<br/>
+          2. 입력한 이메일: <strong>${email}</strong><br/>
+          3. Firebase 콘솔(Authentication → Users)에 해당 계정이 존재하는지 확인<br/>
+          4. 비밀번호가 정확한지 확인<br/><br/>
+          <small>에러 코드: ${errorCode || 'N/A'}</small>`;
+      } else if (errorCode === 'auth/user-not-found') {
+        errorMessage = `등록된 계정이 없습니다.<br/><br/>Firebase 콘솔 → Authentication → Users에서 <strong>"${email}"</strong> 계정이 생성되었는지 확인해주세요.`;
+      } else if (errorCode === 'auth/wrong-password') {
+        errorMessage = '비밀번호가 올바르지 않습니다.<br/><br/>Firebase 콘솔에서 설정한 비밀번호를 확인해주세요.';
+      } else if (errorCode === 'auth/invalid-email') {
+        errorMessage = '유효한 이메일 주소를 입력해주세요. (예: user@example.com)';
+      } else if (errorCode === 'auth/invalid-credential') {
+        errorMessage = `이메일 또는 비밀번호가 올바르지 않습니다.<br/><br/>
+          입력한 이메일: <strong>${email}</strong><br/><br/>
+          확인 사항:<br/>
+          1. Firebase 콘솔에 정확히 <strong>"${email}"</strong> 계정이 있는지<br/>
+          2. 비밀번호가 정확한지<br/>
+          3. 계정이 삭제되지 않았는지`;
       } else {
-        try {
-          await signInWithEmailAndPassword(auth, email, password);
-          statusText.textContent = '로그인 되었습니다. 창이 자동으로 닫힙니다.';
-          setTimeout(() => {
-            $('#loginModal').classList.remove('show');
-          }, 700);
-        } catch (error) {
-          if (error.code === 'auth/user-not-found') {
-            statusText.textContent = '등록된 계정이 없습니다. 먼저 회원가입을 진행해주세요.';
-          } else if (error.code === 'auth/wrong-password') {
-            statusText.textContent = '비밀번호가 올바르지 않습니다.';
-          } else {
-            statusText.textContent = `로그인 실패: ${error.message}`;
-          }
-        }
+        errorMessage = `로그인 실패: <strong>${errorCode || errorMsg || '알 수 없는 오류'}</strong><br/><br/>
+          페이지를 새로고침하거나 Firebase 콘솔에서 계정 상태를 확인해주세요.`;
+      }
+      
+      statusText.innerHTML = errorMessage;
+    }
+  };
+  
+  // 버튼 클릭 이벤트
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', handleLogin);
+    console.log('로그인 버튼 이벤트 리스너 등록됨');
+  } else {
+    console.error('로그인 확인 버튼을 찾을 수 없습니다. id="loginConfirmBtn"');
+  }
+  
+  // 폼 제출 이벤트 (엔터키 등)
+  const loginForm = modal?.querySelector('form') || modal?.querySelector('.modal-body');
+  if (loginForm) {
+    loginForm.addEventListener('submit', handleLogin);
+    console.log('로그인 폼 제출 이벤트 리스너 등록됨');
+  }
+  
+  // 이메일/비밀번호 필드에서 엔터키 처리
+  const emailInput = $('#loginEmail');
+  const passwordInput = $('#loginPassword');
+  if (emailInput) {
+    emailInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleLogin(e);
+      }
+    });
+  }
+  if (passwordInput) {
+    passwordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleLogin(e);
       }
     });
   }
 
-  if (toSignup) {
-    toSignup.addEventListener('click', () => setMode('signup'));
-  }
-  if (toLogin) {
-    toLogin.addEventListener('click', () => setMode('login'));
-  }
+  // 회원가입 비활성화 - 이벤트 리스너 제거
+  // if (toSignup) {
+  //   toSignup.addEventListener('click', () => setMode('signup'));
+  // }
+  // if (toLogin) {
+  //   toLogin.addEventListener('click', () => setMode('login'));
+  // }
 }
 
 // Portfolio rendering
@@ -1677,14 +1905,49 @@ function navigateToPage(page) {
     
     // 어드민 페이지인 경우
     if (page === 'admin') {
-      // 어드민 권한 확인
-      if (!isAdmin) {
-        alert('어드민 권한이 필요합니다.');
+      // 로그인하지 않은 경우
+      if (!currentUser) {
+        alert('어드민 페이지 접근을 위해 로그인이 필요합니다.');
         navigateToPage('dashboard');
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, '', '/');
+        }
+        // 로그인 모달 열기
+        setTimeout(() => {
+          const loginModal = $('#loginModal');
+          const loginBtn = $('#loginBtn');
+          if (loginModal) {
+            loginModal.classList.add('show');
+          } else if (loginBtn) {
+            loginBtn.click();
+          }
+        }, 100);
+        return;
+      }
+      
+      // 어드민 권한 확인 (이중 체크)
+      if (!isAdmin || !currentUser || currentUser.email !== ADMIN_EMAIL) {
+        const userEmail = currentUser ? currentUser.email : '로그인 필요';
+        alert(`어드민 권한이 필요합니다.\n\n현재 로그인 계정: ${userEmail}\n필요한 계정: ${ADMIN_EMAIL}\n\n관리자 계정으로 로그인해주세요.`);
+        navigateToPage('dashboard');
+        // URL도 되돌리기
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, '', '/');
+        }
         return;
       }
       // 어드민 대시보드 렌더링
       renderAdminPage();
+    }
+    
+    // 회원가입 페이지 접근 차단
+    if (page === 'signup') {
+      alert('회원가입은 현재 비활성화되어 있습니다. Firebase 콘솔에서 직접 계정을 생성하세요.');
+      navigateToPage('dashboard');
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, '', '/');
+      }
+      return;
     }
   }
 
@@ -1699,10 +1962,79 @@ function navigateToPage(page) {
   }
 }
 
-// Expose navigateToPage globally for inline handlers
+// Expose navigateToPage globally for inline handlers and logo click
 window.navigateToPage = navigateToPage;
 
+// 로고 클릭 핸들러 함수 (전역으로 사용)
+function handleLogoClick(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  
+  // navigateToPage 함수 사용
+  const navFunction = typeof navigateToPage === 'function' ? navigateToPage : window.navigateToPage;
+  
+  if (navFunction) {
+    navFunction('dashboard');
+  } else {
+    // 대시보드 버튼 클릭
+    const dashboardBtn = document.querySelector('.nav-item-horizontal[data-page="dashboard"]');
+    if (dashboardBtn) {
+      dashboardBtn.click();
+    } else {
+      // 최후의 수단: URL 변경
+      window.location.href = '/';
+    }
+  }
+  
+  return false; // inline handler에서 사용
+}
+
+// 전역으로 노출 (HTML inline onclick에서 사용)
+window.handleLogoClick = handleLogoClick;
+
 function setupNavigation() {
+  // 로고 클릭 이벤트: 대시보드로 이동
+  // 직접 요소 찾기
+  const logoLink = document.getElementById('logoLink') || document.querySelector('.logo-horizontal');
+  if (logoLink) {
+    // 기존 이벤트 리스너 제거 후 새로 추가 (중복 방지)
+    logoLink.removeEventListener('click', handleLogoClick);
+    logoLink.addEventListener('click', handleLogoClick);
+    console.log('로고 클릭 이벤트 리스너 등록됨');
+  }
+  
+  // 로고 내부 모든 요소에도 클릭 이벤트 추가
+  const logoMark = document.querySelector('.logo-mark');
+  const logoText = document.querySelector('.logo-text');
+  const brandText = document.querySelector('.brand');
+  
+  [logoMark, logoText, brandText].forEach((element) => {
+    if (element) {
+      element.style.cursor = 'pointer';
+      element.addEventListener('click', handleLogoClick);
+    }
+  });
+  
+  // 이벤트 위임 추가 (capture phase에서 작동 - 가장 먼저 실행)
+  // 리워드 페이지 등 모든 상황에서 작동하도록
+  document.addEventListener('click', (e) => {
+    // 로고 관련 요소 클릭 감지
+    const target = e.target;
+    const logoElement = target.closest('#logoLink, .logo-horizontal');
+    
+    if (logoElement) {
+      handleLogoClick(e);
+      return;
+    }
+    
+    // 로고 내부 요소들도 체크
+    if (target.closest('.logo-mark, .logo-text, .brand')) {
+      handleLogoClick(e);
+    }
+  }, true); // capture phase - 이벤트 전파 전에 실행
+  
   // Add click handlers to all nav items
   document.querySelectorAll('.nav-item-horizontal').forEach((btn) => {
     btn.addEventListener('click', (e) => {
@@ -1718,20 +2050,74 @@ function setupNavigation() {
 // URL 기반 라우팅 처리 함수
 function handleURLRouting() {
   const path = window.location.pathname;
+  
+  // 어드민 페이지 접근 처리
   if (path === '/admin' || path === '/admin/') {
-    if (isAdmin) {
-      navigateToPage('admin');
-    } else {
-      navigateToPage('dashboard');
-      if (currentUser) {
-        alert('어드민 권한이 필요합니다.');
-      }
+    // Firebase 인증이 완료되지 않았으면 잠시 대기 (최대 3초)
+    if (!window.__firebaseInitialized && auth === undefined) {
+      console.log('Firebase 초기화 대기 중...');
+      setTimeout(() => handleURLRouting(), 100);
+      return;
     }
-  } else if (path === '/rewards' || path === '/rewards/') {
+    
+    // 로그인하지 않은 경우
+    if (!currentUser) {
+      // URL 먼저 변경
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, '', '/');
+      }
+      navigateToPage('dashboard');
+      // 로그인 모달 열기
+      setTimeout(() => {
+        const loginModal = $('#loginModal');
+        const loginBtn = $('#loginBtn');
+        if (loginModal) {
+          loginModal.classList.add('show');
+        } else if (loginBtn) {
+          loginBtn.click();
+        }
+        alert('어드민 페이지 접근을 위해 관리자 계정으로 로그인해주세요.');
+      }, 300);
+      return;
+    }
+    
+      // 어드민 권한 이중 확인
+      if (isAdmin && currentUser && currentUser.email === ADMIN_EMAIL) {
+        navigateToPage('admin');
+      } else {
+        // URL 먼저 변경
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, '', '/');
+        }
+        navigateToPage('dashboard');
+        // 일반 계정이 직접 /admin URL로 접근한 경우에만 알림 표시
+        // (로그인 후 자동 리다이렉트가 아닌 경우)
+        const userEmail = currentUser ? currentUser.email : '로그인 필요';
+        // 알림은 사용자가 직접 어드민 버튼을 클릭하거나 /admin으로 접근한 경우에만 표시
+        // onAuthStateChanged에서 자동으로 처리된 경우는 알림 없이 처리
+        console.log('일반 계정이 어드민 페이지에 접근 시도 - 대시보드로 이동');
+      }
+      return;
+  }
+  
+  // 회원가입 페이지 접근 차단
+  if (path === '/signup' || path === '/signup/') {
+    alert('회원가입은 현재 비활성화되어 있습니다.');
+    navigateToPage('dashboard');
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState({}, '', '/');
+    }
+    return;
+  }
+  
+  // 리워드 페이지
+  if (path === '/rewards' || path === '/rewards/') {
     navigateToPage('rewards');
-  } else if (path === '/signup' || path === '/signup/') {
-    navigateToPage('signup');
-  } else if (path === '/' || path === '') {
+    return;
+  }
+  
+  // 기본 대시보드
+  if (path === '/' || path === '') {
     navigateToPage('dashboard');
   }
 }
@@ -1744,11 +2130,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Setup navigation first
   setupNavigation();
   
-  // 초기 URL 라우팅 처리 (Firebase 초기화 전)
-  handleURLRouting();
+  // 초기 URL 라우팅 처리 (Firebase 초기화 전에 먼저 체크)
+  // 어드민 접근 시도는 로그인 후에 처리되도록 함
+  const currentPath = window.location.pathname;
+  if (currentPath === '/admin' || currentPath === '/admin/') {
+    // 어드민 접근 시도 시 대시보드로 먼저 이동 (Firebase 초기화 후 권한 체크)
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState({}, '', '/');
+    }
+    navigateToPage('dashboard');
+  }
   
-  // Firebase 초기화 (Auth 상태 감지 시작) - 여기서 handleURLRouting이 다시 호출됨
+  // Firebase 초기화 (Auth 상태 감지 시작) - 먼저 초기화
   await initFirebase();
+  
+  // Firebase 초기화 후 URL 라우팅 처리 (onAuthStateChanged에서도 호출됨)
+  // 로그인 상태가 확인된 후 어드민 접근을 처리
+  handleURLRouting();
   
   // 초기 로드 플래그 해제
   setTimeout(() => {
@@ -1773,7 +2171,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupSignupForm();
 
   // 로그인 UI 세팅 (Firebase Auth 모듈 동적 로드)
-  await setupLogin();
+  setupLogin().catch(err => {
+    console.error('setupLogin 초기화 에러:', err);
+  });
 
   // 어드민 모달 세팅
   setupAdminModal();
