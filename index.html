@@ -491,6 +491,21 @@
           </section>
         </section>
 
+        <!-- 어드민 페이지 -->
+        <section class="page-section" id="admin-page" style="display:none;">
+          <div class="card glass" style="margin-bottom:32px;">
+            <div class="card-header">
+              <h2 class="card-title">🔐 어드민 대시보드</h2>
+              <p class="card-subtitle">
+                전체 유저의 스테이킹 데이터를 조회합니다. (Firestore 기반)
+              </p>
+            </div>
+          </div>
+          <div id="adminPageContent" style="max-height: calc(100vh - 200px); overflow-y: auto;">
+            <!-- Filled by JS -->
+          </div>
+        </section>
+
         <!-- 회원가입 페이지 -->
         <section class="page-section" id="signup-page" style="display:none;">
           <div class="card glass" style="max-width:600px;margin:0 auto;">
@@ -687,7 +702,7 @@
 
     <!-- Admin Dashboard Modal -->
     <div class="modal-backdrop" id="adminModal">
-      <div class="modal glass" style="max-width: 900px;">
+      <div class="modal glass" style="max-width: 1200px;">
         <div class="modal-header">
           <h2 class="modal-title">🔐 어드민 대시보드</h2>
           <button class="modal-close" id="adminCloseBtn">✕</button>
@@ -696,7 +711,7 @@
           <p style="font-size: 13px; color: #9ca3af; margin-bottom: 16px;">
             전체 유저의 스테이킹 데이터를 조회합니다. (Firestore 기반)
           </p>
-          <div id="adminContent" style="max-height: 400px; overflow-y: auto;">
+          <div id="adminContent" style="max-height: 600px; overflow-y: auto;">
             <!-- Filled by JS -->
           </div>
         </div>

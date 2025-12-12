@@ -176,6 +176,10 @@ async function initFirebase() {
       renderPortfolio();
       updateLoginUI();
       updateAdminUI();
+      
+      // URL 기반 라우팅 처리 (Firebase 초기화 후)
+      handleURLRouting();
+      
       // 리워드 페이지가 현재 표시 중이면 리워드 렌더링
       const rewardsPage = document.getElementById('rewards-page');
       if (rewardsPage && rewardsPage.style.display !== 'none') {
@@ -188,6 +192,10 @@ async function initFirebase() {
       userRewards = [];
       updateLoginUI();
       updateAdminUI();
+      
+      // URL 기반 라우팅 처리
+      handleURLRouting();
+      
       // 리워드 페이지가 현재 표시 중이면 빈 상태 표시
       const rewardsPage = document.getElementById('rewards-page');
       if (rewardsPage && rewardsPage.style.display !== 'none') {
@@ -222,11 +230,36 @@ async function loadUserStakesFromFirestore(uid) {
 async function saveUserStakesToFirestore() {
   if (!currentUser || !currentUser.uid) return;
   try {
-    const { doc, setDoc } = await import(
+    const { doc, getDoc, setDoc, serverTimestamp } = await import(
       'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
     );
     const docRef = doc(db, 'userStakes', currentUser.uid);
-    await setDoc(docRef, userStakes);
+    
+    // 기존 데이터 확인
+    const docSnap = await getDoc(docRef);
+    const existingData = docSnap.exists() ? docSnap.data() : {};
+    
+    // 각 코인별로 스테이킹 시작일 설정 (처음 스테이킹할 때만)
+    const stakeStartDates = existingData.stakeStartDates || {};
+    ['BTC', 'ETH', 'XRP'].forEach((symbol) => {
+      const currentAmount = userStakes[symbol] || 0;
+      const previousAmount = existingData[symbol] || 0;
+      
+      // 처음 스테이킹을 시작하는 경우
+      if (currentAmount > 0 && previousAmount === 0 && !stakeStartDates[symbol]) {
+        stakeStartDates[symbol] = serverTimestamp();
+      }
+    });
+    
+    // 저장할 데이터 (이메일 정보도 포함)
+    const dataToSave = {
+      ...userStakes,
+      email: currentUser.email,
+      stakeStartDates,
+      lastUpdated: serverTimestamp(),
+    };
+    
+    await setDoc(docRef, dataToSave, { merge: true });
   } catch (e) {
     console.error('Firestore에 데이터를 저장하지 못했습니다:', e);
   }
@@ -1002,23 +1035,68 @@ async function loadAllUserStakes() {
   }
 }
 
-function renderAdminDashboard(users) {
+// 사용자별 리워드 데이터 가져오기
+async function loadUserRewardsForAdmin(userId) {
+  try {
+    const { collection, query, where, getDocs, orderBy } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const rewardsRef = collection(db, 'rewards');
+    const q = query(rewardsRef, where('userId', '==', userId), orderBy('approvedAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    const rewards = [];
+    querySnapshot.forEach((doc) => {
+      rewards.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+    return rewards;
+  } catch (e) {
+    console.error('리워드 데이터를 불러오지 못했습니다:', e);
+    return [];
+  }
+}
+
+async function renderAdminDashboard(users) {
   const container = $('#adminContent');
   if (!container) return;
+
+  container.innerHTML = '<p style="color:#9ca3af; text-align:center; padding: 20px;">데이터를 불러오는 중...</p>';
 
   if (users.length === 0) {
     container.innerHTML = '<p style="color:#9ca3af;">스테이킹 데이터가 없습니다.</p>';
     return;
   }
 
+  // 가격 정보 가져오기
+  const prices = {};
+  try {
+    const ids = Object.values(priceSource).join(',');
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      prices.BTC = data.bitcoin?.usd || 90000;
+      prices.ETH = data.ethereum?.usd || 3000;
+      prices.XRP = data.ripple?.usd || 1;
+    }
+  } catch (e) {
+    prices.BTC = 90000;
+    prices.ETH = 3000;
+    prices.XRP = 1;
+  }
+
   let totalBTC = 0;
   let totalETH = 0;
   let totalXRP = 0;
+  let totalUSD = 0;
 
   users.forEach((u) => {
     totalBTC += u.BTC || 0;
     totalETH += u.ETH || 0;
     totalXRP += u.XRP || 0;
+    totalUSD += ((u.BTC || 0) * prices.BTC) + ((u.ETH || 0) * prices.ETH) + ((u.XRP || 0) * prices.XRP);
   });
 
   // APY 정보
@@ -1028,56 +1106,128 @@ function renderAdminDashboard(users) {
     XRP: 5.4,
   };
 
+  // 통계 섹션
   let html = `
-    <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-      <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">전체 스테이킹 합계</h3>
+    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">📊 전체 통계</h3>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;">
+        <div>
+          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 회원수</div>
+          <div style="font-size: 20px; font-weight: 700; color: #fff;">${users.length}명</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 스테이킹 금액</div>
+          <div style="font-size: 20px; font-weight: 700; color: #10b981;">${formatUSD(totalUSD)}</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">BTC 총합</div>
+          <div style="font-size: 18px; font-weight: 600; color: #f97316;">${totalBTC.toFixed(4)}</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">ETH 총합</div>
+          <div style="font-size: 18px; font-weight: 600; color: #4f46e5;">${totalETH.toFixed(4)}</div>
+        </div>
+      </div>
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
         <div>
-          <div style="font-size: 11px; color: #9ca3af;">BTC</div>
-          <div style="font-size: 16px; font-weight: 600; color: #f97316;">${totalBTC.toFixed(4)}</div>
-        </div>
-        <div>
-          <div style="font-size: 11px; color: #9ca3af;">ETH</div>
-          <div style="font-size: 16px; font-weight: 600; color: #4f46e5;">${totalETH.toFixed(4)}</div>
-        </div>
-        <div>
-          <div style="font-size: 11px; color: #9ca3af;">XRP</div>
+          <div style="font-size: 11px; color: #9ca3af;">XRP 총합</div>
           <div style="font-size: 16px; font-weight: 600; color: #06b6d4;">${totalXRP.toFixed(2)}</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #9ca3af;">BTC USD</div>
+          <div style="font-size: 16px; font-weight: 600;">${formatUSD(totalBTC * prices.BTC)}</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #9ca3af;">ETH USD</div>
+          <div style="font-size: 16px; font-weight: 600;">${formatUSD(totalETH * prices.ETH)}</div>
         </div>
       </div>
     </div>
-    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">유저별 스테이킹 현황 및 승인 (${users.length}명)</h3>
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">👥 회원별 상세 정보 (${users.length}명)</h3>
   `;
 
-  users.forEach((u, idx) => {
+  // 각 사용자별로 리워드 데이터도 가져와서 표시
+  for (let idx = 0; idx < users.length; idx++) {
+    const u = users[idx];
+    const userRewards = await loadUserRewardsForAdmin(u.uid);
+    
+    // 총 리워드 계산
+    let userTotalRewardUSD = 0;
+    userRewards.forEach((reward) => {
+      const rewardUSD = (reward.amount || 0) * (prices[reward.symbol] || 0);
+      userTotalRewardUSD += rewardUSD;
+    });
+
+    // 스테이킹 시작일 계산
+    const calculateStakingPeriod = (startDate) => {
+      if (!startDate) return '정보 없음';
+      const start = startDate.toDate ? startDate.toDate() : new Date(startDate);
+      const now = new Date();
+      const diffTime = Math.abs(now - start);
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays < 30) return `${diffDays}일`;
+      const months = Math.floor(diffDays / 30);
+      const days = diffDays % 30;
+      return `${months}개월 ${days}일`;
+    };
+
     html += `
-      <div style="background: rgba(255,255,255,0.03); padding: 16px; border-radius: 6px; margin-bottom: 12px;">
-        <div style="font-size: 12px; font-weight: 500; margin-bottom: 12px;">
-          User ${idx + 1} · <span style="color: #9ca3af; font-size: 11px;">${u.uid.substring(0, 12)}...</span>
+      <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <div>
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">
+              회원 #${idx + 1} · ${u.email || '이메일 없음'}
+            </div>
+            <div style="font-size: 11px; color: #9ca3af;">
+              UID: ${u.uid.substring(0, 16)}...
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 리워드</div>
+            <div style="font-size: 16px; font-weight: 600; color: #10b981;">${formatUSD(userTotalRewardUSD)}</div>
+          </div>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
+
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 12px; font-weight: 600; color: #9ca3af; margin-bottom: 8px;">💰 투자 내역</div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
     `;
 
     ['BTC', 'ETH', 'XRP'].forEach((symbol) => {
       const amount = u[symbol] || 0;
+      const startDate = u.stakeStartDates?.[symbol];
+      const period = startDate ? calculateStakingPeriod(startDate) : '-';
+      const startDateStr = startDate 
+        ? (startDate.toDate ? startDate.toDate() : new Date(startDate)).toLocaleDateString('ko-KR')
+        : '-';
+      const usdValue = amount * (prices[symbol] || 0);
+      
       if (amount > 0) {
-        // 월별 리워드 계산 (연간 APY / 12)
         const monthlyApy = poolApy[symbol] / 12;
         const monthlyReward = (amount * monthlyApy) / 100;
         
         html += `
-          <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px;">
-            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 6px;">${symbol}</div>
-            <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">
-              스테이킹: <strong>${amount.toFixed(symbol === 'XRP' ? 2 : 4)}</strong>
+          <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 6px; font-weight: 600;">${symbol}</div>
+            <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">
+              수량: <strong>${amount.toFixed(symbol === 'XRP' ? 2 : 4)}</strong>
             </div>
-            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 8px;">
+            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">
+              USD: ${formatUSD(usdValue)}
+            </div>
+            <div style="font-size: 10px; color: #6b7280; margin-bottom: 4px;">
+              시작일: ${startDateStr}
+            </div>
+            <div style="font-size: 10px; color: #6b7280; margin-bottom: 8px;">
+              기간: ${period}
+            </div>
+            <div style="font-size: 10px; color: #9ca3af; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
               APY: ${poolApy[symbol]}%<br/>
-              예상 월 리워드: ${monthlyReward.toFixed(symbol === 'XRP' ? 2 : 6)}
+              예상 월: ${monthlyReward.toFixed(symbol === 'XRP' ? 2 : 6)}
             </div>
             <button 
               class="btn-primary" 
-              style="width: 100%; padding: 8px; font-size: 11px;"
+              style="width: 100%; padding: 6px; font-size: 10px;"
               onclick="handleApproveReward('${u.uid}', '${symbol}', ${amount}, ${monthlyReward}, ${poolApy[symbol]})"
             >
               리워드 승인
@@ -1088,10 +1238,73 @@ function renderAdminDashboard(users) {
     });
 
     html += `
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 12px; font-weight: 600; color: #9ca3af; margin-bottom: 8px;">🎁 이자 내역 (${userRewards.length}건)</div>
+    `;
+
+    if (userRewards.length > 0) {
+      html += `
+          <div style="background: rgba(255,255,255,0.02); border-radius: 6px; overflow: hidden;">
+            <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+              <thead>
+                <tr style="background: rgba(255,255,255,0.05);">
+                  <th style="padding: 8px; text-align: left; color: #9ca3af; font-weight: 600;">날짜</th>
+                  <th style="padding: 8px; text-align: left; color: #9ca3af; font-weight: 600;">코인</th>
+                  <th style="padding: 8px; text-align: right; color: #9ca3af; font-weight: 600;">수량</th>
+                  <th style="padding: 8px; text-align: right; color: #9ca3af; font-weight: 600;">USD</th>
+                  <th style="padding: 8px; text-align: center; color: #9ca3af; font-weight: 600;">APY</th>
+                </tr>
+              </thead>
+              <tbody>
+      `;
+
+      userRewards.slice(0, 5).forEach((reward) => {
+        const rewardDate = reward.approvedAt?.toDate ? reward.approvedAt.toDate() : new Date();
+        const dateStr = rewardDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const rewardUSD = (reward.amount || 0) * (prices[reward.symbol] || 0);
+        
+        html += `
+                <tr style="border-top: 1px solid rgba(255,255,255,0.05);">
+                  <td style="padding: 8px;">${dateStr}</td>
+                  <td style="padding: 8px;">${reward.symbol}</td>
+                  <td style="padding: 8px; text-align: right;">+${reward.amount.toFixed(reward.symbol === 'XRP' ? 2 : 4)}</td>
+                  <td style="padding: 8px; text-align: right; color: #10b981;">${formatUSD(rewardUSD)}</td>
+                  <td style="padding: 8px; text-align: center;">${reward.apy?.toFixed(1) || 0}%</td>
+                </tr>
+        `;
+      });
+
+      if (userRewards.length > 5) {
+        html += `
+                <tr>
+                  <td colspan="5" style="padding: 8px; text-align: center; color: #9ca3af; font-size: 10px;">
+                    외 ${userRewards.length - 5}건 더 있음
+                  </td>
+                </tr>
+        `;
+      }
+
+      html += `
+              </tbody>
+            </table>
+          </div>
+      `;
+    } else {
+      html += `
+          <div style="padding: 12px; text-align: center; color: #6b7280; font-size: 11px; background: rgba(255,255,255,0.02); border-radius: 6px;">
+            리워드 내역이 없습니다.
+          </div>
+      `;
+    }
+
+    html += `
         </div>
       </div>
     `;
-  });
+  }
 
   container.innerHTML = html;
 }
@@ -1105,9 +1318,16 @@ window.handleApproveReward = async function(userId, symbol, stakedAmount, reward
   const success = await approveRewardForUser(userId, rewardAmount, symbol, apy);
   if (success) {
     alert('리워드가 승인되었습니다.');
-    // 어드민 대시보드 새로고침
+    // 어드민 대시보드 새로고침 (페이지 또는 모달)
     const users = await loadAllUserStakes();
-    renderAdminDashboard(users);
+    const adminPageContent = $('#adminPageContent');
+    if (adminPageContent) {
+      // 어드민 페이지가 열려있는 경우
+      await renderAdminDashboardContent(users, adminPageContent);
+    } else {
+      // 모달이 열려있는 경우 (백업)
+      await renderAdminDashboard(users);
+    }
     // 만약 해당 유저가 현재 로그인되어 있다면 리워드 내역도 새로고침
     if (currentUser && currentUser.uid === userId) {
       await renderRewards();
@@ -1117,6 +1337,270 @@ window.handleApproveReward = async function(userId, symbol, stakedAmount, reward
   }
 };
 
+// 어드민 페이지 렌더링
+async function renderAdminPage() {
+  const container = $('#adminPageContent');
+  if (!container) return;
+  
+  container.innerHTML = '<p style="color:#9ca3af; text-align:center; padding: 20px;">데이터를 불러오는 중...</p>';
+  const users = await loadAllUserStakes();
+  await renderAdminDashboardContent(users, container);
+}
+
+// 어드민 대시보드 콘텐츠 렌더링 (모달과 페이지 공통 사용)
+async function renderAdminDashboardContent(users, container) {
+  if (!container) return;
+
+  if (users.length === 0) {
+    container.innerHTML = '<p style="color:#9ca3af;">스테이킹 데이터가 없습니다.</p>';
+    return;
+  }
+
+  // 가격 정보 가져오기
+  const prices = {};
+  try {
+    const ids = Object.values(priceSource).join(',');
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      prices.BTC = data.bitcoin?.usd || 90000;
+      prices.ETH = data.ethereum?.usd || 3000;
+      prices.XRP = data.ripple?.usd || 1;
+    }
+  } catch (e) {
+    prices.BTC = 90000;
+    prices.ETH = 3000;
+    prices.XRP = 1;
+  }
+
+  let totalBTC = 0;
+  let totalETH = 0;
+  let totalXRP = 0;
+  let totalUSD = 0;
+
+  users.forEach((u) => {
+    totalBTC += u.BTC || 0;
+    totalETH += u.ETH || 0;
+    totalXRP += u.XRP || 0;
+    totalUSD += ((u.BTC || 0) * prices.BTC) + ((u.ETH || 0) * prices.ETH) + ((u.XRP || 0) * prices.XRP);
+  });
+
+  // APY 정보
+  const poolApy = {
+    BTC: 3.2,
+    ETH: 6.8,
+    XRP: 5.4,
+  };
+
+  // 통계 섹션
+  let html = `
+    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">📊 전체 통계</h3>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;">
+        <div>
+          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 회원수</div>
+          <div style="font-size: 20px; font-weight: 700; color: #fff;">${users.length}명</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 스테이킹 금액</div>
+          <div style="font-size: 20px; font-weight: 700; color: #10b981;">${formatUSD(totalUSD)}</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">BTC 총합</div>
+          <div style="font-size: 18px; font-weight: 600; color: #f97316;">${totalBTC.toFixed(4)}</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">ETH 총합</div>
+          <div style="font-size: 18px; font-weight: 600; color: #4f46e5;">${totalETH.toFixed(4)}</div>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <div>
+          <div style="font-size: 11px; color: #9ca3af;">XRP 총합</div>
+          <div style="font-size: 16px; font-weight: 600; color: #06b6d4;">${totalXRP.toFixed(2)}</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #9ca3af;">BTC USD</div>
+          <div style="font-size: 16px; font-weight: 600;">${formatUSD(totalBTC * prices.BTC)}</div>
+        </div>
+        <div>
+          <div style="font-size: 11px; color: #9ca3af;">ETH USD</div>
+          <div style="font-size: 16px; font-weight: 600;">${formatUSD(totalETH * prices.ETH)}</div>
+        </div>
+      </div>
+    </div>
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">👥 회원별 상세 정보 (${users.length}명)</h3>
+  `;
+
+  // 각 사용자별로 리워드 데이터도 가져와서 표시
+  for (let idx = 0; idx < users.length; idx++) {
+    const u = users[idx];
+    const userRewards = await loadUserRewardsForAdmin(u.uid);
+    
+    // 총 리워드 계산
+    let userTotalRewardUSD = 0;
+    userRewards.forEach((reward) => {
+      const rewardUSD = (reward.amount || 0) * (prices[reward.symbol] || 0);
+      userTotalRewardUSD += rewardUSD;
+    });
+
+    // 스테이킹 시작일 계산
+    const calculateStakingPeriod = (startDate) => {
+      if (!startDate) return '정보 없음';
+      const start = startDate.toDate ? startDate.toDate() : new Date(startDate);
+      const now = new Date();
+      const diffTime = Math.abs(now - start);
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays < 30) return `${diffDays}일`;
+      const months = Math.floor(diffDays / 30);
+      const days = diffDays % 30;
+      return `${months}개월 ${days}일`;
+    };
+
+    html += `
+      <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+          <div>
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">
+              회원 #${idx + 1} · ${u.email || '이메일 없음'}
+            </div>
+            <div style="font-size: 11px; color: #9ca3af;">
+              UID: ${u.uid.substring(0, 16)}...
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 리워드</div>
+            <div style="font-size: 16px; font-weight: 600; color: #10b981;">${formatUSD(userTotalRewardUSD)}</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 12px; font-weight: 600; color: #9ca3af; margin-bottom: 8px;">💰 투자 내역</div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+    `;
+
+    ['BTC', 'ETH', 'XRP'].forEach((symbol) => {
+      const amount = u[symbol] || 0;
+      const startDate = u.stakeStartDates?.[symbol];
+      const period = startDate ? calculateStakingPeriod(startDate) : '-';
+      const startDateStr = startDate 
+        ? (startDate.toDate ? startDate.toDate() : new Date(startDate)).toLocaleDateString('ko-KR')
+        : '-';
+      const usdValue = amount * (prices[symbol] || 0);
+      
+      if (amount > 0) {
+        const monthlyApy = poolApy[symbol] / 12;
+        const monthlyReward = (amount * monthlyApy) / 100;
+        
+        html += `
+          <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 6px; font-weight: 600;">${symbol}</div>
+            <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">
+              수량: <strong>${amount.toFixed(symbol === 'XRP' ? 2 : 4)}</strong>
+            </div>
+            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">
+              USD: ${formatUSD(usdValue)}
+            </div>
+            <div style="font-size: 10px; color: #6b7280; margin-bottom: 4px;">
+              시작일: ${startDateStr}
+            </div>
+            <div style="font-size: 10px; color: #6b7280; margin-bottom: 8px;">
+              기간: ${period}
+            </div>
+            <div style="font-size: 10px; color: #9ca3af; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
+              APY: ${poolApy[symbol]}%<br/>
+              예상 월: ${monthlyReward.toFixed(symbol === 'XRP' ? 2 : 6)}
+            </div>
+            <button 
+              class="btn-primary" 
+              style="width: 100%; padding: 6px; font-size: 10px;"
+              onclick="handleApproveReward('${u.uid}', '${symbol}', ${amount}, ${monthlyReward}, ${poolApy[symbol]})"
+            >
+              리워드 승인
+            </button>
+          </div>
+        `;
+      }
+    });
+
+    html += `
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 12px; font-weight: 600; color: #9ca3af; margin-bottom: 8px;">🎁 이자 내역 (${userRewards.length}건)</div>
+    `;
+
+    if (userRewards.length > 0) {
+      html += `
+          <div style="background: rgba(255,255,255,0.02); border-radius: 6px; overflow: hidden;">
+            <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+              <thead>
+                <tr style="background: rgba(255,255,255,0.05);">
+                  <th style="padding: 8px; text-align: left; color: #9ca3af; font-weight: 600;">날짜</th>
+                  <th style="padding: 8px; text-align: left; color: #9ca3af; font-weight: 600;">코인</th>
+                  <th style="padding: 8px; text-align: right; color: #9ca3af; font-weight: 600;">수량</th>
+                  <th style="padding: 8px; text-align: right; color: #9ca3af; font-weight: 600;">USD</th>
+                  <th style="padding: 8px; text-align: center; color: #9ca3af; font-weight: 600;">APY</th>
+                </tr>
+              </thead>
+              <tbody>
+      `;
+
+      userRewards.slice(0, 5).forEach((reward) => {
+        const rewardDate = reward.approvedAt?.toDate ? reward.approvedAt.toDate() : new Date();
+        const dateStr = rewardDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const rewardUSD = (reward.amount || 0) * (prices[reward.symbol] || 0);
+        
+        html += `
+                <tr style="border-top: 1px solid rgba(255,255,255,0.05);">
+                  <td style="padding: 8px;">${dateStr}</td>
+                  <td style="padding: 8px;">${reward.symbol}</td>
+                  <td style="padding: 8px; text-align: right;">+${reward.amount.toFixed(reward.symbol === 'XRP' ? 2 : 4)}</td>
+                  <td style="padding: 8px; text-align: right; color: #10b981;">${formatUSD(rewardUSD)}</td>
+                  <td style="padding: 8px; text-align: center;">${reward.apy?.toFixed(1) || 0}%</td>
+                </tr>
+        `;
+      });
+
+      if (userRewards.length > 5) {
+        html += `
+                <tr>
+                  <td colspan="5" style="padding: 8px; text-align: center; color: #9ca3af; font-size: 10px;">
+                    외 ${userRewards.length - 5}건 더 있음
+                  </td>
+                </tr>
+        `;
+      }
+
+      html += `
+              </tbody>
+            </table>
+          </div>
+      `;
+    } else {
+      html += `
+          <div style="padding: 12px; text-align: center; color: #6b7280; font-size: 11px; background: rgba(255,255,255,0.02); border-radius: 6px;">
+            리워드 내역이 없습니다.
+          </div>
+      `;
+    }
+
+    html += `
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+async function renderAdminDashboard(users) {
+  const container = $('#adminContent');
+  await renderAdminDashboardContent(users, container);
+}
+
 function setupAdminModal() {
   const adminBtn = $('#adminBtn');
   const modal = $('#adminModal');
@@ -1124,10 +1608,8 @@ function setupAdminModal() {
 
   if (adminBtn) {
     adminBtn.addEventListener('click', async () => {
-      modal.classList.add('show');
-      $('#adminContent').innerHTML = '<p style="color:#9ca3af;">데이터를 불러오는 중...</p>';
-      const users = await loadAllUserStakes();
-      renderAdminDashboard(users);
+      // 모달 대신 페이지로 이동
+      navigateToPage('admin');
     });
   }
 
@@ -1192,10 +1674,29 @@ function navigateToPage(page) {
     if (page === 'rewards') {
       renderRewards();
     }
+    
+    // 어드민 페이지인 경우
+    if (page === 'admin') {
+      // 어드민 권한 확인
+      if (!isAdmin) {
+        alert('어드민 권한이 필요합니다.');
+        navigateToPage('dashboard');
+        return;
+      }
+      // 어드민 대시보드 렌더링
+      renderAdminPage();
+    }
   }
 
   // Scroll to top for dashboard and other pages (not pools)
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  // URL 업데이트 (히스토리 API 사용) - 실제 네비게이션 시에만 업데이트
+  // 초기 로드 시에는 업데이트하지 않음 (무한 루프 방지)
+  if (window.history && window.history.pushState && !window.__isInitialLoad) {
+    const url = page === 'dashboard' ? '/' : `/${page}`;
+    window.history.pushState({ page }, '', url);
+  }
 }
 
 // Expose navigateToPage globally for inline handlers
@@ -1214,13 +1715,50 @@ function setupNavigation() {
   });
 }
 
+// URL 기반 라우팅 처리 함수
+function handleURLRouting() {
+  const path = window.location.pathname;
+  if (path === '/admin' || path === '/admin/') {
+    if (isAdmin) {
+      navigateToPage('admin');
+    } else {
+      navigateToPage('dashboard');
+      if (currentUser) {
+        alert('어드민 권한이 필요합니다.');
+      }
+    }
+  } else if (path === '/rewards' || path === '/rewards/') {
+    navigateToPage('rewards');
+  } else if (path === '/signup' || path === '/signup/') {
+    navigateToPage('signup');
+  } else if (path === '/' || path === '') {
+    navigateToPage('dashboard');
+  }
+}
+
 // Initialization
 document.addEventListener('DOMContentLoaded', async () => {
-  // Firebase 초기화 (Auth 상태 감지 시작)
-  await initFirebase();
-
+  // 초기 로드 플래그 설정
+  window.__isInitialLoad = true;
+  
   // Setup navigation first
   setupNavigation();
+  
+  // 초기 URL 라우팅 처리 (Firebase 초기화 전)
+  handleURLRouting();
+  
+  // Firebase 초기화 (Auth 상태 감지 시작) - 여기서 handleURLRouting이 다시 호출됨
+  await initFirebase();
+  
+  // 초기 로드 플래그 해제
+  setTimeout(() => {
+    window.__isInitialLoad = false;
+  }, 1000);
+  
+  // 브라우저 뒤로/앞으로 버튼 처리
+  window.addEventListener('popstate', (event) => {
+    handleURLRouting();
+  });
 
   renderPortfolio();
   renderPools();
