@@ -1862,7 +1862,7 @@ function navigateToPage(page) {
   });
 
   // Show the requested page
-  if (page === 'dashboard' || page === 'pools') {
+  if (page === 'dashboard' || page === 'pools' || page === 'faq') {
     // Show main dashboard content (default visible sections)
     document.querySelectorAll('.content-section:not(.page-section), .pre-login-welcome').forEach((section) => {
       section.style.display = '';
@@ -1877,6 +1877,19 @@ function navigateToPage(page) {
         }
       }, 100);
       return; // Don't scroll to top for pools
+    }
+    
+    // If FAQ page, scroll to FAQ section
+    if (page === 'faq') {
+      setTimeout(() => {
+        const faqSection = document.getElementById('faq-section');
+        if (faqSection) {
+          // 약간의 오프셋을 추가하여 네비게이션 바에 가려지지 않도록
+          const offsetTop = faqSection.offsetTop - 80;
+          window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+        }
+      }, 100);
+      return; // Don't scroll to top for FAQ
     }
   } else {
     // Hide main content sections for other pages
@@ -2105,6 +2118,15 @@ function handleURLRouting() {
   // 리워드 페이지
   if (path === '/rewards' || path === '/rewards/') {
     navigateToPage('rewards');
+    return;
+  }
+  
+  // FAQ 페이지
+  if (path === '/faq' || path === '/faq/' || path === '/qna' || path === '/qna/') {
+    navigateToPage('faq');
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState({}, '', '/faq');
+    }
     return;
   }
   
