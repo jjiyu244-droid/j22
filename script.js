@@ -367,8 +367,8 @@ function updateLoginUI() {
     loginBtn.textContent = '로그인';
   }
   
-  // 회원가입 버튼 표시/숨김 처리
-  const signupBtn = document.querySelector('.nav-item-horizontal[data-page="signup"]');
+  // 회원가입 버튼 표시/숨김 처리 (navbar-actions에 위치)
+  const signupBtn = $('#signupNavBtn');
   if (signupBtn) {
     if (currentUser) {
       signupBtn.style.display = 'none'; // 로그인 시 숨김
@@ -2029,6 +2029,15 @@ function setupNavigation() {
       }
     });
   });
+  
+  // 회원가입 버튼 클릭 이벤트 (navbar-actions에 위치)
+  const signupNavBtn = $('#signupNavBtn');
+  if (signupNavBtn) {
+    signupNavBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateToPage('signup');
+    });
+  }
 }
 
 // URL 기반 라우팅 처리 함수
