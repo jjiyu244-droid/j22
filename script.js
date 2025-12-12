@@ -1,4 +1,4 @@
-// Staking portfolio data
+// Demo data for staking portfolio
 const portfolioData = [
   {
     symbol: 'BTC',
@@ -95,82 +95,6 @@ let activity = [
   },
 ];
 
-// 리워드 내역 데이터
-const rewardsHistory = [
-  {
-    date: '2024-12-09',
-    coin: 'BTC',
-    coinName: '비트코인',
-    amount: 0.0015,
-    usd: 142.5,
-    apy: 3.2,
-    status: 'success',
-  },
-  {
-    date: '2024-12-08',
-    coin: 'ETH',
-    coinName: '이더리움',
-    amount: 0.025,
-    usd: 85.3,
-    apy: 6.8,
-    status: 'success',
-  },
-  {
-    date: '2024-12-08',
-    coin: 'XRP',
-    coinName: '리플',
-    amount: 15.5,
-    usd: 25.8,
-    apy: 5.4,
-    status: 'success',
-  },
-  {
-    date: '2024-12-07',
-    coin: 'BTC',
-    coinName: '비트코인',
-    amount: 0.0012,
-    usd: 114.0,
-    apy: 3.2,
-    status: 'success',
-  },
-  {
-    date: '2024-12-07',
-    coin: 'ETH',
-    coinName: '이더리움',
-    amount: 0.022,
-    usd: 75.1,
-    apy: 6.8,
-    status: 'success',
-  },
-  {
-    date: '2024-12-06',
-    coin: 'XRP',
-    coinName: '리플',
-    amount: 14.2,
-    usd: 23.6,
-    apy: 5.4,
-    status: 'success',
-  },
-  {
-    date: '2024-12-06',
-    coin: 'BTC',
-    coinName: '비트코인',
-    amount: 0.0013,
-    usd: 123.5,
-    apy: 3.2,
-    status: 'success',
-  },
-  {
-    date: '2024-12-05',
-    coin: 'ETH',
-    coinName: '이더리움',
-    amount: 0.028,
-    usd: 95.6,
-    apy: 6.8,
-    status: 'pending',
-  },
-];
-
 const $ = (selector) => document.querySelector(selector);
 
 function formatUSD(num) {
@@ -247,16 +171,28 @@ async function initFirebase() {
       currentUser = { email: user.email, uid: user.uid };
       isAdmin = user.email === ADMIN_EMAIL;
       await loadUserStakesFromFirestore(user.uid);
+      await loadUserRewardsFromFirestore(user.uid);
       applyUserStakesToPortfolio();
       renderPortfolio();
       updateLoginUI();
       updateAdminUI();
+      // 리워드 페이지가 현재 표시 중이면 리워드 렌더링
+      const rewardsPage = document.getElementById('rewards-page');
+      if (rewardsPage && rewardsPage.style.display !== 'none') {
+        await renderRewards();
+      }
     } else {
       currentUser = null;
       isAdmin = false;
       userStakes = { BTC: 0, ETH: 0, XRP: 0 };
+      userRewards = [];
       updateLoginUI();
       updateAdminUI();
+      // 리워드 페이지가 현재 표시 중이면 빈 상태 표시
+      const rewardsPage = document.getElementById('rewards-page');
+      if (rewardsPage && rewardsPage.style.display !== 'none') {
+        await renderRewards();
+      }
     }
   });
 }
@@ -296,24 +232,60 @@ async function saveUserStakesToFirestore() {
   }
 }
 
+// 리워드 데이터 관리
+let userRewards = []; // 승인된 리워드 내역
+
+// Firestore에서 유저 리워드 데이터 불러오기
+async function loadUserRewardsFromFirestore(uid) {
+  try {
+    const { collection, query, where, getDocs, orderBy } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const rewardsRef = collection(db, 'rewards');
+    const q = query(rewardsRef, where('userId', '==', uid), orderBy('approvedAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+    userRewards = [];
+    querySnapshot.forEach((doc) => {
+      userRewards.push({
+        id: doc.id,
+        ...doc.data(),
+      });
+    });
+  } catch (e) {
+    console.error('Firestore에서 리워드 데이터를 불러오지 못했습니다:', e);
+    userRewards = [];
+  }
+}
+
+// 관리자가 리워드 승인
+async function approveRewardForUser(userId, approvedAmount, symbol, apy) {
+  try {
+    const { collection, addDoc, serverTimestamp } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const rewardsRef = collection(db, 'rewards');
+    await addDoc(rewardsRef, {
+      userId: userId,
+      symbol: symbol,
+      amount: approvedAmount,
+      apy: apy,
+      status: '수령 완료',
+      approvedAt: serverTimestamp(),
+    });
+    return true;
+  } catch (e) {
+    console.error('리워드 승인 중 오류:', e);
+    return false;
+  }
+}
+
 function updateLoginUI() {
   const loginBtn = $('#loginBtn');
-  const welcomeSection = $('.pre-login-welcome');
   if (!loginBtn) return;
   if (currentUser) {
     loginBtn.textContent = `${currentUser.email} (로그아웃)`;
-    // 로그인 시 대시보드 섹션 표시, 환영 메시지 숨김
-    document.querySelectorAll('.auth-required').forEach(el => {
-      el.style.display = '';
-    });
-    if (welcomeSection) welcomeSection.style.display = 'none';
   } else {
     loginBtn.textContent = '로그인';
-    // 로그아웃 시 대시보드 섹션 숨김, 환영 메시지 표시
-    document.querySelectorAll('.auth-required').forEach(el => {
-      el.style.display = 'none';
-    });
-    if (welcomeSection) welcomeSection.style.display = '';
   }
 }
 
@@ -396,32 +368,18 @@ async function setupLogin() {
 
   if (confirmBtn) {
     confirmBtn.addEventListener('click', async () => {
-      const username = $('#loginEmail').value.trim();
+      const email = $('#loginEmail').value.trim();
       const password = $('#loginPassword').value.trim();
-      if (!username || !password) {
-        statusText.textContent = '사용자명과 비밀번호를 모두 입력해주세요.';
+      if (!email || !password) {
+        statusText.textContent = '이메일과 비밀번호를 모두 입력해주세요.';
         return;
       }
-      
-      // 사용자명을 이메일 형식으로 변환 (Firebase Auth는 이메일 기반)
-      const email = username.includes('@') ? username : `${username}@corestaker.com`;
 
       if (mode === 'signup') {
-        if (password.length < 15) {
-          statusText.textContent = '비밀번호는 최소 15자 이상이어야 합니다.';
+        if (password.length < 6) {
+          statusText.textContent = 'Firebase는 비밀번호 6자 이상을 요구합니다.';
           return;
         }
-        
-        // 비밀번호 복잡도 검사: 숫자와 대소문자 중 2가지 이상 조합
-        const hasNumber = /[0-9]/.test(password);
-        const hasUpperCase = /[A-Z]/.test(password);
-        const hasLowerCase = /[a-z]/.test(password);
-        const complexityCount = [hasNumber, hasUpperCase, hasLowerCase].filter(Boolean).length;
-        if (complexityCount < 2) {
-          statusText.textContent = '비밀번호는 숫자와 대소문자 중 2가지 이상을 조합해야 합니다.';
-          return;
-        }
-        
         try {
           await createUserWithEmailAndPassword(auth, email, password);
           statusText.textContent = '회원가입 및 로그인 완료. 창이 자동으로 닫힙니다.';
@@ -430,10 +388,8 @@ async function setupLogin() {
           }, 700);
         } catch (error) {
           if (error.code === 'auth/email-already-in-use') {
-            statusText.textContent = '이미 사용 중인 사용자명입니다. 로그인 모드로 전환합니다.';
+            statusText.textContent = '이미 가입된 이메일입니다. 로그인 모드로 전환합니다.';
             setMode('login');
-          } else if (error.code === 'auth/weak-password') {
-            statusText.textContent = '비밀번호가 요구사항을 만족하지 않습니다. 15자 이상, 숫자와 대소문자 중 2가지 이상 조합이 필요합니다.';
           } else {
             statusText.textContent = `회원가입 실패: ${error.message}`;
           }
@@ -447,7 +403,7 @@ async function setupLogin() {
           }, 700);
         } catch (error) {
           if (error.code === 'auth/user-not-found') {
-            statusText.textContent = '등록된 사용자명이 없습니다. 먼저 회원가입을 진행해주세요.';
+            statusText.textContent = '등록된 계정이 없습니다. 먼저 회원가입을 진행해주세요.';
           } else if (error.code === 'auth/wrong-password') {
             statusText.textContent = '비밀번호가 올바르지 않습니다.';
           } else {
@@ -474,11 +430,10 @@ function renderPortfolio() {
   portfolioData.forEach((item) => {
     const el = document.createElement('div');
     el.className = 'portfolio-item';
-    const iconUrl = `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@latest/svg/color/${item.symbol.toLowerCase()}.svg`;
     el.innerHTML = `
       <div class="token-info">
-        <div class="token-icon" style="background:${item.bg};padding:4px;display:flex;align-items:center;justify-content:center;">
-          <img src="${iconUrl}" alt="${item.symbol}" style="width:66%;height:66%;object-fit:contain;" />
+        <div class="token-icon" style="background:${item.bg};color:${item.color}">
+          ${item.label ? item.label[0] : item.symbol[0]}
         </div>
         <div class="token-meta">
           <span class="token-symbol">${item.label || item.symbol}</span>
@@ -504,11 +459,10 @@ function renderPools(filter = 'all') {
     .forEach((pool) => {
       const el = document.createElement('div');
       el.className = 'pool-card';
-      const iconUrl = `https://cdn.jsdelivr.net/npm/cryptocurrency-icons@latest/svg/color/${pool.symbol.toLowerCase()}.svg`;
       el.innerHTML = `
         <div class="pool-main">
-          <div class="token-icon" style="background:rgba(148,163,184,0.2);padding:2px;display:flex;align-items:center;justify-content:center;">
-            <img src="${iconUrl}" alt="${pool.symbol}" style="width:95%;height:95%;object-fit:contain;" />
+          <div class="token-icon" style="background:rgba(148,163,184,0.2);color:#e5e7eb">
+            ${pool.symbol[0]}
           </div>
           <div>
             <div class="pool-apr">${pool.name}</div>
@@ -559,6 +513,300 @@ function renderActivity() {
   });
 }
 
+// 리워드 내역 렌더링
+async function renderRewards() {
+  const tableBody = $('#rewardsTableBody');
+  const totalRewardsEl = $('#totalRewardsUSD');
+  const monthRewardsEl = $('#monthRewardsUSD');
+  const avgApyEl = $('#avgAPY');
+  const coinFilter = $('#rewardFilterCoin');
+  const periodFilter = $('#rewardFilterPeriod');
+
+  // 로그인 체크
+  if (!currentUser) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" style="padding: 48px; text-align: center; color: var(--text-muted);">
+          <div style="font-size: 16px; margin-bottom: 8px;">스테이킹 내역이 없습니다.</div>
+          <div style="font-size: 14px;">로그인 후 관리자 승인을 받으면 리워드 내역이 표시됩니다.</div>
+        </td>
+      </tr>
+    `;
+    if (totalRewardsEl) totalRewardsEl.textContent = '$0';
+    if (monthRewardsEl) monthRewardsEl.textContent = '$0';
+    if (avgApyEl) avgApyEl.textContent = '0%';
+    return;
+  }
+
+  // 리워드 데이터 로드
+  await loadUserRewardsFromFirestore(currentUser.uid);
+
+  // 필터 적용
+  const coinFilterValue = coinFilter ? coinFilter.value : 'all';
+  const periodFilterValue = periodFilter ? periodFilter.value : 'all';
+  
+  let filteredRewards = [...userRewards];
+  
+  // 코인 필터
+  if (coinFilterValue !== 'all') {
+    filteredRewards = filteredRewards.filter(r => r.symbol === coinFilterValue);
+  }
+  
+  // 기간 필터
+  if (periodFilterValue !== 'all') {
+    const now = new Date();
+    const cutoffDate = new Date();
+    
+    if (periodFilterValue === 'week') {
+      cutoffDate.setDate(now.getDate() - 7);
+    } else if (periodFilterValue === 'month') {
+      cutoffDate.setMonth(now.getMonth() - 1);
+    } else if (periodFilterValue === 'year') {
+      cutoffDate.setFullYear(now.getFullYear() - 1);
+    }
+    
+    filteredRewards = filteredRewards.filter(r => {
+      const rewardDate = r.approvedAt?.toDate ? r.approvedAt.toDate() : new Date();
+      return rewardDate >= cutoffDate;
+    });
+  }
+
+  if (filteredRewards.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" style="padding: 48px; text-align: center; color: var(--text-muted);">
+          <div style="font-size: 16px; margin-bottom: 8px;">스테이킹 내역이 없습니다.</div>
+          <div style="font-size: 14px;">${userRewards.length === 0 ? '관리자가 승인한 리워드 내역이 없습니다.' : '선택한 필터 조건에 맞는 리워드가 없습니다.'}</div>
+        </td>
+      </tr>
+    `;
+    if (totalRewardsEl) totalRewardsEl.textContent = '$0';
+    if (monthRewardsEl) monthRewardsEl.textContent = '$0';
+    if (avgApyEl) avgApyEl.textContent = '0%';
+    return;
+  }
+
+  // 리워드 통계 계산 (필터링된 데이터 기준)
+  let totalUSD = 0;
+  let monthUSD = 0;
+  let totalApy = 0;
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  // 가격 정보 가져오기
+  const prices = {};
+  try {
+    const ids = Object.values(priceSource).join(',');
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      prices.BTC = data.bitcoin?.usd || 0;
+      prices.ETH = data.ethereum?.usd || 0;
+      prices.XRP = data.ripple?.usd || 0;
+    }
+  } catch (e) {
+    // 기본 가격 사용
+    prices.BTC = 90000;
+    prices.ETH = 3000;
+    prices.XRP = 1;
+  }
+
+  tableBody.innerHTML = '';
+  filteredRewards.forEach((reward) => {
+    const rewardDate = reward.approvedAt?.toDate ? reward.approvedAt.toDate() : new Date();
+    const usdValue = reward.amount * (prices[reward.symbol] || 0);
+    totalUSD += usdValue;
+
+    // 이번 달 리워드 계산
+    if (rewardDate.getMonth() === currentMonth && rewardDate.getFullYear() === currentYear) {
+      monthUSD += usdValue;
+    }
+
+    totalApy += reward.apy || 0;
+
+    const dateStr = rewardDate.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td style="padding: 16px;">${dateStr}</td>
+      <td style="padding: 16px;">${reward.symbol === 'BTC' ? '비트코인 (BTC)' : reward.symbol === 'ETH' ? '이더리움 (ETH)' : '리플 (XRP)'}</td>
+      <td style="padding: 16px;">+${reward.amount.toFixed(reward.symbol === 'XRP' ? 2 : 4)} ${reward.symbol}</td>
+      <td style="padding: 16px;">$${usdValue.toFixed(2)}</td>
+      <td style="padding: 16px;">${reward.apy.toFixed(1)}%</td>
+      <td style="padding: 16px;">
+        <span class="reward-status success">${reward.status || '수령 완료'}</span>
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
+
+  // 통계 업데이트 (모든 리워드 기준)
+  let allTotalUSD = 0;
+  let allMonthUSD = 0;
+  let allTotalApy = 0;
+  
+  userRewards.forEach((reward) => {
+    const rewardDate = reward.approvedAt?.toDate ? reward.approvedAt.toDate() : new Date();
+    const usdValue = reward.amount * (prices[reward.symbol] || 0);
+    allTotalUSD += usdValue;
+    if (rewardDate.getMonth() === currentMonth && rewardDate.getFullYear() === currentYear) {
+      allMonthUSD += usdValue;
+    }
+    allTotalApy += reward.apy || 0;
+  });
+
+  if (totalRewardsEl) totalRewardsEl.textContent = formatUSD(allTotalUSD);
+  if (monthRewardsEl) monthRewardsEl.textContent = formatUSD(allMonthUSD);
+  if (avgApyEl) {
+    const avg = userRewards.length > 0 ? allTotalApy / userRewards.length : 0;
+    avgApyEl.textContent = `${avg.toFixed(1)}%`;
+  }
+}
+
+// 리워드 필터 설정
+function setupRewardFilters() {
+  const coinFilter = $('#rewardFilterCoin');
+  const periodFilter = $('#rewardFilterPeriod');
+  
+  if (coinFilter) {
+    coinFilter.addEventListener('change', () => {
+      renderRewards();
+    });
+  }
+  
+  if (periodFilter) {
+    periodFilter.addEventListener('change', () => {
+      renderRewards();
+    });
+  }
+}
+
+// 회원가입 폼 설정
+function setupSignupForm() {
+  const signupForm = $('#signupForm');
+  const goToLoginBtn = $('#goToLogin');
+  
+  if (goToLoginBtn) {
+    goToLoginBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      // 회원가입 페이지 숨기고 대시보드로 이동
+      navigateToPage('dashboard');
+      // 로그인 모달 열기
+      setTimeout(() => {
+        const loginModal = $('#loginModal');
+        if (loginModal) {
+          loginModal.classList.add('show');
+        }
+      }, 100);
+    });
+  }
+  
+  if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = $('#signupUsername').value.trim();
+      const password = $('#signupPassword').value.trim();
+      const passwordConfirm = $('#signupPasswordConfirm').value.trim();
+      const name = $('#signupName').value.trim();
+      const agree = $('#signupAgree').checked;
+      
+      // 유효성 검사
+      if (!username || !password || !passwordConfirm) {
+        alert('사용자명, 비밀번호, 비밀번호 확인을 모두 입력해주세요.');
+        return;
+      }
+      
+      if (password !== passwordConfirm) {
+        alert('비밀번호가 일치하지 않습니다.');
+        return;
+      }
+      
+      if (password.length < 15) {
+        alert('비밀번호는 15자 이상이어야 합니다.');
+        return;
+      }
+      
+      // 비밀번호 복잡도 검사 (숫자와 대소문자 중 2가지 이상)
+      const hasNumber = /\d/.test(password);
+      const hasUpper = /[A-Z]/.test(password);
+      const hasLower = /[a-z]/.test(password);
+      const complexityCount = [hasNumber, hasUpper, hasLower].filter(Boolean).length;
+      
+      if (complexityCount < 2) {
+        alert('비밀번호는 숫자와 대소문자 중 2가지 이상을 포함해야 합니다.');
+        return;
+      }
+      
+      if (!agree) {
+        alert('이용약관 및 개인정보처리방침에 동의해주세요.');
+        return;
+      }
+      
+      // Firebase Auth를 사용하여 회원가입
+      try {
+        // Firebase Auth 모듈 동적 import
+        const {
+          createUserWithEmailAndPassword,
+        } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
+        
+        // auth 객체 가져오기 - window.__firebase.auth 사용 (setupLogin과 동일한 방식)
+        let currentAuth = auth;
+        if (!currentAuth && window.__firebase && window.__firebase.auth) {
+          currentAuth = window.__firebase.auth;
+        }
+        
+        if (!currentAuth) {
+          alert('Firebase가 초기화되지 않았습니다. 페이지를 새로고침해주세요.');
+          console.error('Firebase auth를 찾을 수 없습니다. auth:', auth, 'window.__firebase:', window.__firebase);
+          return;
+        }
+        
+        // 사용자명을 이메일 형식으로 변환 (Firebase는 이메일 형식 필요)
+        // 실제로는 이메일 형식이 필요하지만, 임시로 사용자명+@temp.com 형식 사용
+        const email = `${username}@temp.com`;
+        
+        await createUserWithEmailAndPassword(currentAuth, email, password);
+        
+        // 성공 메시지 (Firebase Auth는 회원가입 후 자동 로그인됨)
+        alert('회원가입이 완료되었습니다!');
+        
+        // 회원가입 페이지 닫고 대시보드로 이동
+        navigateToPage('dashboard');
+        
+        // 폼 초기화
+        signupForm.reset();
+        
+      } catch (error) {
+        console.error('회원가입 오류 상세:', error);
+        console.error('에러 스택:', error.stack);
+        console.error('현재 auth 상태:', { auth, windowFirebase: window.__firebase });
+        
+        let errorMessage = '회원가입 중 오류가 발생했습니다.';
+        
+        if (error.code === 'auth/email-already-in-use') {
+          errorMessage = '이미 사용 중인 사용자명입니다.';
+        } else if (error.code === 'auth/weak-password') {
+          errorMessage = '비밀번호가 너무 약합니다. 더 복잡한 비밀번호를 사용해주세요.';
+        } else if (error.code === 'auth/invalid-email') {
+          errorMessage = '올바른 사용자명 형식이 아닙니다.';
+        } else {
+          errorMessage = `회원가입 중 오류가 발생했습니다: ${error.message || error}`;
+        }
+        
+        alert(errorMessage);
+        console.error('회원가입 오류:', error);
+      }
+    });
+  }
+}
+
 // Simple APY animation
 function animateApy() {
   const apy = 8.9;
@@ -584,7 +832,9 @@ function setupSimulator() {
     const earned = (amount * (apy / 100)) * yearFraction;
     const total = amount + earned;
 
-    resultEl.textContent = `${days}일 후 예상 리워드: ${earned.toFixed(2)} USD | 총 예상 금액: ${total.toFixed(2)} USD`;
+    resultEl.textContent = `단순 이자 기준, ${days}일 후 예상 리워드는 약 ${earned.toFixed(
+      2
+    )} USD이며, 총 잔액은 약 ${total.toFixed(2)} USD 입니다. (복리 효과 미포함)`;
   });
 }
 
@@ -606,10 +856,13 @@ function openStakeModal(poolId) {
     currentPool.lockup
   }</div>
       </div>
+      <div class="badge badge-success">
+        <span>데모 모드</span>
+      </div>
     </div>
   `;
   $('#stakeAmount').value = '';
-  $('#stakeHelper').textContent = '로그인 후 스테이킹 내역이 자동으로 기록됩니다.';
+  $('#stakeHelper').textContent = 'Firebase Auth 로그인 시 Firestore에 저장됩니다.';
 
   $('#stakeModal').classList.add('show');
 }
@@ -648,7 +901,7 @@ function setupStakeModal() {
 
     if (!currentUser) {
       helper.classList.remove('text-danger');
-      helper.textContent = '로그인이 필요합니다.';
+      helper.textContent = '로그인 후에만 스테이킹 수량이 Firestore에 저장됩니다.';
       return;
     }
 
@@ -666,7 +919,7 @@ function setupStakeModal() {
     // prepend virtual activity
     activity.unshift({
       type: '스테이킹',
-      status: '완료',
+      status: 'Firestore 저장',
       time: '방금 전',
       desc: currentPool.name,
       amount: `+${amount} ${currentPool.symbol}`,
@@ -676,9 +929,9 @@ function setupStakeModal() {
     renderActivity();
 
     // light feedback
-    $('#stakeConfirmBtn').textContent = '완료';
+    $('#stakeConfirmBtn').textContent = '완료 (Firebase)';
     setTimeout(() => {
-      $('#stakeConfirmBtn').textContent = '스테이킹 실행';
+      $('#stakeConfirmBtn').textContent = '가상 스테이킹 실행';
       closeStakeModal();
     }, 900);
   });
@@ -710,11 +963,11 @@ function setupThemeToggle() {
   });
 }
 
-// Wallet button
+// Wallet button (demo)
 function setupWalletButton() {
   const walletBtn = $('#walletBtn');
   walletBtn.addEventListener('click', () => {
-    walletBtn.textContent = '0xF3...D92A';
+    walletBtn.textContent = '0xF3...D92A (Demo)';
   });
 }
 
@@ -768,6 +1021,13 @@ function renderAdminDashboard(users) {
     totalXRP += u.XRP || 0;
   });
 
+  // APY 정보
+  const poolApy = {
+    BTC: 3.2,
+    ETH: 6.8,
+    XRP: 5.4,
+  };
+
   let html = `
     <div style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
       <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">전체 스테이킹 합계</h3>
@@ -786,19 +1046,48 @@ function renderAdminDashboard(users) {
         </div>
       </div>
     </div>
-    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">유저별 스테이킹 현황 (${users.length}명)</h3>
+    <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">유저별 스테이킹 현황 및 승인 (${users.length}명)</h3>
   `;
 
   users.forEach((u, idx) => {
     html += `
-      <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 6px; margin-bottom: 8px;">
-        <div style="font-size: 12px; font-weight: 500; margin-bottom: 6px;">
+      <div style="background: rgba(255,255,255,0.03); padding: 16px; border-radius: 6px; margin-bottom: 12px;">
+        <div style="font-size: 12px; font-weight: 500; margin-bottom: 12px;">
           User ${idx + 1} · <span style="color: #9ca3af; font-size: 11px;">${u.uid.substring(0, 12)}...</span>
         </div>
-        <div style="display: flex; gap: 16px; font-size: 11px;">
-          <span>BTC: <strong>${(u.BTC || 0).toFixed(4)}</strong></span>
-          <span>ETH: <strong>${(u.ETH || 0).toFixed(4)}</strong></span>
-          <span>XRP: <strong>${(u.XRP || 0).toFixed(2)}</strong></span>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
+    `;
+
+    ['BTC', 'ETH', 'XRP'].forEach((symbol) => {
+      const amount = u[symbol] || 0;
+      if (amount > 0) {
+        // 월별 리워드 계산 (연간 APY / 12)
+        const monthlyApy = poolApy[symbol] / 12;
+        const monthlyReward = (amount * monthlyApy) / 100;
+        
+        html += `
+          <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px;">
+            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 6px;">${symbol}</div>
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">
+              스테이킹: <strong>${amount.toFixed(symbol === 'XRP' ? 2 : 4)}</strong>
+            </div>
+            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 8px;">
+              APY: ${poolApy[symbol]}%<br/>
+              예상 월 리워드: ${monthlyReward.toFixed(symbol === 'XRP' ? 2 : 6)}
+            </div>
+            <button 
+              class="btn-primary" 
+              style="width: 100%; padding: 8px; font-size: 11px;"
+              onclick="handleApproveReward('${u.uid}', '${symbol}', ${amount}, ${monthlyReward}, ${poolApy[symbol]})"
+            >
+              리워드 승인
+            </button>
+          </div>
+        `;
+      }
+    });
+
+    html += `
         </div>
       </div>
     `;
@@ -806,6 +1095,27 @@ function renderAdminDashboard(users) {
 
   container.innerHTML = html;
 }
+
+// 리워드 승인 처리 (전역 함수로 노출)
+window.handleApproveReward = async function(userId, symbol, stakedAmount, rewardAmount, apy) {
+  if (!confirm(`${symbol} 스테이킹 ${stakedAmount.toFixed(symbol === 'XRP' ? 2 : 4)}에 대한 리워드 ${rewardAmount.toFixed(symbol === 'XRP' ? 2 : 6)} ${symbol}를 승인하시겠습니까?`)) {
+    return;
+  }
+
+  const success = await approveRewardForUser(userId, rewardAmount, symbol, apy);
+  if (success) {
+    alert('리워드가 승인되었습니다.');
+    // 어드민 대시보드 새로고침
+    const users = await loadAllUserStakes();
+    renderAdminDashboard(users);
+    // 만약 해당 유저가 현재 로그인되어 있다면 리워드 내역도 새로고침
+    if (currentUser && currentUser.uid === userId) {
+      await renderRewards();
+    }
+  } else {
+    alert('리워드 승인 중 오류가 발생했습니다.');
+  }
+};
 
 function setupAdminModal() {
   const adminBtn = $('#adminBtn');
@@ -834,296 +1144,83 @@ function setupAdminModal() {
   }
 }
 
-// Initialization
-// 페이지 전환 함수
-function setupPageNavigation() {
-  const navItems = document.querySelectorAll('.nav-item-horizontal[data-page]');
-  const rewardsPage = document.getElementById('rewards-page');
-  const signupPage = document.getElementById('signup-page');
-  const footerSection = document.querySelector('.footer-section');
-  const contentSection = document.querySelector('.content-section');
-  const overview = document.querySelector('.overview');
-  const preLoginWelcome = document.querySelector('.pre-login-welcome');
-
-  navItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const page = item.getAttribute('data-page');
-      
-      // 네비게이션 활성화 상태 변경
-      navItems.forEach(nav => nav.classList.remove('active'));
-      item.classList.add('active');
-
-      // 모든 페이지 숨기기
-      if (rewardsPage) rewardsPage.style.display = 'none';
-      if (signupPage) signupPage.style.display = 'none';
-      if (footerSection) footerSection.style.display = 'none';
-      if (contentSection) contentSection.style.display = 'none';
-      if (overview) overview.style.display = 'none';
-      if (preLoginWelcome) preLoginWelcome.style.display = 'none';
-
-
-      // 선택한 페이지 표시
-      if (page === 'dashboard') {
-        // 로그인 여부에 따라 표시
-        if (currentUser) {
-          if (overview) overview.style.display = 'grid';
-          if (contentSection) contentSection.style.display = 'grid';
-        } else {
-          if (preLoginWelcome) preLoginWelcome.style.display = 'block';
-        }
-        if (footerSection) footerSection.style.display = 'grid';
-      } else if (page === 'pools') {
-        // 스테이킹 풀만 표시
-        if (contentSection) {
-          contentSection.style.display = 'grid';
-          const poolCards = contentSection.querySelectorAll('.card');
-          poolCards.forEach((card, idx) => {
-            card.style.display = idx === 1 ? 'block' : 'none'; // 두 번째 카드만 표시 (스테이킹 풀)
-          });
-        }
-      } else if (page === 'rewards') {
-        if (rewardsPage) {
-          rewardsPage.style.display = 'block';
-          renderRewardsPage();
-        }
-      } else if (page === 'signup') {
-        if (signupPage) signupPage.style.display = 'block';
-        // 회원가입 페이지에서는 메인 콘텐츠 모두 숨김
-        if (preLoginWelcome) preLoginWelcome.style.display = 'none';
-        // 모든 content-section 숨김 (스테이킹 풀, 리워드 계산기, Features 포함)
-        document.querySelectorAll('.content-section').forEach(section => {
-          section.style.display = 'none';
-        });
-        if (overview) overview.style.display = 'none';
-        if (footerSection) footerSection.style.display = 'none';
-      } else {
-        // 다른 페이지로 돌아올 때 메인 콘텐츠 다시 표시 (dashboard일 때만)
-        if (page === 'dashboard') {
-          if (preLoginWelcome && !currentUser) preLoginWelcome.style.display = 'block';
-          if (contentSection && currentUser) contentSection.style.display = 'grid';
-          // Features 섹션 다시 표시
-          const featuresSection = document.querySelector('.content-section:has(.grid.grid-4)');
-          if (featuresSection && !currentUser) featuresSection.style.display = 'block';
-        }
-      }
-    });
+// Page navigation
+function navigateToPage(page) {
+  // Hide all page sections
+  document.querySelectorAll('.page-section').forEach((section) => {
+    section.style.display = 'none';
   });
-}
 
-// 리워드 페이지 렌더링
-function renderRewardsPage() {
-  // 총 리워드 계산
-  const totalRewards = rewardsHistory.reduce((sum, r) => sum + r.usd, 0);
-  const thisMonth = new Date().getMonth();
-  const monthRewards = rewardsHistory
-    .filter(r => new Date(r.date).getMonth() === thisMonth)
-    .reduce((sum, r) => sum + r.usd, 0);
-  
-  const avgAPY = (rewardsHistory.reduce((sum, r) => sum + r.apy, 0) / rewardsHistory.length).toFixed(1);
+  // Update nav button active states
+  document.querySelectorAll('.nav-item-horizontal').forEach((btn) => {
+    btn.classList.remove('active');
+    if (btn.getAttribute('data-page') === page) {
+      btn.classList.add('active');
+    }
+  });
 
-  // 통계 업데이트
-  document.getElementById('totalRewardsUSD').textContent = formatUSD(totalRewards);
-  document.getElementById('monthRewardsUSD').textContent = formatUSD(monthRewards);
-  document.getElementById('avgAPY').textContent = avgAPY + '%';
-
-  // 테이블 렌더링
-  renderRewardsTable(rewardsHistory);
-
-  // 필터 이벤트 설정
-  const coinFilter = document.getElementById('rewardFilterCoin');
-  const periodFilter = document.getElementById('rewardFilterPeriod');
-
-  if (coinFilter && periodFilter) {
-    const applyFilters = () => {
-      let filtered = [...rewardsHistory];
-
-      // 코인 필터
-      const selectedCoin = coinFilter.value;
-      if (selectedCoin !== 'all') {
-        filtered = filtered.filter(r => r.coin === selectedCoin);
-      }
-
-      // 기간 필터
-      const selectedPeriod = periodFilter.value;
-      const now = new Date();
-      if (selectedPeriod === 'week') {
-        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        filtered = filtered.filter(r => new Date(r.date) >= weekAgo);
-      } else if (selectedPeriod === 'month') {
-        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        filtered = filtered.filter(r => new Date(r.date) >= monthAgo);
-      } else if (selectedPeriod === 'year') {
-        const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-        filtered = filtered.filter(r => new Date(r.date) >= yearAgo);
-      }
-
-      renderRewardsTable(filtered);
-    };
-
-    coinFilter.addEventListener('change', applyFilters);
-    periodFilter.addEventListener('change', applyFilters);
-  }
-}
-
-// 리워드 테이블 렌더링
-function renderRewardsTable(rewards) {
-  const tbody = document.getElementById('rewardsTableBody');
-  if (!tbody) return;
-
-  const coinIcons = {
-    BTC: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png',
-    ETH: 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
-    XRP: 'https://cryptologos.cc/logos/xrp-xrp-logo.png',
-  };
-
-  tbody.innerHTML = rewards.map(reward => `
-    <tr>
-      <td style="color:var(--text);">${reward.date}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <img src="${coinIcons[reward.coin]}" alt="${reward.coin}" style="width:24px;height:24px;object-fit:contain;" />
-          <span style="font-weight:600;color:var(--text);">${reward.coinName} (${reward.coin})</span>
-        </div>
-      </td>
-      <td style="font-weight:600;color:var(--accent-2);">+${reward.amount} ${reward.coin}</td>
-      <td style="color:var(--text);">${formatUSD(reward.usd)}</td>
-      <td style="color:var(--text);">${reward.apy}%</td>
-      <td>
-        <span class="reward-status ${reward.status}">
-          ${reward.status === 'success' ? '수령 완료' : '처리 중'}
-        </span>
-      </td>
-    </tr>
-  `).join('');
-}
-
-// 회원가입 폼 처리
-function setupSignupForm() {
-  const signupForm = document.getElementById('signupForm');
-  const goToLoginBtn = document.getElementById('goToLogin');
-
-  if (goToLoginBtn) {
-    goToLoginBtn.addEventListener('click', () => {
-      document.getElementById('loginBtn').click();
+  // Show the requested page
+  if (page === 'dashboard' || page === 'pools') {
+    // Show main dashboard content (default visible sections)
+    document.querySelectorAll('.content-section:not(.page-section), .pre-login-welcome').forEach((section) => {
+      section.style.display = '';
     });
-  }
-
-  if (signupForm) {
-    signupForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const username = document.getElementById('signupUsername').value.trim();
-      const password = document.getElementById('signupPassword').value;
-      const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
-      const name = document.getElementById('signupName').value;
-      const agree = document.getElementById('signupAgree').checked;
-
-      // 사용자명 유효성 검사 (영문, 숫자, 언더스코어만)
-      if (!/^[A-Za-z0-9_]+$/.test(username)) {
-        alert('사용자명은 영문, 숫자, 언더스코어(_)만 사용 가능합니다.');
-        return;
-      }
-
-      if (username.length < 3) {
-        alert('사용자명은 최소 3자 이상이어야 합니다.');
-        return;
-      }
-
-      // 비밀번호 유효성 검사
-      if (password !== passwordConfirm) {
-        alert('비밀번호가 일치하지 않습니다.');
-        return;
-      }
-
-      if (password.length < 15) {
-        alert('비밀번호는 최소 15자 이상이어야 합니다.');
-        return;
-      }
-
-      // 비밀번호 복잡도 검사: 숫자와 대소문자 중 2가지 이상 조합
-      const hasNumber = /[0-9]/.test(password);
-      const hasUpperCase = /[A-Z]/.test(password);
-      const hasLowerCase = /[a-z]/.test(password);
-      
-      const complexityCount = [hasNumber, hasUpperCase, hasLowerCase].filter(Boolean).length;
-      if (complexityCount < 2) {
-        alert('비밀번호는 숫자와 대소문자 중 2가지 이상을 조합해야 합니다.');
-        return;
-      }
-
-      if (!agree) {
-        alert('이용약관 및 개인정보처리방침에 동의해주세요.');
-        return;
-      }
-
-      try {
-        // Firebase Auth 사용 (사용자명을 이메일 형식으로 변환)
-        if (firebaseAuth) {
-          const { createUserWithEmailAndPassword, updateProfile } = await import(
-            'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
-          );
-
-          // 사용자명을 이메일 형식으로 변환 (Firebase Auth는 이메일 기반)
-          const email = `${username}@corestaker.com`;
-
-          const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-          
-          // 이름 업데이트
-          if (name) {
-            await updateProfile(userCredential.user, { displayName: name });
-          }
-
-          alert('회원가입이 완료되었습니다! 로그인해주세요.');
-          
-          // 대시보드로 이동
-          document.querySelector('.nav-item-horizontal[data-page="dashboard"]').click();
-        }
-      } catch (error) {
-        console.error('회원가입 오류:', error);
-        if (error.code === 'auth/email-already-in-use') {
-          alert('이미 사용 중인 사용자명입니다.');
-        } else if (error.code === 'auth/invalid-email') {
-          alert('올바른 사용자명 형식이 아닙니다.');
-        } else if (error.code === 'auth/weak-password') {
-          alert('비밀번호가 요구사항을 만족하지 않습니다. 15자 이상, 숫자와 대소문자 중 2가지 이상 조합이 필요합니다.');
-        } else {
-          alert('회원가입 중 오류가 발생했습니다: ' + error.message);
-        }
-      }
-    });
-  }
-}
-
-// FAQ 아코디언 기능
-function setupFAQ() {
-  const faqItems = document.querySelectorAll('.faq-item');
-  
-  faqItems.forEach(item => {
-    const question = item.querySelector('.faq-question');
     
-    question.addEventListener('click', () => {
-      const isActive = item.classList.contains('active');
-      
-      // 다른 모든 FAQ 항목 닫기
-      faqItems.forEach(otherItem => {
-        if (otherItem !== item) {
-          otherItem.classList.remove('active');
+    // If pools page, scroll to pools section
+    if (page === 'pools') {
+      setTimeout(() => {
+        const poolsSection = document.querySelector('.pools-rewards-container');
+        if (poolsSection) {
+          poolsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      });
-      
-      // 현재 항목 토글
-      if (isActive) {
-        item.classList.remove('active');
-      } else {
-        item.classList.add('active');
+      }, 100);
+      return; // Don't scroll to top for pools
+    }
+  } else {
+    // Hide main content sections for other pages
+    document.querySelectorAll('.content-section:not(.page-section), .pre-login-welcome').forEach((section) => {
+      section.style.display = 'none';
+    });
+    
+    // Show the specific page
+    const pageElement = document.getElementById(`${page}-page`);
+    if (pageElement) {
+      pageElement.style.display = 'block';
+    }
+    
+    // 리워드 페이지인 경우 리워드 렌더링
+    if (page === 'rewards') {
+      renderRewards();
+    }
+  }
+
+  // Scroll to top for dashboard and other pages (not pools)
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Expose navigateToPage globally for inline handlers
+window.navigateToPage = navigateToPage;
+
+function setupNavigation() {
+  // Add click handlers to all nav items
+  document.querySelectorAll('.nav-item-horizontal').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const page = btn.getAttribute('data-page');
+      if (page) {
+        navigateToPage(page);
       }
     });
   });
 }
 
+// Initialization
 document.addEventListener('DOMContentLoaded', async () => {
   // Firebase 초기화 (Auth 상태 감지 시작)
   await initFirebase();
+
+  // Setup navigation first
+  setupNavigation();
 
   renderPortfolio();
   renderPools();
@@ -1134,9 +1231,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupTabs();
   setupThemeToggle();
   setupWalletButton();
-  setupPageNavigation();
+  setupRewardFilters();
   setupSignupForm();
-  setupFAQ();
 
   // 로그인 UI 세팅 (Firebase Auth 모듈 동적 로드)
   await setupLogin();
@@ -1147,4 +1243,3 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 실제 시세 반영 시도
   fetchAndApplyPrices();
 });
-
