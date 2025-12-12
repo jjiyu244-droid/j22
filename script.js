@@ -558,14 +558,6 @@ async function setupLogin() {
       return;
     }
 
-    // 회원가입 모드 체크 (현재 비활성화)
-    if (mode === 'signup') {
-      if (statusText) {
-        statusText.textContent = '회원가입은 현재 비활성화되어 있습니다. Firebase 콘솔에서 계정을 생성해주세요.';
-      }
-      return;
-    }
-    
     // 로그인 시도
     try {
       if (statusText) {
@@ -1940,15 +1932,7 @@ function navigateToPage(page) {
       renderAdminPage();
     }
     
-    // 회원가입 페이지 접근 차단
-    if (page === 'signup') {
-      alert('회원가입은 현재 비활성화되어 있습니다. Firebase 콘솔에서 직접 계정을 생성하세요.');
-      navigateToPage('dashboard');
-      if (window.history && window.history.replaceState) {
-        window.history.replaceState({}, '', '/');
-      }
-      return;
-    }
+    // 회원가입 페이지 표시 (활성화됨)
   }
 
   // Scroll to top for dashboard and other pages (not pools)
@@ -2100,12 +2084,11 @@ function handleURLRouting() {
       return;
   }
   
-  // 회원가입 페이지 접근 차단
+  // 회원가입 페이지 (활성화됨)
   if (path === '/signup' || path === '/signup/') {
-    alert('회원가입은 현재 비활성화되어 있습니다.');
-    navigateToPage('dashboard');
+    navigateToPage('signup');
     if (window.history && window.history.replaceState) {
-      window.history.replaceState({}, '', '/');
+      window.history.replaceState({}, '', '/signup');
     }
     return;
   }
