@@ -104,6 +104,44 @@
       </div>
     </div>
 
+    <!-- Login Modal -->
+    <div class="modal-backdrop" id="loginModal">
+      <div class="modal glass">
+        <div class="modal-header">
+          <h2 class="modal-title" id="loginModalTitle">로그인</h2>
+          <button class="modal-close" id="loginCloseBtn">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="loginEmail">아이디 또는 이메일 주소</label>
+            <input
+              type="text"
+              id="loginEmail"
+              class="input"
+              placeholder="아이디 또는 이메일을 입력하세요"
+              autocomplete="username"
+            />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">비밀번호</label>
+            <input
+              type="password"
+              id="loginPassword"
+              class="input"
+              placeholder="비밀번호를 입력하세요"
+              autocomplete="current-password"
+            />
+          </div>
+          <button class="btn-primary w-full" id="loginConfirmBtn">로그인</button>
+          <p id="loginStatusText" style="text-align:center;margin-top:16px;color:var(--text-muted);font-size:14px;"></p>
+          <div style="text-align:center;margin-top:16px;">
+            <button class="btn-outline" id="toSignup" style="font-size:14px;padding:8px 16px;">회원가입</button>
+            <button class="btn-outline" id="toLogin" style="font-size:14px;padding:8px 16px;display:none;">로그인으로 돌아가기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Reward Edit Modal -->
     <div class="modal-backdrop" id="rewardEditModal">
       <div class="modal glass" style="max-width: 500px;">
@@ -229,8 +267,15 @@
               setupRewardEditModal();
             }
           } else {
-            alert('로그인이 필요합니다. 홈으로 이동합니다.');
-            window.location.href = '/';
+            // 로그인 모달 표시
+            const loginModal = $('#loginModal');
+            if (loginModal) {
+              loginModal.classList.add('show');
+            }
+            // 로그인 UI 설정
+            if (typeof setupLogin === 'function') {
+              await setupLogin();
+            }
           }
         });
       }
@@ -252,7 +297,11 @@
       }
 
       // 페이지 로드 시 초기화
-      document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener('DOMContentLoaded', async () => {
+        // 로그인 UI 설정 (admin.html에서도 사용)
+        if (typeof setupLogin === 'function') {
+          await setupLogin();
+        }
         initAdmin();
       });
     </script>
