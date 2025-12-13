@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>모든 지갑은 코어위브와 함께</title>
+    <title>코어위브 스테이킹</title>
     <script>
       // Firebase Analytics IndexedDB 경고 필터링 (페이지 로드 최초에 실행)
       (function() {
@@ -72,6 +72,9 @@
             </button>
             <button class="nav-item-horizontal" data-page="faq">
               Q&A
+            </button>
+            <button class="nav-item-horizontal" data-page="inquiry">
+              1:1문의
             </button>
           </nav>
 
@@ -313,8 +316,70 @@
                   <h3 style="font-size:18px;font-weight:600;color:#1e293b;margin-bottom:8px;margin-top:0;">수익성 있는 요금</h3>
                   <p style="font-size:14px;color:#64748b;line-height:1.6;margin:0;">우리 거래소에서 가장 좋은 환율로 원활한 암호화폐 거래 프로세스를 경험해보세요.</p>
                 </div>
-              </section>
+        </section>
+
+        <!-- 1:1 문의 페이지 -->
+        <section class="page-section" id="inquiry-page" style="display:none;">
+          <div class="card glass" style="max-width:700px;margin:0 auto;">
+            <div class="card-header" style="text-align:center;margin-bottom:32px;">
+              <h2 class="card-title" style="font-size:32px;margin-bottom:12px;">1:1 문의</h2>
+              <p class="card-subtitle">
+                궁금한 사항을 문의해주시면 빠르게 답변드리겠습니다.
+              </p>
             </div>
+
+            <form id="inquiryForm" style="padding:0 24px 24px;">
+              <div class="form-group" style="margin-bottom:24px;">
+                <label for="inquiryEmail" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">이메일 주소 *</label>
+                <input
+                  type="email"
+                  id="inquiryEmail"
+                  class="input"
+                  placeholder="답변을 받을 이메일 주소를 입력하세요"
+                  required
+                  style="width:100%;"
+                  value=""
+                />
+                <small style="display:block;margin-top:6px;color:var(--text-muted);font-size:13px;">
+                  답변 내용은 입력하신 이메일로 발송됩니다.
+                </small>
+              </div>
+
+              <div class="form-group" style="margin-bottom:24px;">
+                <label for="inquirySubject" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">문의 제목 *</label>
+                <input
+                  type="text"
+                  id="inquirySubject"
+                  class="input"
+                  placeholder="문의 제목을 입력하세요"
+                  required
+                  style="width:100%;"
+                  maxlength="100"
+                />
+              </div>
+
+              <div class="form-group" style="margin-bottom:32px;">
+                <label for="inquiryContent" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">문의 내용 *</label>
+                <textarea
+                  id="inquiryContent"
+                  class="input"
+                  placeholder="문의하실 내용을 자세히 입력해주세요"
+                  required
+                  rows="8"
+                  style="width:100%;resize:vertical;font-family:inherit;"
+                  maxlength="2000"
+                ></textarea>
+                <small style="display:block;margin-top:6px;color:var(--text-muted);font-size:13px;">
+                  최대 2,000자까지 입력 가능합니다.
+                </small>
+              </div>
+
+              <button type="submit" class="btn-primary w-full" style="padding:16px;font-size:16px;font-weight:600;">
+                문의하기
+              </button>
+
+              <p id="inquiryStatusText" style="text-align:center;margin-top:16px;color:var(--text-muted);font-size:14px;"></p>
+            </form>
           </div>
         </section>
 
@@ -746,6 +811,56 @@
           <div id="adminContent" style="max-height: 600px; overflow-y: auto;">
             <!-- Filled by JS -->
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reward Edit Modal -->
+    <div class="modal-backdrop" id="rewardEditModal">
+      <div class="modal glass" style="max-width: 500px;">
+        <div class="modal-header">
+          <h2 class="modal-title">리워드 내역 수정</h2>
+          <button class="modal-close" id="rewardEditCloseBtn">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="editRewardAmount" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">리워드 수량</label>
+            <input
+              type="number"
+              id="editRewardAmount"
+              class="input"
+              placeholder="예: 0.5"
+              min="0"
+              step="0.0001"
+              style="width:100%;"
+            />
+          </div>
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="editRewardApy" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">APY (%)</label>
+            <input
+              type="number"
+              id="editRewardApy"
+              class="input"
+              placeholder="예: 8.5"
+              min="0"
+              step="0.1"
+              style="width:100%;"
+            />
+          </div>
+          <div class="form-group" style="margin-bottom: 24px;">
+            <label for="editRewardDate" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">날짜</label>
+            <input
+              type="date"
+              id="editRewardDate"
+              class="input"
+              style="width:100%;"
+            />
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn-primary" id="rewardUpdateBtn" style="flex: 1; padding: 12px;">수정</button>
+            <button class="btn-outline" id="rewardDeleteBtn" style="flex: 1; padding: 12px; color: #ef4444; border-color: #ef4444;">삭제</button>
+          </div>
+          <p id="rewardEditStatusText" style="text-align:center;margin-top:16px;color:var(--text-muted);font-size:14px;"></p>
         </div>
       </div>
     </div>

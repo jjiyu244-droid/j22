@@ -354,6 +354,112 @@ async function approveRewardForUser(userId, approvedAmount, symbol, apy) {
   }
 }
 
+// 리워드 수정
+async function updateReward(rewardId, amount, apy, date) {
+  try {
+    const { doc, updateDoc, Timestamp } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const rewardRef = doc(db, 'rewards', rewardId);
+    
+    // 날짜를 Timestamp로 변환
+    const dateObj = date ? new Date(date) : new Date();
+    const timestamp = Timestamp.fromDate(dateObj);
+    
+    await updateDoc(rewardRef, {
+      amount: parseFloat(amount),
+      apy: parseFloat(apy),
+      approvedAt: timestamp,
+    });
+    return true;
+  } catch (e) {
+    console.error('리워드 수정 중 오류:', e);
+    return false;
+  }
+}
+
+// 리워드 삭제
+async function deleteReward(rewardId) {
+  try {
+    const { doc, deleteDoc } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const rewardRef = doc(db, 'rewards', rewardId);
+    await deleteDoc(rewardRef);
+    return true;
+  } catch (e) {
+    console.error('리워드 삭제 중 오류:', e);
+    return false;
+  }
+}
+
+// 1:1 문의 저장
+async function saveInquiry(email, subject, content) {
+  try {
+    const { collection, addDoc, serverTimestamp } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const inquiriesRef = collection(db, 'inquiries');
+    await addDoc(inquiriesRef, {
+      email: email,
+      subject: subject,
+      content: content,
+      userId: currentUser ? currentUser.uid : null,
+      userEmail: currentUser ? currentUser.email : null,
+      status: '대기중',
+      createdAt: serverTimestamp(),
+      repliedAt: null,
+      reply: null,
+    });
+    return true;
+  } catch (e) {
+    console.error('문의 저장 중 오류:', e);
+    return false;
+  }
+}
+
+// 어드민용: 모든 문의 내역 불러오기
+async function loadAllInquiries() {
+  if (!db) return [];
+  
+  try {
+    const { collection, query, getDocs, orderBy } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const inquiriesRef = collection(db, 'inquiries');
+    
+    let q = query(inquiriesRef, orderBy('createdAt', 'desc'));
+    
+    try {
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    } catch (indexError) {
+      // 인덱스가 없으면 orderBy 없이 조회 후 클라이언트에서 정렬
+      console.warn('Firestore 인덱스 없음, 클라이언트 정렬 사용');
+      const querySnapshot = await getDocs(inquiriesRef);
+      const inquiries = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      
+      // 클라이언트에서 날짜순 정렬
+      inquiries.sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+        return dateB.getTime() - dateA.getTime(); // 최신순
+      });
+      
+      return inquiries;
+    }
+  } catch (e) {
+    console.error('문의 내역 로드 실패:', e);
+    return [];
+  }
+}
+
 function updateLoginUI() {
   const loginBtn = $('#loginBtn');
   if (!loginBtn) return;
@@ -363,6 +469,12 @@ function updateLoginUI() {
     // 이메일에서 @ 앞부분만 표시 (일반 계정은 @temp.com 제거)
     const displayEmail = currentUser.email.replace('@temp.com', '').split('@')[0];
     loginBtn.textContent = `${displayEmail} (로그아웃)`;
+    
+    // 문의 폼 이메일 자동 입력 (문의 페이지가 표시 중인 경우)
+    const inquiryEmailInput = $('#inquiryEmail');
+    if (inquiryEmailInput) {
+      inquiryEmailInput.value = currentUser.email;
+    }
   } else {
     loginBtn.textContent = '로그인';
   }
@@ -1060,6 +1172,81 @@ function setupSignupForm() {
   }
 }
 
+// 1:1 문의 폼 설정
+function setupInquiryForm() {
+  const inquiryForm = $('#inquiryForm');
+  const statusText = $('#inquiryStatusText');
+  
+  if (!inquiryForm) return;
+  
+  // 로그인된 사용자의 이메일 자동 입력
+  if (currentUser && currentUser.email) {
+    const emailInput = $('#inquiryEmail');
+    if (emailInput) {
+      emailInput.value = currentUser.email;
+    }
+  }
+  
+  inquiryForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = $('#inquiryEmail').value.trim();
+    const subject = $('#inquirySubject').value.trim();
+    const content = $('#inquiryContent').value.trim();
+    
+    // 유효성 검사
+    if (!email || !subject || !content) {
+      if (statusText) {
+        statusText.textContent = '모든 필드를 입력해주세요.';
+        statusText.style.color = 'var(--error)';
+      }
+      return;
+    }
+    
+    // 이메일 형식 검증
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      if (statusText) {
+        statusText.textContent = '올바른 이메일 주소를 입력해주세요.';
+        statusText.style.color = 'var(--error)';
+      }
+      return;
+    }
+    
+    // 문의 저장
+    if (statusText) {
+      statusText.textContent = '문의를 전송하는 중...';
+      statusText.style.color = 'var(--text)';
+    }
+    
+    const success = await saveInquiry(email, subject, content);
+    
+    if (success) {
+      if (statusText) {
+        statusText.textContent = '문의가 성공적으로 전송되었습니다. 빠른 시일 내에 답변드리겠습니다.';
+        statusText.style.color = 'var(--success)';
+      }
+      inquiryForm.reset();
+      // 로그인된 사용자의 이메일 다시 채우기
+      if (currentUser && currentUser.email) {
+        $('#inquiryEmail').value = currentUser.email;
+      }
+      
+      // 3초 후 메시지 제거
+      setTimeout(() => {
+        if (statusText) {
+          statusText.textContent = '';
+        }
+      }, 3000);
+    } else {
+      if (statusText) {
+        statusText.textContent = '문의 전송 중 오류가 발생했습니다. 다시 시도해주세요.';
+        statusText.style.color = 'var(--error)';
+      }
+    }
+  });
+}
+
 // Simple APY animation
 function animateApy() {
   const apy = 8.9;
@@ -1326,6 +1513,10 @@ async function renderAdminDashboard(users) {
     XRP: 5.4,
   };
 
+  // 문의 내역 불러오기
+  const inquiries = await loadAllInquiries();
+  const pendingInquiries = inquiries.filter(inq => inq.status === '대기중');
+
   // 통계 섹션
   let html = `
     <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
@@ -1363,6 +1554,61 @@ async function renderAdminDashboard(users) {
         </div>
       </div>
     </div>
+    
+    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 16px; font-weight: 600; margin: 0;">📬 1:1 문의 내역 (${inquiries.length}건)</h3>
+        ${pendingInquiries.length > 0 ? `<span style="background: #ef4444; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">대기중 ${pendingInquiries.length}건</span>` : ''}
+      </div>
+      ${inquiries.length > 0 ? `
+        <div style="background: rgba(255,255,255,0.02); border-radius: 6px; overflow: hidden;">
+          <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+            <thead>
+              <tr style="background: rgba(255,255,255,0.05);">
+                <th style="padding: 10px; text-align: left; color: #9ca3af; font-weight: 600;">날짜</th>
+                <th style="padding: 10px; text-align: left; color: #9ca3af; font-weight: 600;">이메일</th>
+                <th style="padding: 10px; text-align: left; color: #9ca3af; font-weight: 600;">제목</th>
+                <th style="padding: 10px; text-align: center; color: #9ca3af; font-weight: 600;">상태</th>
+                <th style="padding: 10px; text-align: left; color: #9ca3af; font-weight: 600;">내용</th>
+              </tr>
+            </thead>
+            <tbody>
+      ` : '<p style="color: #6b7280; text-align: center; padding: 20px;">문의 내역이 없습니다.</p>'}
+      ${inquiries.length > 0 ? inquiries.slice(0, 10).map(inq => {
+        const createdDate = inq.createdAt?.toDate ? inq.createdAt.toDate() : new Date();
+        const dateStr = createdDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const statusColor = inq.status === '대기중' ? '#ef4444' : inq.status === '답변완료' ? '#10b981' : '#9ca3af';
+        const contentPreview = (inq.content || '').substring(0, 50) + ((inq.content || '').length > 50 ? '...' : '');
+        const escapedContent = (inq.content || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        
+        return `
+              <tr style="border-top: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 10px;">${dateStr}</td>
+                <td style="padding: 10px;">${inq.email || inq.userEmail || '-'}</td>
+                <td style="padding: 10px; font-weight: 500;">${inq.subject || '-'}</td>
+                <td style="padding: 10px; text-align: center;">
+                  <span style="background: ${statusColor}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600;">
+                    ${inq.status || '대기중'}
+                  </span>
+                </td>
+                <td style="padding: 10px;">
+                  <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapedContent}">
+                    ${contentPreview}
+                  </div>
+                  ${inq.reply ? `<div style="margin-top: 4px; padding: 6px; background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; font-size: 10px; color: #10b981;">
+                    <strong>답변:</strong> ${inq.reply.substring(0, 100)}${inq.reply.length > 100 ? '...' : ''}
+                  </div>` : ''}
+                </td>
+              </tr>
+        `;
+      }).join('') : ''}
+      ${inquiries.length > 0 ? `
+            </tbody>
+          </table>
+        </div>
+      ` : ''}
+    </div>
+    
     <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">👥 회원별 상세 정보 (${users.length}명)</h3>
   `;
 
@@ -1557,6 +1803,192 @@ window.handleApproveReward = async function(userId, symbol, stakedAmount, reward
   }
 };
 
+// 리워드 수정 모달 열기 (전역 함수로 노출)
+window.handleEditReward = function(rewardId, userId, amount, apy, date, symbol) {
+  const modal = $('#rewardEditModal');
+  const amountInput = $('#editRewardAmount');
+  const apyInput = $('#editRewardApy');
+  const dateInput = $('#editRewardDate');
+  const statusText = $('#rewardEditStatusText');
+  
+  if (!modal || !amountInput || !apyInput || !dateInput) return;
+  
+  // 현재 값으로 입력 필드 채우기
+  amountInput.value = amount;
+  apyInput.value = apy;
+  dateInput.value = date;
+  
+  // 상태 텍스트 초기화
+  if (statusText) {
+    statusText.textContent = '';
+  }
+  
+  // 모달에 데이터 저장 (나중에 사용)
+  modal.dataset.rewardId = rewardId;
+  modal.dataset.userId = userId;
+  modal.dataset.symbol = symbol;
+  
+  // 모달 열기
+  modal.classList.add('show');
+};
+
+// 리워드 수정 모달 설정
+function setupRewardEditModal() {
+  const modal = $('#rewardEditModal');
+  const closeBtn = $('#rewardEditCloseBtn');
+  const updateBtn = $('#rewardUpdateBtn');
+  const deleteBtn = $('#rewardDeleteBtn');
+  const statusText = $('#rewardEditStatusText');
+  
+  if (!modal) return;
+  
+  // 모달 닫기
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      modal.classList.remove('show');
+    });
+  }
+  
+  // 모달 배경 클릭 시 닫기
+  modal.addEventListener('click', (e) => {
+    if (e.target.id === 'rewardEditModal') {
+      modal.classList.remove('show');
+    }
+  });
+  
+  // 수정 버튼
+  if (updateBtn) {
+    updateBtn.addEventListener('click', async () => {
+      const rewardId = modal.dataset.rewardId;
+      const userId = modal.dataset.userId;
+      const amountInput = $('#editRewardAmount');
+      const apyInput = $('#editRewardApy');
+      const dateInput = $('#editRewardDate');
+      
+      if (!rewardId || !amountInput || !apyInput || !dateInput) return;
+      
+      const amount = parseFloat(amountInput.value);
+      const apy = parseFloat(apyInput.value);
+      const date = dateInput.value;
+      
+      // 유효성 검사
+      if (!amount || amount <= 0) {
+        if (statusText) {
+          statusText.textContent = '리워드 수량을 올바르게 입력해주세요.';
+          statusText.style.color = '#ef4444';
+        }
+        return;
+      }
+      
+      if (!apy || apy < 0) {
+        if (statusText) {
+          statusText.textContent = 'APY를 올바르게 입력해주세요.';
+          statusText.style.color = '#ef4444';
+        }
+        return;
+      }
+      
+      if (!date) {
+        if (statusText) {
+          statusText.textContent = '날짜를 선택해주세요.';
+          statusText.style.color = '#ef4444';
+        }
+        return;
+      }
+      
+      // 상태 텍스트 업데이트
+      if (statusText) {
+        statusText.textContent = '수정 중...';
+        statusText.style.color = 'var(--text)';
+      }
+      
+      // 리워드 수정
+      const success = await updateReward(rewardId, amount, apy, date);
+      
+      if (success) {
+        if (statusText) {
+          statusText.textContent = '리워드가 수정되었습니다.';
+          statusText.style.color = '#10b981';
+        }
+        
+        // 모달 닫기
+        setTimeout(async () => {
+          modal.classList.remove('show');
+          
+          // 어드민 대시보드 새로고침
+          const users = await loadAllUserStakes();
+          const adminPageContent = $('#adminPageContent');
+          if (adminPageContent) {
+            await renderAdminDashboardContent(users, adminPageContent);
+          }
+          
+          // 만약 해당 유저가 현재 로그인되어 있다면 리워드 내역도 새로고침
+          if (currentUser && currentUser.uid === userId) {
+            await renderRewards();
+          }
+        }, 1000);
+      } else {
+        if (statusText) {
+          statusText.textContent = '리워드 수정 중 오류가 발생했습니다.';
+          statusText.style.color = '#ef4444';
+        }
+      }
+    });
+  }
+  
+  // 삭제 버튼
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', async () => {
+      const rewardId = modal.dataset.rewardId;
+      const userId = modal.dataset.userId;
+      
+      if (!rewardId) return;
+      
+      if (!confirm('정말로 이 리워드 내역을 삭제하시겠습니까?')) {
+        return;
+      }
+      
+      // 상태 텍스트 업데이트
+      if (statusText) {
+        statusText.textContent = '삭제 중...';
+        statusText.style.color = 'var(--text)';
+      }
+      
+      // 리워드 삭제
+      const success = await deleteReward(rewardId);
+      
+      if (success) {
+        if (statusText) {
+          statusText.textContent = '리워드가 삭제되었습니다.';
+          statusText.style.color = '#10b981';
+        }
+        
+        // 모달 닫기
+        setTimeout(async () => {
+          modal.classList.remove('show');
+          
+          // 어드민 대시보드 새로고침
+          const users = await loadAllUserStakes();
+          const adminPageContent = $('#adminPageContent');
+          if (adminPageContent) {
+            await renderAdminDashboardContent(users, adminPageContent);
+          }
+          
+          // 만약 해당 유저가 현재 로그인되어 있다면 리워드 내역도 새로고침
+          if (currentUser && currentUser.uid === userId) {
+            await renderRewards();
+          }
+        }, 1000);
+      } else {
+        if (statusText) {
+          statusText.textContent = '리워드 삭제 중 오류가 발생했습니다.';
+          statusText.style.color = '#ef4444';
+        }
+      }
+    });
+  }
+}
+
 // 어드민 페이지 렌더링
 async function renderAdminPage() {
   const container = $('#adminPageContent');
@@ -1612,6 +2044,10 @@ async function renderAdminDashboardContent(users, container) {
     ETH: 6.8,
     XRP: 5.4,
   };
+
+  // 문의 내역 불러오기
+  const inquiries = await loadAllInquiries();
+  const pendingInquiries = inquiries.filter(inq => inq.status === '대기중');
 
   // 통계 섹션
   let html = `
@@ -1763,6 +2199,7 @@ async function renderAdminDashboardContent(users, container) {
                   <th style="padding: 8px; text-align: right; color: #9ca3af; font-weight: 600;">수량</th>
                   <th style="padding: 8px; text-align: right; color: #9ca3af; font-weight: 600;">USD</th>
                   <th style="padding: 8px; text-align: center; color: #9ca3af; font-weight: 600;">APY</th>
+                  <th style="padding: 8px; text-align: center; color: #9ca3af; font-weight: 600;">관리</th>
                 </tr>
               </thead>
               <tbody>
@@ -1772,6 +2209,7 @@ async function renderAdminDashboardContent(users, container) {
         const rewardDate = reward.approvedAt?.toDate ? reward.approvedAt.toDate() : new Date();
         const dateStr = rewardDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
         const rewardUSD = (reward.amount || 0) * (prices[reward.symbol] || 0);
+        const dateInputValue = rewardDate.toISOString().split('T')[0];
         
         html += `
                 <tr style="border-top: 1px solid rgba(255,255,255,0.05);">
@@ -1780,6 +2218,15 @@ async function renderAdminDashboardContent(users, container) {
                   <td style="padding: 8px; text-align: right;">+${reward.amount.toFixed(reward.symbol === 'XRP' ? 2 : 4)}</td>
                   <td style="padding: 8px; text-align: right; color: #10b981;">${formatUSD(rewardUSD)}</td>
                   <td style="padding: 8px; text-align: center;">${reward.apy?.toFixed(1) || 0}%</td>
+                  <td style="padding: 8px; text-align: center;">
+                    <button 
+                      class="btn-outline" 
+                      style="padding: 4px 8px; font-size: 10px;"
+                      onclick="handleEditReward('${reward.id}', '${u.uid}', ${reward.amount}, ${reward.apy || 0}, '${dateInputValue}', '${reward.symbol}')"
+                    >
+                      수정
+                    </button>
+                  </td>
                 </tr>
         `;
       });
@@ -1787,7 +2234,7 @@ async function renderAdminDashboardContent(users, container) {
       if (userRewards.length > 5) {
         html += `
                 <tr>
-                  <td colspan="5" style="padding: 8px; text-align: center; color: #9ca3af; font-size: 10px;">
+                  <td colspan="6" style="padding: 8px; text-align: center; color: #9ca3af; font-size: 10px;">
                     외 ${userRewards.length - 5}건 더 있음
                   </td>
                 </tr>
@@ -1906,6 +2353,16 @@ function navigateToPage(page) {
     // 리워드 페이지인 경우 리워드 렌더링
     if (page === 'rewards') {
       renderRewards();
+    }
+    
+    // 문의 페이지인 경우 이메일 자동 입력
+    if (page === 'inquiry') {
+      if (currentUser && currentUser.email) {
+        const emailInput = $('#inquiryEmail');
+        if (emailInput) {
+          emailInput.value = currentUser.email;
+        }
+      }
     }
     
     // 어드민 페이지인 경우
@@ -2130,6 +2587,15 @@ function handleURLRouting() {
     return;
   }
   
+  // 문의 페이지
+  if (path === '/inquiry' || path === '/inquiry/') {
+    navigateToPage('inquiry');
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState({}, '', '/inquiry');
+    }
+    return;
+  }
+  
   // 기본 대시보드
   if (path === '/' || path === '') {
     navigateToPage('dashboard');
@@ -2183,6 +2649,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupWalletButton();
   setupRewardFilters();
   setupSignupForm();
+  setupInquiryForm();
 
   // 로그인 UI 세팅 (Firebase Auth 모듈 동적 로드)
   setupLogin().catch(err => {
@@ -2191,6 +2658,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 어드민 모달 세팅
   setupAdminModal();
+
+  // 리워드 수정 모달 세팅
+  setupRewardEditModal();
 
   // 실제 시세 반영 시도
   fetchAndApplyPrices();
