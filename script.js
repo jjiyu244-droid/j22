@@ -2016,7 +2016,16 @@ async function renderAdminDashboardContent(users, container) {
   if (!container) return;
 
   if (users.length === 0) {
-    container.innerHTML = '<p style="color:#9ca3af;">스테이킹 데이터가 없습니다.</p>';
+    container.innerHTML = `
+      <div style="padding: 60px 20px; text-align: center; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <div style="font-size: 48px; margin-bottom: 20px;">📊</div>
+        <h3 style="font-size: 24px; font-weight: 600; color: var(--text); margin-bottom: 12px;">등록된 회원이 없습니다</h3>
+        <p style="font-size: 16px; color: #9ca3af; margin-bottom: 8px;">현재 Firestore에 저장된 스테이킹 데이터가 없습니다.</p>
+        <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
+          회원들이 스테이킹을 시작하면 여기에 데이터가 표시됩니다.
+        </p>
+      </div>
+    `;
     return;
   }
 
