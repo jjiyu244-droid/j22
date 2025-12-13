@@ -1998,16 +1998,26 @@ async function renderAdminPage() {
   }
   
   console.log('어드민 페이지 렌더링 시작...');
-  container.innerHTML = '<p style="color:#9ca3af; text-align:center; padding: 20px;">데이터를 불러오는 중...</p>';
+  console.log('컨테이너 요소:', container);
+  console.log('컨테이너 부모 요소:', container.parentElement);
+  
+  container.innerHTML = '<p style="color:#ffffff; text-align:center; padding: 40px; font-size: 18px; background: rgba(255,255,255,0.05); border-radius: 8px;">데이터를 불러오는 중...</p>';
   
   try {
     const users = await loadAllUserStakes();
     console.log('로드된 사용자 수:', users.length);
+    console.log('사용자 데이터:', users);
     await renderAdminDashboardContent(users, container);
     console.log('어드민 페이지 렌더링 완료');
+    console.log('컨테이너 최종 내용 길이:', container.innerHTML.length);
   } catch (error) {
     console.error('어드민 페이지 렌더링 중 오류:', error);
-    container.innerHTML = `<p style="color:#ef4444; text-align:center; padding: 20px;">오류가 발생했습니다: ${error.message}</p>`;
+    container.innerHTML = `
+      <div style="padding: 40px; text-align: center; background: rgba(239, 68, 68, 0.1); border-radius: 12px; border: 2px solid rgba(239, 68, 68, 0.3);">
+        <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 12px;">오류가 발생했습니다</h3>
+        <p style="color: #fca5a5; font-size: 16px;">${error.message}</p>
+      </div>
+    `;
   }
 }
 
@@ -2016,16 +2026,25 @@ async function renderAdminDashboardContent(users, container) {
   if (!container) return;
 
   if (users.length === 0) {
+    console.log('사용자 데이터가 없어서 빈 상태 메시지를 표시합니다.');
     container.innerHTML = `
-      <div style="padding: 60px 20px; text-align: center; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-        <div style="font-size: 48px; margin-bottom: 20px;">📊</div>
-        <h3 style="font-size: 24px; font-weight: 600; color: var(--text); margin-bottom: 12px;">등록된 회원이 없습니다</h3>
-        <p style="font-size: 16px; color: #9ca3af; margin-bottom: 8px;">현재 Firestore에 저장된 스테이킹 데이터가 없습니다.</p>
-        <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
+      <div style="padding: 80px 40px; text-align: center; background: rgba(255,255,255,0.05); border-radius: 16px; border: 2px solid rgba(255,255,255,0.1); margin: 40px 0;">
+        <div style="font-size: 64px; margin-bottom: 24px; line-height: 1;">📊</div>
+        <h3 style="font-size: 28px; font-weight: 700; color: #ffffff; margin-bottom: 16px; line-height: 1.4;">등록된 회원이 없습니다</h3>
+        <p style="font-size: 18px; color: #9ca3af; margin-bottom: 12px; line-height: 1.6;">
+          현재 Firestore에 저장된 스테이킹 데이터가 없습니다.
+        </p>
+        <p style="font-size: 16px; color: #6b7280; margin-top: 24px; line-height: 1.6;">
           회원들이 스테이킹을 시작하면 여기에 데이터가 표시됩니다.
         </p>
+        <div style="margin-top: 32px; padding: 16px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.2);">
+          <p style="font-size: 14px; color: #93c5fd; margin: 0;">
+            💡 <strong>팁:</strong> 사용자가 스테이킹을 시작하면 <code>userStakes</code> 컬렉션에 데이터가 저장됩니다.
+          </p>
+        </div>
       </div>
     `;
+    console.log('빈 상태 메시지가 표시되었습니다.');
     return;
   }
 
@@ -2415,7 +2434,14 @@ async function navigateToPage(page) {
       }
       
       console.log('어드민 페이지 표시 중...');
+      console.log('페이지 요소:', pageElement);
+      console.log('페이지 요소 현재 display:', window.getComputedStyle(pageElement).display);
+      
       pageElement.style.display = 'block';
+      
+      console.log('페이지 요소 display 설정 후:', window.getComputedStyle(pageElement).display);
+      console.log('페이지 요소 offsetHeight:', pageElement.offsetHeight);
+      console.log('페이지 요소 offsetWidth:', pageElement.offsetWidth);
       
       // 스크롤을 맨 위로 이동
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2423,9 +2449,11 @@ async function navigateToPage(page) {
       // 어드민 대시보드 렌더링 (비동기 처리)
       await renderAdminPage();
       
-      // 렌더링 후 다시 스크롤 확인
+      // 렌더링 후 다시 스크롤 확인 및 요소 확인
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        console.log('렌더링 후 페이지 요소 offsetHeight:', pageElement.offsetHeight);
+        console.log('렌더링 후 컨테이너 내용:', $('#adminPageContent')?.innerHTML?.substring(0, 100));
       }, 100);
       
       return;
