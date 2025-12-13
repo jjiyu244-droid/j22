@@ -190,7 +190,7 @@
     <script src="./script.js"></script>
     <script>
       // 어드민 페이지 전용 초기화
-      const ADMIN_EMAIL = 'jjiyu244@gmail.com';
+      // ADMIN_EMAIL은 script.js에서 이미 선언됨
       let currentUser = null;
       let isAdmin = false;
       let auth, db;
@@ -212,7 +212,9 @@
         onAuthStateChanged(auth, async (user) => {
           if (user) {
             currentUser = { email: user.email, uid: user.uid };
-            isAdmin = user.email === ADMIN_EMAIL;
+            // ADMIN_EMAIL은 script.js에서 전역으로 선언됨
+            const adminEmail = typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'jjiyu244@gmail.com';
+            isAdmin = user.email === adminEmail;
             
             if (!isAdmin) {
               alert('어드민 권한이 필요합니다. 홈으로 이동합니다.');

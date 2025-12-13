@@ -766,6 +766,7 @@ async function setupLogin() {
 // Portfolio rendering
 function renderPortfolio() {
   const list = $('#portfolioList');
+  if (!list) return; // admin.html에는 포트폴리오 요소가 없음
   list.innerHTML = '';
 
   portfolioData.forEach((item) => {
@@ -793,6 +794,7 @@ function renderPortfolio() {
 // Pools rendering
 function renderPools(filter = 'all') {
   const container = $('#poolList');
+  if (!container) return; // admin.html에는 풀 리스트 요소가 없음
   container.innerHTML = '';
 
   pools
@@ -836,6 +838,7 @@ function renderPools(filter = 'all') {
 // Activity rendering
 function renderActivity() {
   const list = $('#activityList');
+  if (!list) return; // admin.html에는 활동 리스트 요소가 없음
   list.innerHTML = '';
 
   activity.forEach((a) => {
@@ -1226,13 +1229,17 @@ function setupInquiryForm() {
 // Simple APY animation
 function animateApy() {
   const apy = 8.9;
-  $('#estApy').textContent = `${apy}%`;
-  $('#apyProgress').style.width = `${Math.min(apy * 1.2, 100)}%`;
+  const estApyEl = $('#estApy');
+  const apyProgressEl = $('#apyProgress');
+  if (!estApyEl || !apyProgressEl) return; // admin.html에는 APY 요소가 없음
+  estApyEl.textContent = `${apy}%`;
+  apyProgressEl.style.width = `${Math.min(apy * 1.2, 100)}%`;
 }
 
 // Reward simulator
 function setupSimulator() {
   const simBtn = $('#simBtn');
+  if (!simBtn) return; // admin.html에는 시뮬레이터 버튼이 없음
   simBtn.addEventListener('click', () => {
     const amount = parseFloat($('#simAmount').value || '0');
     const days = parseFloat($('#simDays').value || '0');
@@ -2582,30 +2589,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     handleURLRouting();
   });
 
-  renderPortfolio();
-  renderPools();
-  renderActivity();
-  animateApy();
-  setupSimulator();
-  setupStakeModal();
-  setupTabs();
-  setupThemeToggle();
-  setupWalletButton();
-  setupRewardFilters();
-  setupSignupForm();
-  setupInquiryForm();
+  // admin.html에서는 이 함수들을 호출하지 않음 (요소가 없음)
+  // admin.html인지 확인
+  const isAdminPage = window.location.pathname.includes('admin.html');
+  
+  if (!isAdminPage) {
+    renderPortfolio();
+    renderPools();
+    renderActivity();
+    animateApy();
+    setupSimulator();
+    setupStakeModal();
+    setupTabs();
+    setupThemeToggle();
+    setupWalletButton();
+    setupRewardFilters();
+    setupSignupForm();
+    setupInquiryForm();
 
-  // 로그인 UI 세팅 (Firebase Auth 모듈 동적 로드)
-  setupLogin().catch(err => {
-    console.error('setupLogin 초기화 에러:', err);
-  });
+    // 로그인 UI 세팅 (Firebase Auth 모듈 동적 로드)
+    setupLogin().catch(err => {
+      console.error('setupLogin 초기화 에러:', err);
+    });
 
-  // 어드민 모달 세팅
-  setupAdminModal();
+    // 어드민 모달 세팅
+    setupAdminModal();
 
-  // 리워드 수정 모달 세팅
+    // 실제 시세 반영 시도
+    fetchAndApplyPrices();
+  }
+
+  // 리워드 수정 모달 세팅 (admin.html에서도 사용)
   setupRewardEditModal();
-
-  // 실제 시세 반영 시도
-  fetchAndApplyPrices();
 });
