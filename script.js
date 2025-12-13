@@ -101,12 +101,18 @@ function formatUSD(num) {
   return '$' + num.toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
 
+// 전역으로 노출 (admin.html에서 사용)
+window.formatUSD = formatUSD;
+
 // Map our symbols to CoinGecko IDs
 const priceSource = {
   BTC: 'bitcoin',
   ETH: 'ethereum',
   XRP: 'ripple',
 };
+
+// 전역으로 노출 (admin.html에서 사용)
+window.priceSource = priceSource;
 
 async function fetchAndApplyPrices() {
   try {
@@ -1449,16 +1455,43 @@ async function loadUserRewardsForAdmin(userId) {
       'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
     );
     const rewardsRef = collection(db, 'rewards');
-    const q = query(rewardsRef, where('userId', '==', userId), orderBy('approvedAt', 'desc'));
-    const querySnapshot = await getDocs(q);
-    const rewards = [];
-    querySnapshot.forEach((doc) => {
-      rewards.push({
-        id: doc.id,
-        ...doc.data(),
+    
+    // orderBy 없이 먼저 시도 (인덱스 불필요)
+    let q = query(rewardsRef, where('userId', '==', userId));
+    
+    try {
+      // orderBy를 시도 (인덱스가 있다면)
+      q = query(rewardsRef, where('userId', '==', userId), orderBy('approvedAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const rewards = [];
+      querySnapshot.forEach((doc) => {
+        rewards.push({
+          id: doc.id,
+          ...doc.data(),
+        });
       });
-    });
-    return rewards;
+      return rewards;
+    } catch (indexError) {
+      // 인덱스가 없으면 orderBy 없이 조회 후 클라이언트에서 정렬
+      console.warn('Firestore 인덱스 없음, 클라이언트 정렬 사용 (어드민)');
+      const querySnapshot = await getDocs(q);
+      const rewards = [];
+      querySnapshot.forEach((doc) => {
+        rewards.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+      
+      // 클라이언트에서 날짜순 정렬
+      rewards.sort((a, b) => {
+        const dateA = a.approvedAt?.toDate ? a.approvedAt.toDate() : new Date(0);
+        const dateB = b.approvedAt?.toDate ? b.approvedAt.toDate() : new Date(0);
+        return dateB.getTime() - dateA.getTime(); // 최신순
+      });
+      
+      return rewards;
+    }
   } catch (e) {
     console.error('리워드 데이터를 불러오지 못했습니다:', e);
     return [];
@@ -2314,9 +2347,9 @@ function setupAdminModal() {
   const closeBtn = $('#adminCloseBtn');
 
   if (adminBtn) {
-    adminBtn.addEventListener('click', async () => {
-      // 모달 대신 페이지로 이동
-      navigateToPage('admin');
+    adminBtn.addEventListener('click', () => {
+      // 별도 어드민 페이지로 이동
+      window.location.href = '/admin.html';
     });
   }
 

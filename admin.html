@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>어드민 대시보드 - 코어위브 스테이킹</title>
+    <script>
+      // Firebase Analytics IndexedDB 경고 필터링
+      (function() {
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        const filterMessage = (args) => {
+          const message = args.map(arg => {
+            if (typeof arg === 'string') return arg;
+            if (arg && typeof arg.toString === 'function') return arg.toString();
+            return JSON.stringify(arg);
+          }).join(' ');
+          
+          return message.includes('Analytics') && 
+                 (message.includes('IndexedDB') || 
+                  message.includes('indexeddb-unavailable') ||
+                  message.includes('analytics/indexeddb-unavailable'));
+        };
+        
+        console.error = function(...args) {
+          if (filterMessage(args)) {
+            return;
+          }
+          originalError.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+          if (filterMessage(args)) {
+            return;
+          }
+          originalWarn.apply(console, args);
+        };
+      })();
+    </script>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .admin-container {
+        min-height: 100vh;
+        padding: 20px;
+        background: radial-gradient(circle at top, #1e293b 0, #020617 55%, #000 100%);
+      }
+      .admin-header {
+        background: linear-gradient(135deg, #0052CC 0%, #0047AB 100%);
+        padding: 20px 40px;
+        margin-bottom: 32px;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .admin-header h1 {
+        color: white;
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+      }
+      .admin-content {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .back-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+      }
+      .back-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-container">
+      <div class="admin-content">
+        <!-- Admin Header -->
+        <div class="admin-header">
+          <h1>🔐 어드민 대시보드</h1>
+          <a href="/" class="back-btn">← 홈으로</a>
+        </div>
+
+        <!-- Admin Dashboard Content -->
+        <div id="adminPageContent" style="width: 100%; min-height: 500px;">
+          <div class="card glass" style="padding: 40px; text-align: center;">
+            <p style="color: #9ca3af; font-size: 16px;">데이터를 불러오는 중...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reward Edit Modal -->
+    <div class="modal-backdrop" id="rewardEditModal">
+      <div class="modal glass" style="max-width: 500px;">
+        <div class="modal-header">
+          <h2 class="modal-title">리워드 내역 수정</h2>
+          <button class="modal-close" id="rewardEditCloseBtn">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="editRewardAmount" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">리워드 수량</label>
+            <input
+              type="number"
+              id="editRewardAmount"
+              class="input"
+              placeholder="예: 0.5"
+              min="0"
+              step="0.0001"
+              style="width:100%;"
+            />
+          </div>
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="editRewardApy" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">APY (%)</label>
+            <input
+              type="number"
+              id="editRewardApy"
+              class="input"
+              placeholder="예: 8.5"
+              min="0"
+              step="0.1"
+              style="width:100%;"
+            />
+          </div>
+          <div class="form-group" style="margin-bottom: 24px;">
+            <label for="editRewardDate" style="display:block;margin-bottom:8px;font-weight:600;color:var(--text);">날짜</label>
+            <input
+              type="date"
+              id="editRewardDate"
+              class="input"
+              style="width:100%;"
+            />
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn-primary" id="rewardUpdateBtn" style="flex: 1; padding: 12px;">수정</button>
+            <button class="btn-outline" id="rewardDeleteBtn" style="flex: 1; padding: 12px; color: #ef4444; border-color: #ef4444;">삭제</button>
+          </div>
+          <p id="rewardEditStatusText" style="text-align:center;margin-top:16px;color:var(--text-muted);font-size:14px;"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Firebase core (Auth/Firestore) 초기화 -->
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js';
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js';
+      import {
+        getFirestore,
+      } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js';
+
+      const firebaseConfig = {
+        apiKey: 'AIzaSyBvb8p8PFmeIh3ZVyWqWk1RQLBZyAUpfk4',
+        authDomain: 'j22j22.firebaseapp.com',
+        projectId: 'j22j22',
+        storageBucket: 'j22j22.firebasestorage.app',
+        messagingSenderId: '874202688810',
+        appId: '1:874202688810:web:d384f6ea7cc4dcfb0b4253',
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      window.__firebase = {
+        app,
+        auth,
+        db,
+        onAuthStateChanged,
+      };
+      window.__firebaseInitialized = true;
+    </script>
+
+    <script src="./script.js"></script>
+    <script>
+      // 어드민 페이지 전용 초기화
+      const ADMIN_EMAIL = 'jjiyu244@gmail.com';
+      let currentUser = null;
+      let isAdmin = false;
+      let auth, db;
+
+      const $ = (selector) => document.querySelector(selector);
+
+      async function initAdmin() {
+        if (!window.__firebase) {
+          console.warn('Firebase가 아직 로드되지 않았습니다.');
+          setTimeout(initAdmin, 100);
+          return;
+        }
+
+        auth = window.__firebase.auth;
+        db = window.__firebase.db;
+
+        const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
+        
+        onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            currentUser = { email: user.email, uid: user.uid };
+            isAdmin = user.email === ADMIN_EMAIL;
+            
+            if (!isAdmin) {
+              alert('어드민 권한이 필요합니다. 홈으로 이동합니다.');
+              window.location.href = '/';
+              return;
+            }
+            
+            // 어드민 대시보드 렌더링
+            await renderAdminPage();
+            // 리워드 수정 모달 설정 (script.js의 함수 사용)
+            if (typeof setupRewardEditModal === 'function') {
+              setupRewardEditModal();
+            }
+          } else {
+            alert('로그인이 필요합니다. 홈으로 이동합니다.');
+            window.location.href = '/';
+          }
+        });
+      }
+
+      // 어드민 페이지 렌더링 (script.js의 함수 사용)
+      async function renderAdminPage() {
+        const container = $('#adminPageContent');
+        if (!container) return;
+        
+        container.innerHTML = '<div class="card glass" style="padding: 40px; text-align: center;"><p style="color: #9ca3af; font-size: 16px;">데이터를 불러오는 중...</p></div>';
+        
+        try {
+          const users = await loadAllUserStakes();
+          await renderAdminDashboardContent(users, container);
+        } catch (error) {
+          console.error('어드민 페이지 렌더링 중 오류:', error);
+          container.innerHTML = `<div class="card glass" style="padding: 40px; text-align: center;"><p style="color: #ef4444; font-size: 16px;">오류가 발생했습니다: ${error.message}</p></div>`;
+        }
+      }
+
+      // 페이지 로드 시 초기화
+      document.addEventListener('DOMContentLoaded', () => {
+        initAdmin();
+      });
+    </script>
+  </body>
+</html>
+
