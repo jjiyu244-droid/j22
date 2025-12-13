@@ -297,10 +297,31 @@
             } catch (error) {
               console.error('어드민 페이지 렌더링 중 오류:', error);
               if (container) {
+                let errorMessage = error.message;
+                let errorDetails = '';
+                
+                // Firestore 권한 오류인 경우
+                if (error.message && (error.message.includes('Permission denied') || 
+                    error.message.includes('Missing or insufficient permissions'))) {
+                  errorMessage = 'Firestore 보안 규칙 오류';
+                  errorDetails = `
+                    <div style="background: rgba(239, 68, 68, 0.1); padding: 16px; border-radius: 8px; margin-top: 16px; text-align: left;">
+                      <p style="color: #fca5a5; font-size: 14px; margin: 0 0 8px 0;"><strong>해결 방법:</strong></p>
+                      <ol style="color: #fca5a5; font-size: 14px; margin: 0; padding-left: 20px;">
+                        <li>Firebase 콘솔 접속: <a href="https://console.firebase.google.com/project/j22j22/firestore/rules" target="_blank" style="color: #93c5fd;">Firestore 규칙 설정</a></li>
+                        <li>어드민 계정(jjiyu244@gmail.com)이 모든 userStakes 데이터를 읽을 수 있도록 규칙 수정</li>
+                        <li>규칙 저장 후 페이지 새로고침</li>
+                      </ol>
+                      <p style="color: #fca5a5; font-size: 12px; margin: 12px 0 0 0;">자세한 내용은 FIREBASE_FIX_GUIDE.md 파일을 참고하세요.</p>
+                    </div>
+                  `;
+                }
+                
                 container.innerHTML = `
                   <div class="card glass" style="padding: 40px; text-align: center;">
                     <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 12px;">오류가 발생했습니다</h3>
-                    <p style="color: #fca5a5; font-size: 16px;">${error.message}</p>
+                    <p style="color: #fca5a5; font-size: 16px; margin-bottom: 8px;">${errorMessage}</p>
+                    ${errorDetails}
                     <button class="btn-primary" onclick="location.reload()" style="margin-top: 20px; padding: 12px 24px;">새로고침</button>
                   </div>
                 `;
