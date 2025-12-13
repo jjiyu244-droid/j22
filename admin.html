@@ -228,9 +228,7 @@
     <script src="./script.js"></script>
     <script>
       // 어드민 페이지 전용 초기화
-      // ADMIN_EMAIL은 script.js에서 이미 선언됨
-      let currentUser = null;
-      let isAdmin = false;
+      // ADMIN_EMAIL, currentUser, isAdmin은 script.js에서 이미 전역으로 선언됨
       let auth, db;
 
       const $ = (selector) => document.querySelector(selector);
@@ -263,8 +261,8 @@
         const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
         
         // 즉시 현재 인증 상태 확인
-        const currentUser = auth.currentUser;
-        console.log('현재 인증 상태:', currentUser ? currentUser.email : '로그인 안 됨');
+        const currentAuthUser = auth.currentUser;
+        console.log('현재 인증 상태:', currentAuthUser ? currentAuthUser.email : '로그인 안 됨');
         
         onAuthStateChanged(auth, async (user) => {
           console.log('인증 상태 변경:', user ? user.email : '로그아웃');
@@ -278,12 +276,15 @@
           }
           
           if (user) {
-            currentUser = { email: user.email, uid: user.uid };
+            // script.js의 전역 변수는 직접 수정할 수 없으므로 로컬 변수 사용
+            const userEmail = user.email;
+            const userUid = user.uid;
+            
             // ADMIN_EMAIL은 script.js에서 전역으로 선언됨
             const adminEmail = typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'jjiyu244@gmail.com';
-            isAdmin = user.email === adminEmail;
+            const userIsAdmin = userEmail === adminEmail;
             
-            if (!isAdmin) {
+            if (!userIsAdmin) {
               if (container) {
                 container.innerHTML = `
                   <div class="card glass" style="padding: 40px; text-align: center;">
