@@ -1992,11 +1992,23 @@ function setupRewardEditModal() {
 // 어드민 페이지 렌더링
 async function renderAdminPage() {
   const container = $('#adminPageContent');
-  if (!container) return;
+  if (!container) {
+    console.error('어드민 페이지 컨테이너를 찾을 수 없습니다.');
+    return;
+  }
   
+  console.log('어드민 페이지 렌더링 시작...');
   container.innerHTML = '<p style="color:#9ca3af; text-align:center; padding: 20px;">데이터를 불러오는 중...</p>';
-  const users = await loadAllUserStakes();
-  await renderAdminDashboardContent(users, container);
+  
+  try {
+    const users = await loadAllUserStakes();
+    console.log('로드된 사용자 수:', users.length);
+    await renderAdminDashboardContent(users, container);
+    console.log('어드민 페이지 렌더링 완료');
+  } catch (error) {
+    console.error('어드민 페이지 렌더링 중 오류:', error);
+    container.innerHTML = `<p style="color:#ef4444; text-align:center; padding: 20px;">오류가 발생했습니다: ${error.message}</p>`;
+  }
 }
 
 // 어드민 대시보드 콘텐츠 렌더링 (모달과 페이지 공통 사용)
@@ -2294,7 +2306,7 @@ function setupAdminModal() {
 }
 
 // Page navigation
-function navigateToPage(page) {
+async function navigateToPage(page) {
   // Hide all page sections
   document.querySelectorAll('.page-section').forEach((section) => {
     section.style.display = 'none';
@@ -2344,33 +2356,12 @@ function navigateToPage(page) {
       section.style.display = 'none';
     });
     
-    // Show the specific page
-    const pageElement = document.getElementById(`${page}-page`);
-    if (pageElement) {
-      pageElement.style.display = 'block';
-    }
-    
-    // 리워드 페이지인 경우 리워드 렌더링
-    if (page === 'rewards') {
-      renderRewards();
-    }
-    
-    // 문의 페이지인 경우 이메일 자동 입력
-    if (page === 'inquiry') {
-      if (currentUser && currentUser.email) {
-        const emailInput = $('#inquiryEmail');
-        if (emailInput) {
-          emailInput.value = currentUser.email;
-        }
-      }
-    }
-    
-    // 어드민 페이지인 경우
+    // 어드민 페이지인 경우 (권한 확인 먼저)
     if (page === 'admin') {
       // 로그인하지 않은 경우
       if (!currentUser) {
         alert('어드민 페이지 접근을 위해 로그인이 필요합니다.');
-        navigateToPage('dashboard');
+        await navigateToPage('dashboard');
         if (window.history && window.history.replaceState) {
           window.history.replaceState({}, '', '/');
         }
@@ -2391,15 +2382,49 @@ function navigateToPage(page) {
       if (!isAdmin || !currentUser || currentUser.email !== ADMIN_EMAIL) {
         const userEmail = currentUser ? currentUser.email : '로그인 필요';
         alert(`어드민 권한이 필요합니다.\n\n현재 로그인 계정: ${userEmail}\n필요한 계정: ${ADMIN_EMAIL}\n\n관리자 계정으로 로그인해주세요.`);
-        navigateToPage('dashboard');
+        await navigateToPage('dashboard');
         // URL도 되돌리기
         if (window.history && window.history.replaceState) {
           window.history.replaceState({}, '', '/');
         }
         return;
       }
-      // 어드민 대시보드 렌더링
-      renderAdminPage();
+      
+      // 어드민 페이지 표시
+      const pageElement = document.getElementById(`${page}-page`);
+      if (!pageElement) {
+        console.error('어드민 페이지 요소를 찾을 수 없습니다.');
+        alert('어드민 페이지를 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+        return;
+      }
+      
+      console.log('어드민 페이지 표시 중...');
+      pageElement.style.display = 'block';
+      
+      // 어드민 대시보드 렌더링 (비동기 처리)
+      await renderAdminPage();
+      return;
+    }
+    
+    // Show the specific page
+    const pageElement = document.getElementById(`${page}-page`);
+    if (pageElement) {
+      pageElement.style.display = 'block';
+    }
+    
+    // 리워드 페이지인 경우 리워드 렌더링
+    if (page === 'rewards') {
+      renderRewards();
+    }
+    
+    // 문의 페이지인 경우 이메일 자동 입력
+    if (page === 'inquiry') {
+      if (currentUser && currentUser.email) {
+        const emailInput = $('#inquiryEmail');
+        if (emailInput) {
+          emailInput.value = currentUser.email;
+        }
+      }
     }
     
     // 회원가입 페이지 표시 (활성화됨)
