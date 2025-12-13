@@ -2307,7 +2307,7 @@ function setupAdminModal() {
 
 // Page navigation
 async function navigateToPage(page) {
-  // Hide all page sections
+  // Hide all page sections (will be shown later if needed)
   document.querySelectorAll('.page-section').forEach((section) => {
     section.style.display = 'none';
   });
@@ -2356,6 +2356,13 @@ async function navigateToPage(page) {
       section.style.display = 'none';
     });
     
+    // 모든 page-section 숨기기 (어드민 페이지 제외)
+    document.querySelectorAll('.page-section').forEach((section) => {
+      if (section.id !== `${page}-page`) {
+        section.style.display = 'none';
+      }
+    });
+    
     // 어드민 페이지인 경우 (권한 확인 먼저)
     if (page === 'admin') {
       // 로그인하지 않은 경우
@@ -2401,8 +2408,17 @@ async function navigateToPage(page) {
       console.log('어드민 페이지 표시 중...');
       pageElement.style.display = 'block';
       
+      // 스크롤을 맨 위로 이동
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
       // 어드민 대시보드 렌더링 (비동기 처리)
       await renderAdminPage();
+      
+      // 렌더링 후 다시 스크롤 확인
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+      
       return;
     }
     
