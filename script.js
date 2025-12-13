@@ -2441,13 +2441,25 @@ async function navigateToPage(page) {
       pageElement.style.display = 'block';
       pageElement.style.visibility = 'visible';
       pageElement.style.opacity = '1';
+      pageElement.style.flex = '1';
+      pageElement.style.height = 'auto';
       
       console.log('페이지 요소 display 설정 후:', window.getComputedStyle(pageElement).display);
       console.log('페이지 요소 offsetHeight:', pageElement.offsetHeight);
       console.log('페이지 요소 offsetWidth:', pageElement.offsetWidth);
+      console.log('페이지 요소 computed height:', window.getComputedStyle(pageElement).height);
+      console.log('페이지 요소 computed min-height:', window.getComputedStyle(pageElement).minHeight);
       
       // 강제로 레이아웃 재계산
       void pageElement.offsetHeight;
+      
+      // 부모 요소 확인
+      const parent = pageElement.parentElement;
+      if (parent) {
+        console.log('부모 요소:', parent);
+        console.log('부모 요소 display:', window.getComputedStyle(parent).display);
+        console.log('부모 요소 height:', window.getComputedStyle(parent).height);
+      }
       
       // 스크롤을 맨 위로 이동
       window.scrollTo({ top: 0, behavior: 'smooth' });

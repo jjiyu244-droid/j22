@@ -591,7 +591,7 @@
         </section>
 
         <!-- 어드민 페이지 -->
-        <section class="page-section" id="admin-page" style="display:none; padding: 20px; min-height: 100vh; width: 100%; box-sizing: border-box;">
+        <section class="page-section" id="admin-page" style="display:none; padding: 20px; min-height: calc(100vh - 80px); width: 100%; box-sizing: border-box; position: relative; flex: 1;">
           <div class="card glass" style="margin-bottom:32px;">
             <div class="card-header">
               <h2 class="card-title">🔐 어드민 대시보드</h2>
@@ -600,7 +600,7 @@
               </p>
             </div>
           </div>
-          <div id="adminPageContent" style="width: 100%; max-height: calc(100vh - 200px); overflow-y: auto; min-height: 500px; box-sizing: border-box;">
+          <div id="adminPageContent" style="width: 100%; max-height: calc(100vh - 300px); overflow-y: auto; min-height: 500px; box-sizing: border-box; position: relative;">
             <!-- Filled by JS -->
           </div>
         </section>
