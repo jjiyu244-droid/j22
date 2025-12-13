@@ -244,10 +244,18 @@
 
         auth = window.__firebase.auth;
         db = window.__firebase.db;
+        
+        // script.js에서 사용할 수 있도록 전역으로 설정
+        if (typeof window !== 'undefined') {
+          window.db = db;
+          window.auth = auth;
+        }
 
         const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
         
         onAuthStateChanged(auth, async (user) => {
+          const container = $('#adminPageContent');
+          
           if (user) {
             currentUser = { email: user.email, uid: user.uid };
             // ADMIN_EMAIL은 script.js에서 전역으로 선언됨
@@ -255,46 +263,83 @@
             isAdmin = user.email === adminEmail;
             
             if (!isAdmin) {
-              alert('어드민 권한이 필요합니다. 홈으로 이동합니다.');
-              window.location.href = '/';
+              if (container) {
+                container.innerHTML = `
+                  <div class="card glass" style="padding: 40px; text-align: center;">
+                    <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 16px;">어드민 권한이 필요합니다</h3>
+                    <p style="color: #9ca3af; font-size: 16px; margin-bottom: 24px;">현재 계정: ${user.email}</p>
+                    <a href="/" class="btn-primary" style="display: inline-block; text-decoration: none;">홈으로 이동</a>
+                  </div>
+                `;
+              }
               return;
             }
             
             // 어드민 대시보드 렌더링
-            await renderAdminPage();
-            // 리워드 수정 모달 설정 (script.js의 함수 사용)
-            if (typeof setupRewardEditModal === 'function') {
-              setupRewardEditModal();
+            if (container) {
+              container.innerHTML = '<div class="card glass" style="padding: 40px; text-align: center;"><p style="color: #9ca3af; font-size: 16px;">데이터를 불러오는 중...</p></div>';
+            }
+            
+            try {
+              // script.js의 db를 사용하기 위해 전역 변수 설정
+              if (typeof window !== 'undefined' && !window.db) {
+                window.db = db;
+              }
+              
+              const users = await loadAllUserStakes();
+              if (container) {
+                await renderAdminDashboardContent(users, container);
+              }
+              // 리워드 수정 모달 설정 (script.js의 함수 사용)
+              if (typeof setupRewardEditModal === 'function') {
+                setupRewardEditModal();
+              }
+            } catch (error) {
+              console.error('어드민 페이지 렌더링 중 오류:', error);
+              if (container) {
+                container.innerHTML = `
+                  <div class="card glass" style="padding: 40px; text-align: center;">
+                    <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 12px;">오류가 발생했습니다</h3>
+                    <p style="color: #fca5a5; font-size: 16px;">${error.message}</p>
+                    <button class="btn-primary" onclick="location.reload()" style="margin-top: 20px; padding: 12px 24px;">새로고침</button>
+                  </div>
+                `;
+              }
             }
           } else {
-            // 로그인 모달 표시
-            const loginModal = $('#loginModal');
-            if (loginModal) {
-              loginModal.classList.add('show');
+            // 로그인하지 않은 상태
+            if (container) {
+              container.innerHTML = `
+                <div class="card glass" style="padding: 40px; text-align: center;">
+                  <h3 style="color: #ffffff; font-size: 20px; margin-bottom: 16px;">로그인이 필요합니다</h3>
+                  <p style="color: #9ca3af; font-size: 16px; margin-bottom: 24px;">어드민 대시보드에 접근하려면 관리자 계정으로 로그인해주세요.</p>
+                  <button class="btn-primary" id="showLoginBtn" style="padding: 12px 24px; font-size: 16px;">로그인하기</button>
+                </div>
+              `;
+              
+              // 로그인 버튼 이벤트
+              const showLoginBtn = $('#showLoginBtn');
+              if (showLoginBtn) {
+                showLoginBtn.addEventListener('click', () => {
+                  const loginModal = $('#loginModal');
+                  if (loginModal) {
+                    loginModal.classList.add('show');
+                  }
+                });
+              }
             }
-            // 로그인 UI 설정
-            if (typeof setupLogin === 'function') {
-              await setupLogin();
-            }
+            
+            // 로그인 모달 자동 표시
+            setTimeout(() => {
+              const loginModal = $('#loginModal');
+              if (loginModal) {
+                loginModal.classList.add('show');
+              }
+            }, 300);
           }
         });
       }
 
-      // 어드민 페이지 렌더링 (script.js의 함수 사용)
-      async function renderAdminPage() {
-        const container = $('#adminPageContent');
-        if (!container) return;
-        
-        container.innerHTML = '<div class="card glass" style="padding: 40px; text-align: center;"><p style="color: #9ca3af; font-size: 16px;">데이터를 불러오는 중...</p></div>';
-        
-        try {
-          const users = await loadAllUserStakes();
-          await renderAdminDashboardContent(users, container);
-        } catch (error) {
-          console.error('어드민 페이지 렌더링 중 오류:', error);
-          container.innerHTML = `<div class="card glass" style="padding: 40px; text-align: center;"><p style="color: #ef4444; font-size: 16px;">오류가 발생했습니다: ${error.message}</p></div>`;
-        }
-      }
 
       // 페이지 로드 시 초기화
       document.addEventListener('DOMContentLoaded', async () => {

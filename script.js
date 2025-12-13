@@ -1407,10 +1407,16 @@ function updateAdminUI() {
 
 async function loadAllUserStakes() {
   try {
+    // db가 없으면 window.db 또는 전역 db 사용
+    const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db);
+    if (!firestoreDb) {
+      throw new Error('Firestore 데이터베이스가 초기화되지 않았습니다.');
+    }
+    
     const { collection, getDocs } = await import(
       'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
     );
-    const querySnapshot = await getDocs(collection(db, 'userStakes'));
+    const querySnapshot = await getDocs(collection(firestoreDb, 'userStakes'));
     const allUsers = [];
     querySnapshot.forEach((doc) => {
       allUsers.push({
@@ -1428,10 +1434,16 @@ async function loadAllUserStakes() {
 // 사용자별 리워드 데이터 가져오기
 async function loadUserRewardsForAdmin(userId) {
   try {
+    // db가 없으면 window.db 또는 전역 db 사용
+    const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db);
+    if (!firestoreDb) {
+      throw new Error('Firestore 데이터베이스가 초기화되지 않았습니다.');
+    }
+    
     const { collection, query, where, getDocs, orderBy } = await import(
       'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
     );
-    const rewardsRef = collection(db, 'rewards');
+    const rewardsRef = collection(firestoreDb, 'rewards');
     
     // orderBy 없이 먼저 시도 (인덱스 불필요)
     let q = query(rewardsRef, where('userId', '==', userId));
