@@ -145,6 +145,7 @@ async function fetchAndApplyPrices() {
   } catch (e) {
     // 네트워크 에러 시에는 그냥 더미 데이터 그대로 사용
     console.error('가격 데이터를 불러오지 못했습니다:', e);
+    // 사용자에게는 조용히 실패 (기존 더미 데이터 사용)
   }
 }
 
@@ -185,17 +186,7 @@ async function initFirebase() {
       updateAdminUI();
       
       // URL 기반 라우팅 처리 (Firebase 초기화 후)
-      // 단, 어드민 페이지인 경우 일반 계정이면 자동으로 대시보드로 이동 (알림 없이)
-      const currentPath = window.location.pathname;
-      if ((currentPath === '/admin' || currentPath === '/admin/') && !isAdmin) {
-        // 일반 계정이 어드민 URL에 있으면 조용히 대시보드로 이동
-        if (window.history && window.history.replaceState) {
-          window.history.replaceState({}, '', '/');
-        }
-        navigateToPage('dashboard');
-      } else {
-        handleURLRouting();
-      }
+      handleURLRouting();
       
       // 리워드 페이지가 현재 표시 중이면 리워드 렌더링
       const rewardsPage = document.getElementById('rewards-page');
@@ -210,13 +201,7 @@ async function initFirebase() {
       updateLoginUI();
       updateAdminUI();
       
-      // 로그아웃 시 URL 기반 라우팅 처리 (어드민 페이지에서 로그아웃한 경우 대시보드로)
-      const path = window.location.pathname;
-      if (path === '/admin' || path === '/admin/') {
-        if (window.history && window.history.replaceState) {
-          window.history.replaceState({}, '', '/');
-        }
-      }
+      // URL 기반 라우팅 처리
       handleURLRouting();
       
       // 리워드 페이지가 현재 표시 중이면 빈 상태 표시
@@ -506,7 +491,6 @@ function applyUserStakesToPortfolio() {
 }
 
 async function setupLogin() {
-  console.log('setupLogin 함수 시작');
   const loginBtn = $('#loginBtn');
   const modal = $('#loginModal');
   const closeBtn = $('#loginCloseBtn');
@@ -517,13 +501,6 @@ async function setupLogin() {
   const toLogin = $('#toLogin');
   let mode = 'login'; // 'login' | 'signup'
 
-  console.log('DOM 요소 확인:', {
-    loginBtn: !!loginBtn,
-    modal: !!modal,
-    confirmBtn: !!confirmBtn,
-    statusText: !!statusText
-  });
-
   // Firebase Auth 모듈 동적 import
   let signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword;
   try {
@@ -531,7 +508,6 @@ async function setupLogin() {
     signInWithEmailAndPassword = authModule.signInWithEmailAndPassword;
     signOut = authModule.signOut;
     createUserWithEmailAndPassword = authModule.createUserWithEmailAndPassword;
-    console.log('Firebase Auth 모듈 로드 완료');
   } catch (err) {
     console.error('Firebase Auth 모듈 로드 실패:', err);
     return;
@@ -653,7 +629,6 @@ async function setupLogin() {
     if (isGeneralId) {
       // 일반 아이디 형식인 경우 @temp.com 도메인 추가
       email = `${email}@temp.com`;
-      console.log('일반 아이디를 이메일 형식으로 변환:', email);
     } else {
       // 이메일 형식인지 확인
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -689,7 +664,6 @@ async function setupLogin() {
       
       // Firebase 로그인 API 호출
       const result = await signInWithEmailAndPassword(currentAuth, email, password);
-      console.log('로그인 성공:', result.user?.email);
       
       // 성공 메시지 및 모달 닫기
       if (statusText) {
@@ -752,16 +726,12 @@ async function setupLogin() {
   // 버튼 클릭 이벤트
   if (confirmBtn) {
     confirmBtn.addEventListener('click', handleLogin);
-    console.log('로그인 버튼 이벤트 리스너 등록됨');
-  } else {
-    console.error('로그인 확인 버튼을 찾을 수 없습니다. id="loginConfirmBtn"');
   }
   
   // 폼 제출 이벤트 (엔터키 등)
   const loginForm = modal?.querySelector('form') || modal?.querySelector('.modal-body');
   if (loginForm) {
     loginForm.addEventListener('submit', handleLogin);
-    console.log('로그인 폼 제출 이벤트 리스너 등록됨');
   }
   
   // 이메일/비밀번호 필드에서 엔터키 처리
@@ -1865,6 +1835,20 @@ window.handleEditReward = function(rewardId, userId, amount, apy, date, symbol) 
   modal.classList.add('show');
 };
 
+// 어드민 대시보드 새로고침 헬퍼 함수
+async function refreshAdminDashboard(userId) {
+  const adminPageContent = $('#adminPageContent');
+  if (adminPageContent) {
+    const users = await loadAllUserStakes();
+    await renderAdminDashboardContent(users, adminPageContent);
+  }
+  
+  // 만약 해당 유저가 현재 로그인되어 있다면 리워드 내역도 새로고침
+  if (currentUser && currentUser.uid === userId && typeof renderRewards === 'function') {
+    await renderRewards();
+  }
+}
+
 // 리워드 수정 모달 설정
 function setupRewardEditModal() {
   const modal = $('#rewardEditModal');
@@ -1944,22 +1928,9 @@ function setupRewardEditModal() {
           statusText.style.color = '#10b981';
         }
         
-        // 모달 닫기
-        setTimeout(async () => {
-          modal.classList.remove('show');
-          
-          // 어드민 대시보드 새로고침
-          const users = await loadAllUserStakes();
-          const adminPageContent = $('#adminPageContent');
-          if (adminPageContent) {
-            await renderAdminDashboardContent(users, adminPageContent);
-          }
-          
-          // 만약 해당 유저가 현재 로그인되어 있다면 리워드 내역도 새로고침
-          if (currentUser && currentUser.uid === userId) {
-            await renderRewards();
-          }
-        }, 1000);
+        // 모달 닫기 및 대시보드 새로고침
+        modal.classList.remove('show');
+        setTimeout(() => refreshAdminDashboard(userId), 500);
       } else {
         if (statusText) {
           statusText.textContent = '리워드 수정 중 오류가 발생했습니다.';
@@ -1996,22 +1967,9 @@ function setupRewardEditModal() {
           statusText.style.color = '#10b981';
         }
         
-        // 모달 닫기
-        setTimeout(async () => {
-          modal.classList.remove('show');
-          
-          // 어드민 대시보드 새로고침
-          const users = await loadAllUserStakes();
-          const adminPageContent = $('#adminPageContent');
-          if (adminPageContent) {
-            await renderAdminDashboardContent(users, adminPageContent);
-          }
-          
-          // 만약 해당 유저가 현재 로그인되어 있다면 리워드 내역도 새로고침
-          if (currentUser && currentUser.uid === userId) {
-            await renderRewards();
-          }
-        }, 1000);
+        // 모달 닫기 및 대시보드 새로고침
+        modal.classList.remove('show');
+        setTimeout(() => refreshAdminDashboard(userId), 500);
       } else {
         if (statusText) {
           statusText.textContent = '리워드 삭제 중 오류가 발생했습니다.';
@@ -2030,19 +1988,11 @@ async function renderAdminPage() {
     return;
   }
   
-  console.log('어드민 페이지 렌더링 시작...');
-  console.log('컨테이너 요소:', container);
-  console.log('컨테이너 부모 요소:', container.parentElement);
-  
   container.innerHTML = '<p style="color:#ffffff; text-align:center; padding: 40px; font-size: 18px; background: rgba(255,255,255,0.05); border-radius: 8px;">데이터를 불러오는 중...</p>';
   
   try {
     const users = await loadAllUserStakes();
-    console.log('로드된 사용자 수:', users.length);
-    console.log('사용자 데이터:', users);
     await renderAdminDashboardContent(users, container);
-    console.log('어드민 페이지 렌더링 완료');
-    console.log('컨테이너 최종 내용 길이:', container.innerHTML.length);
   } catch (error) {
     console.error('어드민 페이지 렌더링 중 오류:', error);
     container.innerHTML = `
@@ -2059,7 +2009,6 @@ async function renderAdminDashboardContent(users, container) {
   if (!container) return;
 
   if (users.length === 0) {
-    console.log('사용자 데이터가 없어서 빈 상태 메시지를 표시합니다.');
     container.innerHTML = `
       <div style="padding: 80px 40px; text-align: center; background: rgba(255,255,255,0.05); border-radius: 16px; border: 2px solid rgba(255,255,255,0.1); margin: 40px 0;">
         <div style="font-size: 64px; margin-bottom: 24px; line-height: 1;">📊</div>
@@ -2077,7 +2026,6 @@ async function renderAdminDashboardContent(users, container) {
         </div>
       </div>
     `;
-    console.log('빈 상태 메시지가 표시되었습니다.');
     return;
   }
 
@@ -2417,98 +2365,12 @@ async function navigateToPage(page) {
       section.style.display = 'none';
     });
     
-    // 모든 page-section 숨기기 (어드민 페이지 제외)
+    // 모든 page-section 숨기기
     document.querySelectorAll('.page-section').forEach((section) => {
       if (section.id !== `${page}-page`) {
         section.style.display = 'none';
       }
     });
-    
-    // 어드민 페이지인 경우 (권한 확인 먼저)
-    if (page === 'admin') {
-      // 로그인하지 않은 경우
-      if (!currentUser) {
-        alert('어드민 페이지 접근을 위해 로그인이 필요합니다.');
-        await navigateToPage('dashboard');
-        if (window.history && window.history.replaceState) {
-          window.history.replaceState({}, '', '/');
-        }
-        // 로그인 모달 열기
-        setTimeout(() => {
-          const loginModal = $('#loginModal');
-          const loginBtn = $('#loginBtn');
-          if (loginModal) {
-            loginModal.classList.add('show');
-          } else if (loginBtn) {
-            loginBtn.click();
-          }
-        }, 100);
-        return;
-      }
-      
-      // 어드민 권한 확인 (이중 체크)
-      if (!isAdmin || !currentUser || currentUser.email !== ADMIN_EMAIL) {
-        const userEmail = currentUser ? currentUser.email : '로그인 필요';
-        alert(`어드민 권한이 필요합니다.\n\n현재 로그인 계정: ${userEmail}\n필요한 계정: ${ADMIN_EMAIL}\n\n관리자 계정으로 로그인해주세요.`);
-        await navigateToPage('dashboard');
-        // URL도 되돌리기
-        if (window.history && window.history.replaceState) {
-          window.history.replaceState({}, '', '/');
-        }
-        return;
-      }
-      
-      // 어드민 페이지 표시
-      const pageElement = document.getElementById(`${page}-page`);
-      if (!pageElement) {
-        console.error('어드민 페이지 요소를 찾을 수 없습니다.');
-        alert('어드민 페이지를 찾을 수 없습니다. 페이지를 새로고침해주세요.');
-        return;
-      }
-      
-      console.log('어드민 페이지 표시 중...');
-      console.log('페이지 요소:', pageElement);
-      console.log('페이지 요소 현재 display:', window.getComputedStyle(pageElement).display);
-      
-      // 페이지 요소를 확실히 표시
-      pageElement.style.display = 'block';
-      pageElement.style.visibility = 'visible';
-      pageElement.style.opacity = '1';
-      pageElement.style.flex = '1';
-      pageElement.style.height = 'auto';
-      
-      console.log('페이지 요소 display 설정 후:', window.getComputedStyle(pageElement).display);
-      console.log('페이지 요소 offsetHeight:', pageElement.offsetHeight);
-      console.log('페이지 요소 offsetWidth:', pageElement.offsetWidth);
-      console.log('페이지 요소 computed height:', window.getComputedStyle(pageElement).height);
-      console.log('페이지 요소 computed min-height:', window.getComputedStyle(pageElement).minHeight);
-      
-      // 강제로 레이아웃 재계산
-      void pageElement.offsetHeight;
-      
-      // 부모 요소 확인
-      const parent = pageElement.parentElement;
-      if (parent) {
-        console.log('부모 요소:', parent);
-        console.log('부모 요소 display:', window.getComputedStyle(parent).display);
-        console.log('부모 요소 height:', window.getComputedStyle(parent).height);
-      }
-      
-      // 스크롤을 맨 위로 이동
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      // 어드민 대시보드 렌더링 (비동기 처리)
-      await renderAdminPage();
-      
-      // 렌더링 후 다시 스크롤 확인 및 요소 확인
-      setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        console.log('렌더링 후 페이지 요소 offsetHeight:', pageElement.offsetHeight);
-        console.log('렌더링 후 컨테이너 내용:', $('#adminPageContent')?.innerHTML?.substring(0, 100));
-      }, 100);
-      
-      return;
-    }
     
     // Show the specific page
     const pageElement = document.getElementById(`${page}-page`);
@@ -2585,7 +2447,6 @@ function setupNavigation() {
     // 기존 이벤트 리스너 제거 후 새로 추가 (중복 방지)
     logoLink.removeEventListener('click', handleLogoClick);
     logoLink.addEventListener('click', handleLogoClick);
-    console.log('로고 클릭 이벤트 리스너 등록됨');
   }
   
   // 로고 내부 모든 요소에도 클릭 이벤트 추가
@@ -2643,53 +2504,10 @@ function setupNavigation() {
 function handleURLRouting() {
   const path = window.location.pathname;
   
-  // 어드민 페이지 접근 처리
+  // 어드민 페이지 접근 처리 - admin.html로 리다이렉트
   if (path === '/admin' || path === '/admin/') {
-    // Firebase 인증이 완료되지 않았으면 잠시 대기 (최대 3초)
-    if (!window.__firebaseInitialized && auth === undefined) {
-      console.log('Firebase 초기화 대기 중...');
-      setTimeout(() => handleURLRouting(), 100);
-      return;
-    }
-    
-    // 로그인하지 않은 경우
-    if (!currentUser) {
-      // URL 먼저 변경
-      if (window.history && window.history.replaceState) {
-        window.history.replaceState({}, '', '/');
-      }
-      navigateToPage('dashboard');
-      // 로그인 모달 열기
-      setTimeout(() => {
-        const loginModal = $('#loginModal');
-        const loginBtn = $('#loginBtn');
-        if (loginModal) {
-          loginModal.classList.add('show');
-        } else if (loginBtn) {
-          loginBtn.click();
-        }
-        alert('어드민 페이지 접근을 위해 관리자 계정으로 로그인해주세요.');
-      }, 300);
-      return;
-    }
-    
-      // 어드민 권한 이중 확인
-      if (isAdmin && currentUser && currentUser.email === ADMIN_EMAIL) {
-        navigateToPage('admin');
-      } else {
-        // URL 먼저 변경
-        if (window.history && window.history.replaceState) {
-          window.history.replaceState({}, '', '/');
-        }
-        navigateToPage('dashboard');
-        // 일반 계정이 직접 /admin URL로 접근한 경우에만 알림 표시
-        // (로그인 후 자동 리다이렉트가 아닌 경우)
-        const userEmail = currentUser ? currentUser.email : '로그인 필요';
-        // 알림은 사용자가 직접 어드민 버튼을 클릭하거나 /admin으로 접근한 경우에만 표시
-        // onAuthStateChanged에서 자동으로 처리된 경우는 알림 없이 처리
-        console.log('일반 계정이 어드민 페이지에 접근 시도 - 대시보드로 이동');
-      }
-      return;
+    window.location.href = '/admin.html';
+    return;
   }
   
   // 회원가입 페이지 (활성화됨)
@@ -2740,14 +2558,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupNavigation();
   
   // 초기 URL 라우팅 처리 (Firebase 초기화 전에 먼저 체크)
-  // 어드민 접근 시도는 로그인 후에 처리되도록 함
+  // 어드민 접근 시도는 admin.html로 리다이렉트
   const currentPath = window.location.pathname;
   if (currentPath === '/admin' || currentPath === '/admin/') {
-    // 어드민 접근 시도 시 대시보드로 먼저 이동 (Firebase 초기화 후 권한 체크)
-    if (window.history && window.history.replaceState) {
-      window.history.replaceState({}, '', '/');
-    }
-    navigateToPage('dashboard');
+    window.location.href = '/admin.html';
+    return;
   }
   
   // Firebase 초기화 (Auth 상태 감지 시작) - 먼저 초기화
