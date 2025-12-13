@@ -2437,11 +2437,17 @@ async function navigateToPage(page) {
       console.log('페이지 요소:', pageElement);
       console.log('페이지 요소 현재 display:', window.getComputedStyle(pageElement).display);
       
+      // 페이지 요소를 확실히 표시
       pageElement.style.display = 'block';
+      pageElement.style.visibility = 'visible';
+      pageElement.style.opacity = '1';
       
       console.log('페이지 요소 display 설정 후:', window.getComputedStyle(pageElement).display);
       console.log('페이지 요소 offsetHeight:', pageElement.offsetHeight);
       console.log('페이지 요소 offsetWidth:', pageElement.offsetWidth);
+      
+      // 강제로 레이아웃 재계산
+      void pageElement.offsetHeight;
       
       // 스크롤을 맨 위로 이동
       window.scrollTo({ top: 0, behavior: 'smooth' });
