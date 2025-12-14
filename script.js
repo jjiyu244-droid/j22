@@ -2092,7 +2092,25 @@ async function renderAdminDashboardContent(users, container) {
   // 통계 섹션
   let html = `
     <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">📊 전체 통계</h3>
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">🔍 사용자 검색</h3>
+      <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+        <input
+          type="text"
+          id="adminUserSearch"
+          class="input"
+          placeholder="이메일 주소로 사용자 검색..."
+          style="flex: 1; padding: 12px; font-size: 14px;"
+        />
+        <button
+          class="btn-primary"
+          id="adminSearchBtn"
+          style="padding: 12px 24px; font-size: 14px;"
+        >
+          검색
+        </button>
+      </div>
+      <div id="adminSearchResult" style="display: none; margin-top: 16px;"></div>
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; margin-top: 24px;">📊 전체 통계</h3>
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;">
         <div>
           <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 회원수</div>
@@ -2301,6 +2319,258 @@ async function renderAdminDashboardContent(users, container) {
   }
 
   container.innerHTML = html;
+  
+  // 검색 기능 이벤트 리스너 추가
+  setupAdminUserSearch(users, prices);
+}
+
+// 어드민 사용자 검색 및 스테이킹 수정 기능
+async function setupAdminUserSearch(users, prices) {
+  const searchInput = $('#adminUserSearch');
+  const searchBtn = $('#adminSearchBtn');
+  const searchResult = $('#adminSearchResult');
+  
+  if (!searchInput || !searchBtn || !searchResult) return;
+  
+  const performSearch = async () => {
+    const searchEmail = searchInput.value.trim().toLowerCase();
+    if (!searchEmail) {
+      searchResult.style.display = 'none';
+      return;
+    }
+    
+    // users 배열에서 이메일로 검색
+    const foundUser = users.find(u => u.email && u.email.toLowerCase() === searchEmail);
+    
+    if (!foundUser) {
+      // Firestore에서 직접 검색 시도
+      try {
+        const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db);
+        if (!firestoreDb) {
+          searchResult.innerHTML = `
+            <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
+              사용자를 찾을 수 없습니다: ${searchEmail}
+            </div>
+          `;
+          searchResult.style.display = 'block';
+          return;
+        }
+        
+        const { collection, query, where, getDocs } = await import(
+          'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+        );
+        const q = query(collection(firestoreDb, 'userStakes'), where('email', '==', searchEmail));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          searchResult.innerHTML = `
+            <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
+              사용자를 찾을 수 없습니다: ${searchEmail}
+            </div>
+          `;
+          searchResult.style.display = 'block';
+          return;
+        }
+        
+        const doc = querySnapshot.docs[0];
+        const userData = {
+          uid: doc.id,
+          ...doc.data(),
+        };
+        
+        displayUserEditForm(userData, prices);
+      } catch (error) {
+        console.error('사용자 검색 오류:', error);
+        searchResult.innerHTML = `
+          <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
+            검색 중 오류가 발생했습니다: ${error.message}
+          </div>
+        `;
+        searchResult.style.display = 'block';
+      }
+    } else {
+      displayUserEditForm(foundUser, prices);
+    }
+  };
+  
+  searchBtn.addEventListener('click', performSearch);
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      performSearch();
+    }
+  });
+  
+  function displayUserEditForm(user, prices) {
+    const btcAmount = user.BTC || 0;
+    const ethAmount = user.ETH || 0;
+    const xrpAmount = user.XRP || 0;
+    
+    searchResult.innerHTML = `
+      <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
+        <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #fff;">
+          사용자: ${user.email || '이메일 없음'} (UID: ${user.uid.substring(0, 16)}...)
+        </h4>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px;">
+          <div>
+            <label style="display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; font-weight: 600;">BTC 수량</label>
+            <input
+              type="number"
+              id="editUserBTC"
+              class="input"
+              value="${btcAmount}"
+              step="0.0001"
+              min="0"
+              style="width: 100%; padding: 10px;"
+            />
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; font-weight: 600;">ETH 수량</label>
+            <input
+              type="number"
+              id="editUserETH"
+              class="input"
+              value="${ethAmount}"
+              step="0.0001"
+              min="0"
+              style="width: 100%; padding: 10px;"
+            />
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; font-weight: 600;">XRP 수량</label>
+            <input
+              type="number"
+              id="editUserXRP"
+              class="input"
+              value="${xrpAmount}"
+              step="0.01"
+              min="0"
+              style="width: 100%; padding: 10px;"
+            />
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px;">
+          <button
+            class="btn-primary"
+            id="saveUserStakesBtn"
+            data-user-uid="${user.uid}"
+            style="flex: 1; padding: 12px; font-size: 14px;"
+          >
+            저장
+          </button>
+          <button
+            class="btn-outline"
+            id="cancelUserEditBtn"
+            style="flex: 1; padding: 12px; font-size: 14px;"
+          >
+            취소
+          </button>
+        </div>
+        <p id="userEditStatusText" style="text-align: center; margin-top: 12px; color: #9ca3af; font-size: 14px;"></p>
+      </div>
+    `;
+    searchResult.style.display = 'block';
+    
+    // 저장 버튼 이벤트
+    const saveBtn = $('#saveUserStakesBtn');
+    const cancelBtn = $('#cancelUserEditBtn');
+    const statusText = $('#userEditStatusText');
+    
+    if (saveBtn) {
+      saveBtn.addEventListener('click', async () => {
+        const newBTC = parseFloat($('#editUserBTC').value) || 0;
+        const newETH = parseFloat($('#editUserETH').value) || 0;
+        const newXRP = parseFloat($('#editUserXRP').value) || 0;
+        const userId = saveBtn.getAttribute('data-user-uid');
+        
+        if (statusText) {
+          statusText.textContent = '저장 중...';
+          statusText.style.color = '#9ca3af';
+        }
+        
+        const success = await updateUserStakes(userId, {
+          BTC: newBTC,
+          ETH: newETH,
+          XRP: newXRP,
+        }, user.email);
+        
+        if (success) {
+          if (statusText) {
+            statusText.textContent = '저장되었습니다!';
+            statusText.style.color = '#10b981';
+          }
+          // 페이지 새로고침하여 변경사항 반영
+          setTimeout(() => {
+            location.reload();
+          }, 1000);
+        } else {
+          if (statusText) {
+            statusText.textContent = '저장 실패. 다시 시도해주세요.';
+            statusText.style.color = '#ef4444';
+          }
+        }
+      });
+    }
+    
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        searchResult.style.display = 'none';
+        searchInput.value = '';
+      });
+    }
+  }
+}
+
+// 어드민이 사용자 스테이킹 수치 업데이트
+async function updateUserStakes(userId, stakes, userEmail) {
+  try {
+    const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db);
+    if (!firestoreDb) {
+      throw new Error('Firestore 데이터베이스가 초기화되지 않았습니다.');
+    }
+    
+    const { doc, setDoc, serverTimestamp } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    
+    const docRef = doc(firestoreDb, 'userStakes', userId);
+    
+    // 기존 데이터 가져오기 (stakeStartDates 유지)
+    const { getDoc } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const docSnap = await getDoc(docRef);
+    const existingData = docSnap.exists() ? docSnap.data() : {};
+    
+    // 스테이킹 시작일 업데이트 로직
+    const stakeStartDates = existingData.stakeStartDates || {};
+    ['BTC', 'ETH', 'XRP'].forEach((symbol) => {
+      const currentAmount = stakes[symbol] || 0;
+      const previousAmount = existingData[symbol] || 0;
+      
+      // 처음 스테이킹을 시작하는 경우
+      if (currentAmount > 0 && previousAmount === 0 && !stakeStartDates[symbol]) {
+        stakeStartDates[symbol] = serverTimestamp();
+      }
+      // 스테이킹이 0이 되면 시작일 제거
+      if (currentAmount === 0 && previousAmount > 0) {
+        delete stakeStartDates[symbol];
+      }
+    });
+    
+    // 저장할 데이터
+    const dataToSave = {
+      ...stakes,
+      email: userEmail || existingData.email,
+      stakeStartDates,
+      lastUpdated: serverTimestamp(),
+    };
+    
+    await setDoc(docRef, dataToSave, { merge: true });
+    return true;
+  } catch (error) {
+    console.error('사용자 스테이킹 수치 업데이트 실패:', error);
+    return false;
+  }
 }
 
 async function renderAdminDashboard(users) {
