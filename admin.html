@@ -228,10 +228,8 @@
     <script src="./script.js"></script>
     <script>
       // 어드민 페이지 전용 초기화
-      // ADMIN_EMAIL, currentUser, isAdmin, auth, db는 script.js에서 이미 전역으로 선언됨
+      // ADMIN_EMAIL, currentUser, isAdmin, auth, db, $는 script.js에서 이미 전역으로 선언됨
       // admin.html에서는 window.__firebase를 통해 접근
-
-      const $ = (selector) => document.querySelector(selector);
 
       async function initAdmin() {
         const container = $('#adminPageContent');
