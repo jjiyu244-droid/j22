@@ -651,6 +651,23 @@ async function setupLogin() {
       return;
     }
 
+    // 어드민 페이지인지 확인
+    const isAdminPage = window.location.pathname.includes('admin.html');
+    
+    // 어드민 페이지에서는 관리자 계정만 로그인 가능
+    if (isAdminPage) {
+      const adminEmail = typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'jjiyu244@gmail.com';
+      if (email.toLowerCase() !== adminEmail.toLowerCase()) {
+        if (statusText) {
+          statusText.innerHTML = `
+            <span style="color: #ef4444;">❌ 관리자 계정만 로그인할 수 있습니다.</span><br/>
+            <span style="color: #9ca3af; font-size: 12px;">허용된 계정: ${adminEmail}</span>
+          `;
+        }
+        return;
+      }
+    }
+    
     // 로그인 시도
     try {
       if (statusText) {
@@ -664,6 +681,23 @@ async function setupLogin() {
       
       // Firebase 로그인 API 호출
       const result = await signInWithEmailAndPassword(currentAuth, email, password);
+      
+      // 어드민 페이지에서 로그인 성공 후 관리자 계정인지 다시 확인
+      if (isAdminPage) {
+        const adminEmail = typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'jjiyu244@gmail.com';
+        if (result.user.email.toLowerCase() !== adminEmail.toLowerCase()) {
+          // 관리자가 아니면 로그아웃
+          const { signOut } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
+          await signOut(currentAuth);
+          if (statusText) {
+            statusText.innerHTML = `
+              <span style="color: #ef4444;">❌ 관리자 계정만 로그인할 수 있습니다.</span><br/>
+              <span style="color: #9ca3af; font-size: 12px;">허용된 계정: ${adminEmail}</span>
+            `;
+          }
+          return;
+        }
+      }
       
       // 성공 메시지 및 모달 닫기
       if (statusText) {

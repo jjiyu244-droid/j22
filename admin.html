@@ -134,10 +134,11 @@
           </div>
           <button class="btn-primary w-full" id="loginConfirmBtn">로그인</button>
           <p id="loginStatusText" style="text-align:center;margin-top:16px;color:var(--text-muted);font-size:14px;"></p>
-          <div style="text-align:center;margin-top:16px;">
-            <button class="btn-outline" id="toSignup" style="font-size:14px;padding:8px 16px;">회원가입</button>
+          <div style="text-align:center;margin-top:16px;display:none;">
+            <button class="btn-outline" id="toSignup" style="font-size:14px;padding:8px 16px;display:none;">회원가입</button>
             <button class="btn-outline" id="toLogin" style="font-size:14px;padding:8px 16px;display:none;">로그인으로 돌아가기</button>
           </div>
+          <p style="text-align:center;margin-top:16px;color:#9ca3af;font-size:12px;">관리자 계정만 로그인할 수 있습니다.</p>
         </div>
       </div>
     </div>
@@ -281,18 +282,42 @@
             
             // ADMIN_EMAIL은 script.js에서 전역으로 선언됨
             const adminEmail = typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'jjiyu244@gmail.com';
-            const userIsAdmin = userEmail === adminEmail;
+            const userIsAdmin = userEmail && userEmail.toLowerCase() === adminEmail.toLowerCase();
             
             if (!userIsAdmin) {
+              // 관리자가 아니면 자동 로그아웃
+              const { signOut } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
+              await signOut(firebaseAuth);
+              
               if (container) {
                 container.innerHTML = `
                   <div class="card glass" style="padding: 40px; text-align: center;">
-                    <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 16px;">어드민 권한이 필요합니다</h3>
-                    <p style="color: #9ca3af; font-size: 16px; margin-bottom: 24px;">현재 계정: ${user.email}</p>
-                    <a href="/" class="btn-primary" style="display: inline-block; text-decoration: none;">홈으로 이동</a>
+                    <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 16px;">❌ 어드민 권한이 필요합니다</h3>
+                    <p style="color: #9ca3af; font-size: 16px; margin-bottom: 12px;">현재 계정: ${user.email}</p>
+                    <p style="color: #9ca3af; font-size: 14px; margin-bottom: 24px;">허용된 계정: ${adminEmail}</p>
+                    <button class="btn-primary" id="showLoginBtnAgain" style="padding: 12px 24px; font-size: 16px; margin-top: 16px;">다시 로그인하기</button>
                   </div>
                 `;
+                
+                // 다시 로그인 버튼 이벤트
+                const showLoginBtnAgain = $('#showLoginBtnAgain');
+                if (showLoginBtnAgain) {
+                  showLoginBtnAgain.addEventListener('click', () => {
+                    const loginModal = $('#loginModal');
+                    if (loginModal) {
+                      loginModal.classList.add('show');
+                    }
+                  });
+                }
               }
+              
+              // 로그인 모달 자동 표시
+              setTimeout(() => {
+                const loginModal = $('#loginModal');
+                if (loginModal) {
+                  loginModal.classList.add('show');
+                }
+              }, 500);
               return;
             }
             
