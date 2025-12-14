@@ -228,8 +228,8 @@
     <script src="./script.js"></script>
     <script>
       // 어드민 페이지 전용 초기화
-      // ADMIN_EMAIL, currentUser, isAdmin은 script.js에서 이미 전역으로 선언됨
-      let auth, db;
+      // ADMIN_EMAIL, currentUser, isAdmin, auth, db는 script.js에서 이미 전역으로 선언됨
+      // admin.html에서는 window.__firebase를 통해 접근
 
       const $ = (selector) => document.querySelector(selector);
 
@@ -249,22 +249,23 @@
           return;
         }
 
-        auth = window.__firebase.auth;
-        db = window.__firebase.db;
+        // script.js의 전역 변수는 직접 수정할 수 없으므로 로컬 변수 사용
+        const firebaseAuth = window.__firebase.auth;
+        const firebaseDb = window.__firebase.db;
         
         // script.js에서 사용할 수 있도록 전역으로 설정
         if (typeof window !== 'undefined') {
-          window.db = db;
-          window.auth = auth;
+          window.db = firebaseDb;
+          window.auth = firebaseAuth;
         }
 
         const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
         
         // 즉시 현재 인증 상태 확인
-        const currentAuthUser = auth.currentUser;
+        const currentAuthUser = firebaseAuth.currentUser;
         console.log('현재 인증 상태:', currentAuthUser ? currentAuthUser.email : '로그인 안 됨');
         
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(firebaseAuth, async (user) => {
           console.log('인증 상태 변경:', user ? user.email : '로그아웃');
           
           if (container) {
@@ -307,7 +308,7 @@
               
               // script.js의 db를 사용하기 위해 전역 변수 설정
               if (typeof window !== 'undefined' && !window.db) {
-                window.db = db;
+                window.db = firebaseDb;
               }
               
               // loadAllUserStakes 함수가 존재하는지 확인
