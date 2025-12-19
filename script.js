@@ -2825,6 +2825,15 @@ async function navigateToPage(page) {
       section.style.display = 'none';
     });
     
+    // main-content가 숨겨져 있으면 표시
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      const mainDisplay = window.getComputedStyle(mainContent).display;
+      if (mainDisplay === 'none') {
+        mainContent.style.setProperty('display', 'flex', 'important');
+      }
+    }
+    
     // 모든 page-section 숨기기
     document.querySelectorAll('.page-section').forEach((section) => {
       section.style.display = 'none';
@@ -2833,13 +2842,36 @@ async function navigateToPage(page) {
     // Show the specific page
     const pageElement = document.getElementById(`${page}-page`);
     if (pageElement) {
-      pageElement.style.display = 'block';
+      // 강제로 표시 (다른 스타일이 덮어쓰는 것을 방지)
+      pageElement.style.setProperty('display', 'block', 'important');
+      pageElement.style.setProperty('visibility', 'visible', 'important');
+      pageElement.style.setProperty('opacity', '1', 'important');
+      pageElement.style.setProperty('height', 'auto', 'important');
+      pageElement.style.setProperty('min-height', '400px', 'important');
+      
+      // 부모 요소도 확인
+      let parent = pageElement.parentElement;
+      while (parent && parent !== document.body) {
+        const parentDisplay = window.getComputedStyle(parent).display;
+        if (parentDisplay === 'none') {
+          console.warn('부모 요소가 숨겨져 있습니다:', parent);
+          parent.style.setProperty('display', 'block', 'important');
+        }
+        parent = parent.parentElement;
+      }
+      
       // 회원가입 페이지인 경우 추가 확인
       if (page === 'signup') {
         console.log('회원가입 페이지 표시:', pageElement);
+        console.log('회원가입 페이지 computed display:', window.getComputedStyle(pageElement).display);
+        console.log('회원가입 페이지 offsetHeight:', pageElement.offsetHeight);
+        console.log('회원가입 페이지 offsetTop:', pageElement.offsetTop);
+        
         // 스크롤을 페이지 상단으로 이동
         setTimeout(() => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
+          // 페이지 요소로 스크롤
+          pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
       }
     } else {
@@ -2959,25 +2991,46 @@ function setupNavigation() {
   // 회원가입 버튼 클릭 이벤트 (navbar-actions에 위치)
   const signupNavBtn = $('#signupNavBtn');
   if (signupNavBtn) {
-    signupNavBtn.addEventListener('click', (e) => {
+    // 기존 이벤트 리스너 제거 (중복 방지)
+    signupNavBtn.replaceWith(signupNavBtn.cloneNode(true));
+    const newSignupBtn = $('#signupNavBtn');
+    
+    newSignupBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       console.log('회원가입 버튼 클릭됨');
+      
+      // 먼저 navigateToPage 호출
       navigateToPage('signup');
-      // 추가 확인: 페이지가 표시되었는지 확인
+      
+      // 추가 확인: 페이지가 표시되었는지 확인 및 강제 표시
       setTimeout(() => {
         const signupPage = document.getElementById('signup-page');
         if (signupPage) {
           console.log('회원가입 페이지 요소 찾음:', signupPage);
-          console.log('회원가입 페이지 display:', window.getComputedStyle(signupPage).display);
-          if (window.getComputedStyle(signupPage).display === 'none') {
+          const computedStyle = window.getComputedStyle(signupPage);
+          console.log('회원가입 페이지 computed display:', computedStyle.display);
+          console.log('회원가입 페이지 computed visibility:', computedStyle.visibility);
+          console.log('회원가입 페이지 computed opacity:', computedStyle.opacity);
+          console.log('회원가입 페이지 offsetHeight:', signupPage.offsetHeight);
+          console.log('회원가입 페이지 offsetWidth:', signupPage.offsetWidth);
+          
+          // 강제로 표시 (다른 스타일이 덮어쓰는 것을 방지)
+          if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden' || computedStyle.opacity === '0') {
             console.warn('회원가입 페이지가 여전히 숨겨져 있습니다. 강제로 표시합니다.');
-            signupPage.style.display = 'block';
+            signupPage.style.setProperty('display', 'block', 'important');
+            signupPage.style.setProperty('visibility', 'visible', 'important');
+            signupPage.style.setProperty('opacity', '1', 'important');
+            signupPage.style.setProperty('height', 'auto', 'important');
+            signupPage.style.setProperty('min-height', '400px', 'important');
           }
+          
+          // 페이지로 스크롤
+          signupPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
         } else {
           console.error('회원가입 페이지 요소를 찾을 수 없습니다!');
         }
-      }, 200);
+      }, 300);
     });
   }
 }
