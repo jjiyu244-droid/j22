@@ -301,9 +301,23 @@ async function loadUserRewardsFromFirestore(uid) {
         id: doc.id,
         ...doc.data(),
       }));
+      // 인덱스가 정상 작동하면 여기서 반환
+      return;
     } catch (indexError) {
-      // 인덱스가 없으면 orderBy 없이 조회 후 클라이언트에서 정렬
-      console.warn('Firestore 인덱스 없음, 클라이언트 정렬 사용');
+      // 인덱스가 없거나 아직 생성 중이면 orderBy 없이 조회 후 클라이언트에서 정렬
+      // 인덱스 오류인지 확인 (인덱스 관련 오류는 무시하고 fallback 사용)
+      const isIndexError = indexError.message && (
+        indexError.message.includes('index') || 
+        indexError.message.includes('The query requires an index')
+      );
+      
+      if (!isIndexError) {
+        // 인덱스 오류가 아니면 그대로 throw
+        throw indexError;
+      }
+      
+      // 인덱스 오류는 조용히 fallback 사용 (콘솔에 출력하지 않음)
+      // 인덱스가 완전히 생성되면 자동으로 서버 정렬 사용됨
       const querySnapshot = await getDocs(q);
       userRewards = querySnapshot.docs.map(doc => ({
         id: doc.id,
@@ -318,7 +332,15 @@ async function loadUserRewardsFromFirestore(uid) {
       });
     }
   } catch (e) {
-    console.error('Firestore 리워드 데이터 로드 실패:', e.message || e);
+    // 인덱스 오류가 아닌 경우에만 에러 로그 출력
+    const isIndexError = e.message && (
+      e.message.includes('index') || 
+      e.message.includes('The query requires an index')
+    );
+    
+    if (!isIndexError) {
+      console.error('Firestore 리워드 데이터 로드 실패:', e.message || e);
+    }
     userRewards = []; // 에러 시 빈 배열로 초기화
   }
 }
@@ -1444,23 +1466,126 @@ async function loadAllUserStakes() {
     // db가 없으면 window.db 또는 전역 db 사용
     const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db);
     if (!firestoreDb) {
+      console.error('Firestore 데이터베이스가 초기화되지 않았습니다.');
       throw new Error('Firestore 데이터베이스가 초기화되지 않았습니다.');
     }
+    
+    console.log('loadAllUserStakes: Firestore DB 확인 완료');
     
     const { collection, getDocs } = await import(
       'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
     );
-    const querySnapshot = await getDocs(collection(firestoreDb, 'userStakes'));
-    const allUsers = [];
-    querySnapshot.forEach((doc) => {
-      allUsers.push({
+    
+    // 먼저 userStakes 컬렉션 시도 (기존 구조)
+    console.log('loadAllUserStakes: userStakes 컬렉션 읽기 시도...');
+    const userStakesSnapshot = await getDocs(collection(firestoreDb, 'userStakes'));
+    const userStakesData = [];
+    userStakesSnapshot.forEach((doc) => {
+      userStakesData.push({
         uid: doc.id,
         ...doc.data(),
       });
     });
-    return allUsers;
+    
+    console.log(`loadAllUserStakes: userStakes 컬렉션에서 ${userStakesData.length}개 문서 발견`);
+    
+    // userStakes에 데이터가 있으면 반환
+    if (userStakesData.length > 0) {
+      console.log('loadAllUserStakes: userStakes 데이터 반환');
+      return userStakesData;
+    }
+    
+    // userStakes가 비어있으면 stake 컬렉션에서 데이터 읽기 (새 구조)
+    console.log('loadAllUserStakes: userStakes가 비어있음, stake 컬렉션 읽기 시도...');
+    const stakeSnapshot = await getDocs(collection(firestoreDb, 'stake'));
+    const stakeData = [];
+    stakeSnapshot.forEach((doc) => {
+      const data = doc.data();
+      stakeData.push({
+        documentId: doc.id,
+        user_uid: data.user_uid || '',
+        amount: data.amount || 0,
+        stake_date: data.stake_date,
+        stake_period: data.stake_period || 90,
+        is_admin: data.is_admin || false,
+        symbol: data.symbol || null, // symbol 필드도 포함
+      });
+    });
+    
+    console.log(`loadAllUserStakes: stake 컬렉션에서 ${stakeData.length}개 문서 발견`);
+    
+    if (stakeData.length === 0) {
+      console.log('loadAllUserStakes: stake 컬렉션도 비어있음');
+      return [];
+    }
+    
+    // stake 컬렉션 데이터를 사용자별로 그룹화
+    const usersMap = new Map();
+    let skippedCount = 0;
+    
+    stakeData.forEach((stake) => {
+      const uid = stake.user_uid;
+      if (!uid || uid.trim() === '') {
+        skippedCount++;
+        console.warn('loadAllUserStakes: user_uid가 없는 stake 문서 건너뜀:', stake.documentId);
+        return;
+      }
+      
+      if (!usersMap.has(uid)) {
+        usersMap.set(uid, {
+          uid: uid,
+          BTC: 0,
+          ETH: 0,
+          XRP: 0,
+          stakes: [],
+          stakeStartDates: {},
+        });
+      }
+      
+      const user = usersMap.get(uid);
+      // symbol 필드가 있으면 해당 코인으로 분배, 없으면 "UNKNOWN"으로 처리
+      const symbol = stake.symbol || 'UNKNOWN';
+      if (symbol === 'BTC' || symbol === 'ETH' || symbol === 'XRP') {
+        user[symbol] = (user[symbol] || 0) + (stake.amount || 0);
+        // 스테이킹 시작일 저장 (가장 이른 날짜)
+        if (stake.stake_date) {
+          const stakeDate = stake.stake_date.toDate ? stake.stake_date.toDate() : new Date(stake.stake_date);
+          if (!user.stakeStartDates[symbol] || stakeDate < (user.stakeStartDates[symbol].toDate ? user.stakeStartDates[symbol].toDate() : new Date(user.stakeStartDates[symbol]))) {
+            user.stakeStartDates[symbol] = stake.stake_date;
+          }
+        }
+      } else if (symbol === 'UNKNOWN') {
+        // symbol이 없으면 첫 번째 거래의 amount를 BTC로 간주 (임시 처리)
+        // 실제로는 stake 컬렉션에 symbol 필드를 추가하는 것이 좋습니다
+        user.BTC = (user.BTC || 0) + (stake.amount || 0);
+        // 스테이킹 시작일 저장
+        if (stake.stake_date) {
+          const stakeDate = stake.stake_date.toDate ? stake.stake_date.toDate() : new Date(stake.stake_date);
+          if (!user.stakeStartDates.BTC || stakeDate < (user.stakeStartDates.BTC.toDate ? user.stakeStartDates.BTC.toDate() : new Date(user.stakeStartDates.BTC))) {
+            user.stakeStartDates.BTC = stake.stake_date;
+          }
+        }
+      }
+      user.stakes.push(stake);
+    });
+    
+    const result = Array.from(usersMap.values());
+    console.log(`loadAllUserStakes: ${result.length}명의 사용자로 그룹화 완료 (건너뛴 문서: ${skippedCount}개)`);
+    console.log('loadAllUserStakes: 결과 샘플:', result.length > 0 ? result[0] : '없음');
+    
+    return result;
   } catch (e) {
-    console.error('전체 유저 스테이킹 데이터를 불러오지 못했습니다:', e);
+    console.error('loadAllUserStakes: 전체 유저 스테이킹 데이터를 불러오지 못했습니다:', e);
+    console.error('loadAllUserStakes: 에러 상세:', e.message);
+    console.error('loadAllUserStakes: 에러 코드:', e.code);
+    console.error('loadAllUserStakes: 에러 스택:', e.stack);
+    
+    // 권한 오류인 경우 명확히 표시
+    if (e.code === 'permission-denied' || e.message?.includes('permission') || e.message?.includes('Permission')) {
+      console.error('⚠️ Firestore 보안 규칙 문제입니다! stake 컬렉션에 대한 읽기 권한이 없습니다.');
+      console.error('해결 방법: Firebase 콘솔 > Firestore > 규칙 탭에서 stake 컬렉션 규칙을 추가하세요.');
+    }
+    
     return [];
   }
 }
@@ -1495,8 +1620,20 @@ async function loadUserRewardsForAdmin(userId) {
       });
       return rewards;
     } catch (indexError) {
-      // 인덱스가 없으면 orderBy 없이 조회 후 클라이언트에서 정렬
-      console.warn('Firestore 인덱스 없음, 클라이언트 정렬 사용 (어드민)');
+      // 인덱스가 없거나 아직 생성 중이면 orderBy 없이 조회 후 클라이언트에서 정렬
+      // 인덱스 오류인지 확인
+      const isIndexError = indexError.message && (
+        indexError.message.includes('index') || 
+        indexError.message.includes('The query requires an index')
+      );
+      
+      if (!isIndexError) {
+        // 인덱스 오류가 아니면 그대로 throw
+        throw indexError;
+      }
+      
+      // 인덱스 오류는 조용히 fallback 사용 (콘솔에 출력하지 않음)
+      // 인덱스가 완전히 생성되면 자동으로 서버 정렬 사용됨
       const querySnapshot = await getDocs(q);
       const rewards = [];
       querySnapshot.forEach((doc) => {
@@ -2690,15 +2827,23 @@ async function navigateToPage(page) {
     
     // 모든 page-section 숨기기
     document.querySelectorAll('.page-section').forEach((section) => {
-      if (section.id !== `${page}-page`) {
-        section.style.display = 'none';
-      }
+      section.style.display = 'none';
     });
     
     // Show the specific page
     const pageElement = document.getElementById(`${page}-page`);
     if (pageElement) {
       pageElement.style.display = 'block';
+      // 회원가입 페이지인 경우 추가 확인
+      if (page === 'signup') {
+        console.log('회원가입 페이지 표시:', pageElement);
+        // 스크롤을 페이지 상단으로 이동
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+      }
+    } else {
+      console.error(`페이지 요소를 찾을 수 없습니다: ${page}-page`);
     }
     
     // 리워드 페이지인 경우 리워드 렌더링
@@ -2715,8 +2860,6 @@ async function navigateToPage(page) {
         }
       }
     }
-    
-    // 회원가입 페이지 표시 (활성화됨)
   }
 
   // Scroll to top for dashboard and other pages (not pools)
@@ -2818,7 +2961,23 @@ function setupNavigation() {
   if (signupNavBtn) {
     signupNavBtn.addEventListener('click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
+      console.log('회원가입 버튼 클릭됨');
       navigateToPage('signup');
+      // 추가 확인: 페이지가 표시되었는지 확인
+      setTimeout(() => {
+        const signupPage = document.getElementById('signup-page');
+        if (signupPage) {
+          console.log('회원가입 페이지 요소 찾음:', signupPage);
+          console.log('회원가입 페이지 display:', window.getComputedStyle(signupPage).display);
+          if (window.getComputedStyle(signupPage).display === 'none') {
+            console.warn('회원가입 페이지가 여전히 숨겨져 있습니다. 강제로 표시합니다.');
+            signupPage.style.display = 'block';
+          }
+        } else {
+          console.error('회원가입 페이지 요소를 찾을 수 없습니다!');
+        }
+      }, 200);
     });
   }
 }

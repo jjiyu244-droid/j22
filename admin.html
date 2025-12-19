@@ -17,10 +17,21 @@
             return JSON.stringify(arg);
           }).join(' ');
           
-          return message.includes('Analytics') && 
-                 (message.includes('IndexedDB') || 
-                  message.includes('indexeddb-unavailable') ||
-                  message.includes('analytics/indexeddb-unavailable'));
+          // Analytics IndexedDB 경고 필터링
+          if (message.includes('Analytics') && 
+              (message.includes('IndexedDB') || 
+               message.includes('indexeddb-unavailable') ||
+               message.includes('analytics/indexeddb-unavailable'))) {
+            return true;
+          }
+          
+          // Firestore 인덱스 오류 필터링 (fallback으로 처리되므로 에러로 표시하지 않음)
+          if (message.includes('Firestore 리워드 데이터 로드 실패') &&
+              message.includes('The query requires an index')) {
+            return true;
+          }
+          
+          return false;
         };
         
         console.error = function(...args) {
@@ -340,8 +351,22 @@
               }
               
               console.log('loadAllUserStakes 함수 호출 중...');
-              const users = await loadAllUserStakes();
-              console.log('로드된 사용자 수:', users.length);
+              let users;
+              try {
+                users = await loadAllUserStakes();
+                console.log('로드된 사용자 수:', users.length);
+                if (users.length === 0) {
+                  console.warn('⚠️ 사용자 데이터가 0명입니다. 다음을 확인하세요:');
+                  console.warn('1. Firestore 콘솔에서 stake 컬렉션에 데이터가 있는지 확인');
+                  console.warn('2. Firestore 보안 규칙에서 stake 컬렉션 읽기 권한 확인');
+                  console.warn('3. 브라우저 콘솔에서 loadAllUserStakes 관련 에러 확인');
+                }
+              } catch (error) {
+                console.error('❌ loadAllUserStakes 호출 중 에러 발생:', error);
+                console.error('에러 메시지:', error.message);
+                console.error('에러 코드:', error.code);
+                users = [];
+              }
               
               if (container) {
                 // renderAdminDashboardContent 함수가 존재하는지 확인
