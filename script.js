@@ -2796,6 +2796,20 @@ async function navigateToPage(page) {
       section.style.display = '';
     });
     
+    // Footer 섹션도 다시 표시
+    document.querySelectorAll('.footer-left, .footer-right').forEach((footer) => {
+      footer.style.display = '';
+      // 부모 섹션도 찾아서 표시
+      let parent = footer.parentElement;
+      while (parent && parent !== document.body) {
+        if (parent.tagName === 'SECTION' && !parent.classList.contains('page-section')) {
+          parent.style.display = '';
+          break;
+        }
+        parent = parent.parentElement;
+      }
+    });
+    
     // If pools page, scroll to pools section
     if (page === 'pools') {
       setTimeout(() => {
@@ -2823,6 +2837,20 @@ async function navigateToPage(page) {
     // Hide main content sections for other pages
     document.querySelectorAll('.content-section:not(.page-section), .pre-login-welcome').forEach((section) => {
       section.style.display = 'none';
+    });
+    
+    // Footer 섹션도 숨기기 (회원가입 페이지와 겹치는 문제 해결)
+    document.querySelectorAll('.footer-left, .footer-right').forEach((footer) => {
+      footer.style.display = 'none';
+      // 부모 섹션도 찾아서 숨기기
+      let parent = footer.parentElement;
+      while (parent && parent !== document.body) {
+        if (parent.tagName === 'SECTION' && !parent.classList.contains('page-section')) {
+          parent.style.display = 'none';
+          break;
+        }
+        parent = parent.parentElement;
+      }
     });
     
     // main-content가 숨겨져 있으면 표시
@@ -2866,6 +2894,14 @@ async function navigateToPage(page) {
         console.log('회원가입 페이지 computed display:', window.getComputedStyle(pageElement).display);
         console.log('회원가입 페이지 offsetHeight:', pageElement.offsetHeight);
         console.log('회원가입 페이지 offsetTop:', pageElement.offsetTop);
+        
+        // 회원가입 페이지에 적절한 간격 추가 (다른 요소와 겹치지 않도록)
+        pageElement.style.setProperty('padding', '40px 20px', 'important');
+        pageElement.style.setProperty('margin', '40px auto', 'important');
+        pageElement.style.setProperty('position', 'relative', 'important');
+        pageElement.style.setProperty('z-index', '10', 'important');
+        pageElement.style.setProperty('width', '100%', 'important');
+        pageElement.style.setProperty('max-width', '100%', 'important');
         
         // 스크롤을 페이지 상단으로 이동
         setTimeout(() => {
