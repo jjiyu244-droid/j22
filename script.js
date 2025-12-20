@@ -3057,13 +3057,39 @@ async function navigateToPage(page) {
       pageElement.style.setProperty('height', 'auto', 'important');
       pageElement.style.setProperty('min-height', '400px', 'important');
       
-      // 부모 요소도 확인
+      // 부모 요소도 확인하고 복원 (회원가입 페이지가 보이도록)
       let parent = pageElement.parentElement;
       while (parent && parent !== document.body) {
-        const parentDisplay = window.getComputedStyle(parent).display;
-        if (parentDisplay === 'none') {
+        const parentStyle = window.getComputedStyle(parent);
+        const parentDisplay = parentStyle.display;
+        const parentVisibility = parentStyle.visibility;
+        const parentOpacity = parentStyle.opacity;
+        const parentHeight = parentStyle.height;
+        
+        // 부모 요소가 숨겨져 있는지 확인 (display, visibility, opacity, height 모두 체크)
+        if (parentDisplay === 'none' || parentVisibility === 'hidden' || parentOpacity === '0' || parentHeight === '0px') {
           console.warn('부모 요소가 숨겨져 있습니다:', parent);
-          parent.style.setProperty('display', 'block', 'important');
+          
+          // 부모 요소 복원
+          if (parent.tagName === 'SECTION' && parent.classList.contains('content-section')) {
+            // content-section이지만 page-section이 아닌 경우는 숨겨야 함
+            // 하지만 회원가입 페이지의 직접 부모는 예외
+            if (!parent.contains(pageElement) || parent === pageElement.parentElement) {
+              // 회원가입 페이지의 직접 부모인 경우만 복원
+              parent.style.setProperty('display', 'block', 'important');
+              parent.style.setProperty('visibility', 'visible', 'important');
+              parent.style.setProperty('opacity', '1', 'important');
+              parent.style.removeProperty('height');
+              parent.style.removeProperty('overflow');
+            }
+          } else {
+            // 다른 부모 요소는 모두 복원
+            parent.style.setProperty('display', 'block', 'important');
+            parent.style.setProperty('visibility', 'visible', 'important');
+            parent.style.setProperty('opacity', '1', 'important');
+            parent.style.removeProperty('height');
+            parent.style.removeProperty('overflow');
+          }
         }
         parent = parent.parentElement;
       }
@@ -3074,6 +3100,37 @@ async function navigateToPage(page) {
         console.log('회원가입 페이지 computed display:', window.getComputedStyle(pageElement).display);
         console.log('회원가입 페이지 offsetHeight:', pageElement.offsetHeight);
         console.log('회원가입 페이지 offsetTop:', pageElement.offsetTop);
+        
+        // 회원가입 페이지의 모든 부모 요소를 명시적으로 복원
+        let currentParent = pageElement.parentElement;
+        while (currentParent && currentParent !== document.body) {
+          // main-content는 항상 표시되어야 함
+          if (currentParent.classList.contains('main-content')) {
+            currentParent.style.setProperty('display', 'flex', 'important');
+            currentParent.style.setProperty('visibility', 'visible', 'important');
+            currentParent.style.setProperty('opacity', '1', 'important');
+            currentParent.style.removeProperty('height');
+            currentParent.style.removeProperty('overflow');
+          }
+          // app 컨테이너도 표시
+          else if (currentParent.classList.contains('app')) {
+            currentParent.style.setProperty('display', 'flex', 'important');
+            currentParent.style.setProperty('visibility', 'visible', 'important');
+            currentParent.style.setProperty('opacity', '1', 'important');
+          }
+          // 다른 부모 요소들도 복원
+          else {
+            const computedStyle = window.getComputedStyle(currentParent);
+            if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden' || computedStyle.opacity === '0') {
+              currentParent.style.setProperty('display', 'block', 'important');
+              currentParent.style.setProperty('visibility', 'visible', 'important');
+              currentParent.style.setProperty('opacity', '1', 'important');
+              currentParent.style.removeProperty('height');
+              currentParent.style.removeProperty('overflow');
+            }
+          }
+          currentParent = currentParent.parentElement;
+        }
         
         // 회원가입 페이지에 적절한 간격 추가 (다른 요소와 겹치지 않도록)
         pageElement.style.setProperty('padding', '40px 20px', 'important');
