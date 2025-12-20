@@ -3235,6 +3235,23 @@ function handleLogoClick(e) {
 window.handleLogoClick = handleLogoClick;
 
 function setupNavigation() {
+  console.log('setupNavigation 호출됨');
+  
+  // navigateToPage 함수 확인
+  if (typeof navigateToPage !== 'function') {
+    console.error('navigateToPage 함수가 정의되지 않았습니다!');
+  } else {
+    console.log('navigateToPage 함수 확인됨');
+  }
+  
+  // 회원가입 버튼 존재 확인
+  const signupBtnCheck = $('#signupNavBtn');
+  console.log('회원가입 버튼 존재:', !!signupBtnCheck);
+  if (signupBtnCheck) {
+    console.log('회원가입 버튼 ID:', signupBtnCheck.id);
+    console.log('회원가입 버튼 텍스트:', signupBtnCheck.textContent);
+  }
+  
   // 로고 클릭 이벤트: 대시보드로 이동
   // 직접 요소 찾기
   const logoLink = document.getElementById('logoLink') || document.querySelector('.logo-horizontal');
@@ -3285,50 +3302,104 @@ function setupNavigation() {
     });
   });
   
-  // 회원가입 버튼 클릭 이벤트 (navbar-actions에 위치)
-  const signupNavBtn = $('#signupNavBtn');
-  if (signupNavBtn) {
-    // 기존 이벤트 리스너 제거 (중복 방지)
-    signupNavBtn.replaceWith(signupNavBtn.cloneNode(true));
-    const newSignupBtn = $('#signupNavBtn');
+  // 회원가입 버튼 클릭 이벤트 - document 레벨 이벤트 위임 (가장 확실한 방법)
+  // 모든 클릭 이벤트를 document에서 감지하여 회원가입 버튼 클릭 처리
+  const handleSignupClick = (e) => {
+    // 회원가입 버튼 클릭 확인 (여러 방법으로 확인)
+    const target = e.target;
+    const signupBtn = target.id === 'signupNavBtn' 
+      ? target 
+      : target.closest('#signupNavBtn');
     
-    newSignupBtn.addEventListener('click', (e) => {
+    if (signupBtn) {
       e.preventDefault();
       e.stopPropagation();
-      console.log('회원가입 버튼 클릭됨');
+      e.stopImmediatePropagation();
+      console.log('회원가입 버튼 클릭됨 (document 이벤트 위임)', signupBtn);
       
-      // 먼저 navigateToPage 호출
-      navigateToPage('signup');
+      // navigateToPage 함수 확인 및 호출
+      const navFunc = typeof navigateToPage === 'function' 
+        ? navigateToPage 
+        : typeof window.navigateToPage === 'function' 
+          ? window.navigateToPage 
+          : null;
       
-      // 추가 확인: 페이지가 표시되었는지 확인 및 강제 표시
-      setTimeout(() => {
-        const signupPage = document.getElementById('signup-page');
-        if (signupPage) {
-          console.log('회원가입 페이지 요소 찾음:', signupPage);
-          const computedStyle = window.getComputedStyle(signupPage);
-          console.log('회원가입 페이지 computed display:', computedStyle.display);
-          console.log('회원가입 페이지 computed visibility:', computedStyle.visibility);
-          console.log('회원가입 페이지 computed opacity:', computedStyle.opacity);
-          console.log('회원가입 페이지 offsetHeight:', signupPage.offsetHeight);
-          console.log('회원가입 페이지 offsetWidth:', signupPage.offsetWidth);
-          
-          // 강제로 표시 (다른 스타일이 덮어쓰는 것을 방지)
-          if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden' || computedStyle.opacity === '0') {
-            console.warn('회원가입 페이지가 여전히 숨겨져 있습니다. 강제로 표시합니다.');
-            signupPage.style.setProperty('display', 'block', 'important');
-            signupPage.style.setProperty('visibility', 'visible', 'important');
-            signupPage.style.setProperty('opacity', '1', 'important');
-            signupPage.style.setProperty('height', 'auto', 'important');
-            signupPage.style.setProperty('min-height', '400px', 'important');
+      if (navFunc) {
+        console.log('navigateToPage 호출:', navFunc);
+        navFunc('signup');
+        
+        // 추가 확인: 페이지가 표시되었는지 확인 및 강제 표시
+        setTimeout(() => {
+          const signupPage = document.getElementById('signup-page');
+          if (signupPage) {
+            console.log('회원가입 페이지 요소 찾음:', signupPage);
+            const computedStyle = window.getComputedStyle(signupPage);
+            console.log('회원가입 페이지 computed display:', computedStyle.display);
+            console.log('회원가입 페이지 computed visibility:', computedStyle.visibility);
+            console.log('회원가입 페이지 computed opacity:', computedStyle.opacity);
+            console.log('회원가입 페이지 offsetHeight:', signupPage.offsetHeight);
+            console.log('회원가입 페이지 offsetWidth:', signupPage.offsetWidth);
+            
+            // 강제로 표시 (다른 스타일이 덮어쓰는 것을 방지)
+            if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden' || computedStyle.opacity === '0') {
+              console.warn('회원가입 페이지가 여전히 숨겨져 있습니다. 강제로 표시합니다.');
+              signupPage.style.setProperty('display', 'block', 'important');
+              signupPage.style.setProperty('visibility', 'visible', 'important');
+              signupPage.style.setProperty('opacity', '1', 'important');
+              signupPage.style.setProperty('height', 'auto', 'important');
+              signupPage.style.setProperty('min-height', '400px', 'important');
+            }
+            
+            // 페이지로 스크롤
+            signupPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else {
+            console.error('회원가입 페이지 요소를 찾을 수 없습니다!');
           }
-          
-          // 페이지로 스크롤
-          signupPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-          console.error('회원가입 페이지 요소를 찾을 수 없습니다!');
-        }
-      }, 300);
-    });
+        }, 300);
+      } else {
+        console.error('navigateToPage 함수를 찾을 수 없습니다!', {
+          navigateToPage: typeof navigateToPage,
+          windowNavigateToPage: typeof window.navigateToPage
+        });
+      }
+    }
+  };
+  
+  // document 레벨에서 이벤트 위임 (capture phase에서 실행 - 가장 먼저)
+  document.addEventListener('click', handleSignupClick, true);
+  
+  // 직접 이벤트 리스너도 추가 (이중 보험)
+  const signupNavBtn = $('#signupNavBtn');
+  if (signupNavBtn) {
+    console.log('회원가입 버튼 직접 리스너 추가:', signupNavBtn);
+    const directHandler = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      console.log('회원가입 버튼 클릭됨 (직접 리스너)', signupNavBtn);
+      
+      // navigateToPage 호출
+      const navFunc = typeof navigateToPage === 'function' 
+        ? navigateToPage 
+        : typeof window.navigateToPage === 'function' 
+          ? window.navigateToPage 
+          : null;
+      
+      if (navFunc) {
+        navFunc('signup');
+      } else {
+        console.error('navigateToPage 함수를 찾을 수 없습니다!');
+      }
+    };
+    
+    // 기존 리스너 제거 후 새로 추가
+    signupNavBtn.removeEventListener('click', directHandler);
+    signupNavBtn.addEventListener('click', directHandler, true); // capture phase
+    
+    // onclick 속성도 추가 (가장 확실한 방법)
+    signupNavBtn.setAttribute('onclick', 'event.preventDefault(); event.stopPropagation(); if(typeof navigateToPage === "function") { navigateToPage("signup"); } else if(typeof window.navigateToPage === "function") { window.navigateToPage("signup"); } return false;');
+  } else {
+    console.warn('회원가입 버튼을 찾을 수 없습니다!');
   }
 }
 
@@ -3386,8 +3457,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 초기 로드 플래그 설정
   window.__isInitialLoad = true;
   
-  // Setup navigation first
-  setupNavigation();
+  // Setup navigation - 버튼이 준비될 때까지 기다림
+  // 회원가입 버튼이 나타날 때까지 최대 2초 대기
+  let retryCount = 0;
+  const maxRetries = 20;
+  const checkAndSetupNavigation = () => {
+    const signupBtn = $('#signupNavBtn');
+    if (signupBtn || retryCount >= maxRetries) {
+      console.log('회원가입 버튼 확인됨, setupNavigation 호출:', !!signupBtn, 'retryCount:', retryCount);
+      setupNavigation();
+    } else {
+      retryCount++;
+      setTimeout(checkAndSetupNavigation, 100);
+    }
+  };
+  checkAndSetupNavigation();
   
   // 초기 URL 라우팅 처리 (Firebase 초기화 전에 먼저 체크)
   // 어드민 접근 시도는 admin.html로 리다이렉트
