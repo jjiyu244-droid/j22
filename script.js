@@ -3155,22 +3155,22 @@ async function navigateToPage(page) {
           parent = parent.parentElement;
         }
       }
-        
-        // 회원가입 페이지에 적절한 간격 추가 (다른 요소와 겹치지 않도록)
-        pageElement.style.setProperty('padding', '40px 20px', 'important');
-        pageElement.style.setProperty('margin', '40px auto', 'important');
-        pageElement.style.setProperty('position', 'relative', 'important');
-        pageElement.style.setProperty('z-index', '10', 'important');
-        pageElement.style.setProperty('width', '100%', 'important');
-        pageElement.style.setProperty('max-width', '100%', 'important');
-        
-        // 스크롤을 페이지 상단으로 이동
-        setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          // 페이지 요소로 스크롤
-          pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      }
+      
+      // 회원가입 페이지에 적절한 간격 추가 (다른 요소와 겹치지 않도록)
+      // 이 코드는 모든 페이지에 공통으로 적용
+      pageElement.style.setProperty('padding', '40px 20px', 'important');
+      pageElement.style.setProperty('margin', '40px auto', 'important');
+      pageElement.style.setProperty('position', 'relative', 'important');
+      pageElement.style.setProperty('z-index', '10', 'important');
+      pageElement.style.setProperty('width', '100%', 'important');
+      pageElement.style.setProperty('max-width', '100%', 'important');
+      
+      // 스크롤을 페이지 상단으로 이동
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // 페이지 요소로 스크롤
+        pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     } else {
       console.error(`페이지 요소를 찾을 수 없습니다: ${page}-page`);
     }
