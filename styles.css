@@ -990,6 +990,29 @@ body {
 /* 페이지 섹션 */
 .page-section {
   animation: fadeIn 0.3s ease-in-out;
+  display: none;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.page-section.active {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
+  z-index: 9999;
+  min-height: 600px;
+  width: 100%;
+  padding: 40px 20px;
+  margin: 40px auto;
+  box-sizing: border-box;
+}
+
+/* 회원가입 페이지 특별 처리 */
+#signup-page.active {
+  flex: 1 0 auto;
+  min-height: 600px;
+  height: auto;
 }
 
 @keyframes fadeIn {

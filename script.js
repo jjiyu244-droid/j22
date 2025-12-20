@@ -3042,10 +3042,18 @@ async function navigateToPage(page) {
       }
     }
     
-    // 모든 page-section 숨기기 (먼저 모두 숨김)
+    // 모든 page-section 숨기기 (먼저 모두 숨김) - .active 클래스 제거 및 인라인 스타일 제거
     document.querySelectorAll('.page-section').forEach((section) => {
-      section.style.setProperty('display', 'none', 'important');
-      section.style.setProperty('visibility', 'hidden', 'important');
+      section.classList.remove('active');
+      // 인라인 스타일도 제거 (CSS 초기화)
+      const inlineStylesToRemove = [
+        'display', 'visibility', 'opacity', 'height', 'min-height', 'max-height',
+        'width', 'max-width', 'position', 'z-index', 'padding', 'margin',
+        'box-sizing', 'background', 'overflow', 'flex', 'flex-grow', 'flex-shrink', 'flex-basis'
+      ];
+      inlineStylesToRemove.forEach(prop => {
+        section.style.removeProperty(prop);
+      });
     });
     
     // Show the specific page (숨긴 후에 표시)
@@ -3053,161 +3061,133 @@ async function navigateToPage(page) {
     if (pageElement) {
       console.log(`페이지 요소 찾음: ${page}-page`, pageElement);
       
-      // 회원가입 페이지인 경우 특별 처리 (다른 페이지보다 먼저)
+      // 회원가입 페이지인 경우 특별 처리 (4단계 강제 표시)
       if (page === 'signup') {
-        console.log('회원가입 페이지 특별 처리 시작');
+        console.log('회원가입 페이지 특별 처리 시작 (4단계)');
         
-        // 1. main-content를 확실히 표시 (회원가입 페이지의 직접 부모)
+        // ===== 단계 1: 계층 구조 확인 및 flex 설정 =====
         const mainContent = document.querySelector('.main-content');
         if (mainContent) {
+          // main-content가 flex 컨테이너인지 확인
+          const mainContentDisplay = window.getComputedStyle(mainContent).display;
+          console.log('main-content display:', mainContentDisplay);
+          console.log('main-content가 #signup-page의 직계 부모인지 확인:', mainContent.contains(pageElement) && pageElement.parentElement === mainContent);
+          
+          // main-content를 flex로 설정
           mainContent.style.setProperty('display', 'flex', 'important');
           mainContent.style.setProperty('flex-direction', 'column', 'important');
           mainContent.style.setProperty('visibility', 'visible', 'important');
           mainContent.style.setProperty('opacity', '1', 'important');
-          mainContent.style.removeProperty('height');
-          mainContent.style.removeProperty('overflow');
           mainContent.style.setProperty('min-height', '100vh', 'important');
-          console.log('main-content 표시 완료');
+          console.log('단계 1 완료: main-content flex 설정');
         }
         
-        // 2. app 컨테이너도 표시
-        const appContainer = document.querySelector('.app');
-        if (appContainer) {
-          appContainer.style.setProperty('display', 'flex', 'important');
-          appContainer.style.setProperty('flex-direction', 'column', 'important');
-          appContainer.style.setProperty('visibility', 'visible', 'important');
-          appContainer.style.setProperty('opacity', '1', 'important');
-        }
+        // ===== 단계 2: CSS 초기화 - 모든 인라인 스타일 제거 =====
+        console.log('단계 2 시작: 인라인 스타일 제거');
+        // 모든 인라인 스타일 속성 제거
+        const inlineStylesToRemove = [
+          'display', 'visibility', 'opacity', 'height', 'min-height', 'max-height',
+          'width', 'max-width', 'position', 'z-index', 'padding', 'margin',
+          'box-sizing', 'background', 'overflow', 'flex', 'flex-grow', 'flex-shrink', 'flex-basis'
+        ];
+        inlineStylesToRemove.forEach(prop => {
+          pageElement.style.removeProperty(prop);
+        });
+        console.log('단계 2 완료: 인라인 스타일 제거 완료');
         
-        // 3. body도 확인
-        document.body.style.setProperty('display', 'block', 'important');
-        document.body.style.setProperty('visibility', 'visible', 'important');
-        document.body.style.setProperty('opacity', '1', 'important');
+        // ===== 단계 3: .active 클래스 추가 및 기본 스타일 설정 =====
+        console.log('단계 3 시작: .active 클래스 추가');
+        // 다른 모든 page-section에서 active 제거
+        document.querySelectorAll('.page-section').forEach(section => {
+          section.classList.remove('active');
+        });
         
-        // 4. 회원가입 페이지 자체를 강제로 표시 (min-height: 600px)
-        pageElement.style.setProperty('display', 'block', 'important');
-        pageElement.style.setProperty('visibility', 'visible', 'important');
-        pageElement.style.setProperty('opacity', '1', 'important');
-        pageElement.style.setProperty('height', 'auto', 'important');
-        pageElement.style.setProperty('min-height', '600px', 'important'); // 강제로 600px
-        pageElement.style.setProperty('width', '100%', 'important');
-        pageElement.style.setProperty('max-width', '100%', 'important');
+        // 회원가입 페이지에 active 클래스 추가
+        pageElement.classList.add('active');
+        
+        // flex: 1 0 auto 추가 (main-content가 flex일 때 높이 문제 해결)
+        pageElement.style.setProperty('flex', '1 0 auto', 'important');
+        
+        // z-index를 9999로 설정 (최상단)
+        pageElement.style.setProperty('z-index', '9999', 'important');
         pageElement.style.setProperty('position', 'relative', 'important');
-        pageElement.style.setProperty('z-index', '10', 'important');
-        pageElement.style.setProperty('padding', '40px 20px', 'important');
-        pageElement.style.setProperty('margin', '40px auto', 'important');
-        pageElement.style.setProperty('box-sizing', 'border-box', 'important');
-        pageElement.style.setProperty('background', 'transparent', 'important');
         
-        // 5. 회원가입 페이지 내부 .card 요소도 확인
+        // display: block 설정
+        pageElement.style.setProperty('display', 'block', 'important');
+        console.log('단계 3 완료: .active 클래스 추가 및 기본 스타일 설정');
+        
+        // ===== 단계 4: 강제 렌더링 (Force Reflow) =====
+        console.log('단계 4 시작: 강제 렌더링');
+        // void element.offsetWidth를 호출하여 브라우저가 강제로 레이아웃을 다시 계산하게 함
+        void pageElement.offsetWidth;
+        void pageElement.offsetHeight;
+        console.log('단계 4 완료: 강제 렌더링 완료');
+        
+        // ===== 내부 요소 확인 =====
         const signupCard = pageElement.querySelector('.card');
+        const signupForm = pageElement.querySelector('#signupForm');
+        
         if (signupCard) {
-          signupCard.style.setProperty('display', 'block', 'important');
-          signupCard.style.setProperty('visibility', 'visible', 'important');
-          signupCard.style.setProperty('opacity', '1', 'important');
-          signupCard.style.setProperty('min-height', '500px', 'important');
           console.log('회원가입 카드 요소 확인됨:', signupCard);
         } else {
           console.warn('회원가입 페이지 내부 .card 요소를 찾을 수 없습니다!');
         }
         
-        // 6. 회원가입 폼도 확인
-        const signupForm = pageElement.querySelector('#signupForm');
         if (signupForm) {
-          signupForm.style.setProperty('display', 'block', 'important');
-          signupForm.style.setProperty('visibility', 'visible', 'important');
           console.log('회원가입 폼 확인됨:', signupForm);
         } else {
           console.warn('회원가입 폼(#signupForm)을 찾을 수 없습니다!');
         }
         
-        console.log('회원가입 페이지 표시:', pageElement);
-        console.log('회원가입 페이지 computed display:', window.getComputedStyle(pageElement).display);
-        console.log('회원가입 페이지 offsetHeight:', pageElement.offsetHeight);
-        console.log('회원가입 페이지 offsetTop:', pageElement.offsetTop);
+        // ===== 최종 확인 및 로그 =====
+        const computedDisplay = window.getComputedStyle(pageElement).display;
+        const computedVisibility = window.getComputedStyle(pageElement).visibility;
+        const computedOpacity = window.getComputedStyle(pageElement).opacity;
+        const computedZIndex = window.getComputedStyle(pageElement).zIndex;
+        const offsetHeight = pageElement.offsetHeight;
+        const offsetWidth = pageElement.offsetWidth;
         
-        // 7. 약간의 지연 후 다시 확인 (렌더링 완료 대기)
-        setTimeout(() => {
-          const finalHeight = pageElement.offsetHeight;
-          const finalWidth = pageElement.offsetWidth;
-          console.log('회원가입 페이지 offsetHeight (지연 후):', finalHeight);
-          console.log('회원가입 페이지 offsetWidth (지연 후):', finalWidth);
-          console.log('main-content display:', mainContent ? window.getComputedStyle(mainContent).display : 'N/A');
-          console.log('main-content offsetHeight:', mainContent ? mainContent.offsetHeight : 'N/A');
-          
-          // 여전히 offsetHeight가 0이면 강제로 높이 설정
-          if (finalHeight === 0) {
-            console.warn('회원가입 페이지 높이가 여전히 0입니다. 강제로 설정합니다.');
-            pageElement.style.setProperty('height', '600px', 'important');
-            pageElement.style.setProperty('min-height', '600px', 'important');
-            
-            // 내부 카드도 강제로 높이 설정
-            if (signupCard) {
-              signupCard.style.setProperty('min-height', '500px', 'important');
-            }
-          }
-          
-          // 페이지로 스크롤
-          pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 200);
-      } else {
-        // 다른 페이지의 경우 일반 처리
-        // 강제로 표시 (다른 스타일이 덮어쓰는 것을 방지)
-        pageElement.style.setProperty('display', 'block', 'important');
-        pageElement.style.setProperty('visibility', 'visible', 'important');
-        pageElement.style.setProperty('opacity', '1', 'important');
-        pageElement.style.setProperty('height', 'auto', 'important');
-        pageElement.style.setProperty('min-height', '400px', 'important');
-        pageElement.style.setProperty('width', '100%', 'important');
-        pageElement.style.setProperty('max-width', '100%', 'important');
-        pageElement.style.setProperty('position', 'relative', 'important');
-        pageElement.style.setProperty('z-index', '10', 'important');
-        pageElement.style.setProperty('padding', '40px 20px', 'important');
-        pageElement.style.setProperty('margin', '40px auto', 'important');
-        pageElement.style.setProperty('box-sizing', 'border-box', 'important');
+        console.log('=== 회원가입 페이지 최종 상태 ===');
+        console.log('computed display:', computedDisplay);
+        console.log('computed visibility:', computedVisibility);
+        console.log('computed opacity:', computedOpacity);
+        console.log('computed z-index:', computedZIndex);
+        console.log('offsetHeight:', offsetHeight);
+        console.log('offsetWidth:', offsetWidth);
+        console.log('has .active class:', pageElement.classList.contains('active'));
+        console.log('main-content offsetHeight:', mainContent ? mainContent.offsetHeight : 'N/A');
         
-        // 부모 요소 복원
-        let parent = pageElement.parentElement;
-        while (parent && parent !== document.body) {
-          const parentStyle = window.getComputedStyle(parent);
-          const parentDisplay = parentStyle.display;
-          const parentVisibility = parentStyle.visibility;
-          const parentOpacity = parentStyle.opacity;
-          const parentHeight = parentStyle.height;
+        // offsetHeight가 여전히 0이면 추가 조치
+        if (offsetHeight === 0) {
+          console.warn('⚠️ offsetHeight가 여전히 0입니다. 추가 조치를 취합니다.');
           
-          // content-section이면서 page-section이 아닌 경우는 의도적으로 숨긴 것이므로 건너뛰기
-          if (parent.classList.contains('content-section') && !parent.classList.contains('page-section')) {
-            parent = parent.parentElement;
-            continue;
-          }
+          // 다시 한번 강제 렌더링
+          void pageElement.offsetWidth;
           
-          // 실제로 숨겨져 있는 경우만 복원
-          if (parentDisplay === 'none' || parentVisibility === 'hidden' || parentOpacity === '0' || parentHeight === '0px') {
-            if (parent.classList.contains('main-content')) {
-              parent.style.setProperty('display', 'flex', 'important');
-              parent.style.setProperty('visibility', 'visible', 'important');
-              parent.style.setProperty('opacity', '1', 'important');
-              parent.style.removeProperty('height');
-              parent.style.removeProperty('overflow');
-            } else if (parent.classList.contains('app')) {
-              parent.style.setProperty('display', 'flex', 'important');
-              parent.style.setProperty('visibility', 'visible', 'important');
-              parent.style.setProperty('opacity', '1', 'important');
-            } else {
-              parent.style.setProperty('display', 'block', 'important');
-              parent.style.setProperty('visibility', 'visible', 'important');
-              parent.style.setProperty('opacity', '1', 'important');
-              parent.style.removeProperty('height');
-              parent.style.removeProperty('overflow');
-            }
-          }
-          parent = parent.parentElement;
+          // 최소 높이 강제 설정
+          pageElement.style.setProperty('height', '600px', 'important');
+          pageElement.style.setProperty('min-height', '600px', 'important');
+          
+          // 한번 더 강제 렌더링
+          void pageElement.offsetWidth;
+          
+          console.log('추가 조치 후 offsetHeight:', pageElement.offsetHeight);
         }
+        
+        // 스크롤 처리
+        setTimeout(() => {
+          pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      } else {
+        // 다른 페이지의 경우 .active 클래스 사용
+        pageElement.classList.add('active');
+        
+        // 강제 렌더링 (Force Reflow)
+        void pageElement.offsetWidth;
         
         // 스크롤을 페이지 상단으로 이동
         setTimeout(() => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
-          // 페이지 요소로 스크롤
           pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
       }
