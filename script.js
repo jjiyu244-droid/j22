@@ -2792,18 +2792,39 @@ async function navigateToPage(page) {
   // Show the requested page
   if (page === 'dashboard' || page === 'pools' || page === 'faq') {
     // Show main dashboard content (default visible sections)
+    // !important를 덮어쓰기 위해 다시 block으로 설정
     document.querySelectorAll('.content-section:not(.page-section), .pre-login-welcome').forEach((section) => {
-      section.style.display = '';
+      // CSS 클래스에 따라 기본 display 값 설정
+      if (section.classList.contains('pre-login-welcome')) {
+        section.style.setProperty('display', 'block', 'important');
+      } else if (section.classList.contains('content-section')) {
+        section.style.setProperty('display', 'block', 'important');
+      }
+    });
+    
+    // feature-card들 다시 표시
+    document.querySelectorAll('.feature-card').forEach((card) => {
+      card.style.setProperty('display', 'flex', 'important');
+    });
+    
+    // overview 섹션 다시 표시
+    document.querySelectorAll('.overview').forEach((section) => {
+      section.style.setProperty('display', 'grid', 'important');
+    });
+    
+    // pools-rewards-container 다시 표시
+    document.querySelectorAll('.pools-rewards-container').forEach((container) => {
+      container.style.setProperty('display', 'grid', 'important');
     });
     
     // Footer 섹션도 다시 표시
     document.querySelectorAll('.footer-left, .footer-right').forEach((footer) => {
-      footer.style.display = '';
+      footer.style.setProperty('display', 'block', 'important');
       // 부모 섹션도 찾아서 표시
       let parent = footer.parentElement;
       while (parent && parent !== document.body) {
         if (parent.tagName === 'SECTION' && !parent.classList.contains('page-section')) {
-          parent.style.display = '';
+          parent.style.setProperty('display', 'block', 'important');
           break;
         }
         parent = parent.parentElement;
@@ -2834,24 +2855,73 @@ async function navigateToPage(page) {
       return; // Don't scroll to top for FAQ
     }
   } else {
-    // Hide main content sections for other pages
-    document.querySelectorAll('.content-section:not(.page-section), .pre-login-welcome').forEach((section) => {
-      section.style.display = 'none';
-    });
-    
-    // Footer 섹션도 숨기기 (회원가입 페이지와 겹치는 문제 해결)
-    document.querySelectorAll('.footer-left, .footer-right').forEach((footer) => {
-      footer.style.display = 'none';
-      // 부모 섹션도 찾아서 숨기기
-      let parent = footer.parentElement;
-      while (parent && parent !== document.body) {
-        if (parent.tagName === 'SECTION' && !parent.classList.contains('page-section')) {
-          parent.style.display = 'none';
-          break;
+    // 회원가입 페이지인 경우 모든 메인 콘텐츠를 완전히 숨기기
+    if (page === 'signup') {
+      // 모든 content-section 숨기기 (page-section 제외)
+      document.querySelectorAll('.content-section:not(.page-section)').forEach((section) => {
+        section.style.setProperty('display', 'none', 'important');
+      });
+      
+      // pre-login-welcome 숨기기
+      document.querySelectorAll('.pre-login-welcome').forEach((section) => {
+        section.style.setProperty('display', 'none', 'important');
+      });
+      
+      // feature-card들 숨기기
+      document.querySelectorAll('.feature-card').forEach((card) => {
+        card.style.setProperty('display', 'none', 'important');
+      });
+      
+      // Features Section 숨기기
+      document.querySelectorAll('section.content-section').forEach((section) => {
+        if (!section.classList.contains('page-section')) {
+          section.style.setProperty('display', 'none', 'important');
         }
-        parent = parent.parentElement;
-      }
-    });
+      });
+      
+      // Footer 섹션도 숨기기
+      document.querySelectorAll('.footer-left, .footer-right').forEach((footer) => {
+        footer.style.setProperty('display', 'none', 'important');
+        // 부모 섹션도 찾아서 숨기기
+        let parent = footer.parentElement;
+        while (parent && parent !== document.body) {
+          if (parent.tagName === 'SECTION' && !parent.classList.contains('page-section')) {
+            parent.style.setProperty('display', 'none', 'important');
+            break;
+          }
+          parent = parent.parentElement;
+        }
+      });
+      
+      // overview 섹션 숨기기
+      document.querySelectorAll('.overview').forEach((section) => {
+        section.style.setProperty('display', 'none', 'important');
+      });
+      
+      // pools-rewards-container 숨기기
+      document.querySelectorAll('.pools-rewards-container').forEach((container) => {
+        container.style.setProperty('display', 'none', 'important');
+      });
+    } else {
+      // 다른 페이지들은 기존 로직 사용
+      document.querySelectorAll('.content-section:not(.page-section), .pre-login-welcome').forEach((section) => {
+        section.style.display = 'none';
+      });
+      
+      // Footer 섹션도 숨기기
+      document.querySelectorAll('.footer-left, .footer-right').forEach((footer) => {
+        footer.style.display = 'none';
+        // 부모 섹션도 찾아서 숨기기
+        let parent = footer.parentElement;
+        while (parent && parent !== document.body) {
+          if (parent.tagName === 'SECTION' && !parent.classList.contains('page-section')) {
+            parent.style.display = 'none';
+            break;
+          }
+          parent = parent.parentElement;
+        }
+      });
+    }
     
     // main-content가 숨겨져 있으면 표시
     const mainContent = document.querySelector('.main-content');
