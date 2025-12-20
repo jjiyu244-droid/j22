@@ -3056,26 +3056,84 @@ async function navigateToPage(page) {
       pageElement.style.setProperty('opacity', '1', 'important');
       pageElement.style.setProperty('height', 'auto', 'important');
       pageElement.style.setProperty('min-height', '400px', 'important');
+      pageElement.style.setProperty('width', '100%', 'important');
+      pageElement.style.setProperty('max-width', '100%', 'important');
+      pageElement.style.setProperty('position', 'relative', 'important');
+      pageElement.style.setProperty('z-index', '10', 'important');
+      pageElement.style.setProperty('padding', '40px 20px', 'important');
+      pageElement.style.setProperty('margin', '40px auto', 'important');
+      pageElement.style.setProperty('box-sizing', 'border-box', 'important');
       
-      // 부모 요소도 확인하고 복원 (회원가입 페이지가 보이도록)
-      let parent = pageElement.parentElement;
-      while (parent && parent !== document.body) {
-        const parentStyle = window.getComputedStyle(parent);
-        const parentDisplay = parentStyle.display;
-        const parentVisibility = parentStyle.visibility;
-        const parentOpacity = parentStyle.opacity;
-        const parentHeight = parentStyle.height;
-        
-        // content-section이면서 page-section이 아닌 경우는 의도적으로 숨긴 것이므로 건너뛰기
-        // (회원가입 페이지의 부모가 아니므로)
-        if (parent.classList.contains('content-section') && !parent.classList.contains('page-section')) {
-          parent = parent.parentElement;
-          continue;
+      // 회원가입 페이지인 경우 특별 처리
+      if (page === 'signup') {
+        // main-content를 확실히 표시 (회원가입 페이지의 직접 부모)
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+          mainContent.style.setProperty('display', 'flex', 'important');
+          mainContent.style.setProperty('flex-direction', 'column', 'important');
+          mainContent.style.setProperty('visibility', 'visible', 'important');
+          mainContent.style.setProperty('opacity', '1', 'important');
+          mainContent.style.removeProperty('height');
+          mainContent.style.removeProperty('overflow');
+          mainContent.style.setProperty('min-height', '100vh', 'important');
         }
         
-        // 실제로 숨겨져 있는 경우만 복원 (offsetHeight는 제외 - 너무 엄격함)
-        if (parentDisplay === 'none' || parentVisibility === 'hidden' || parentOpacity === '0' || parentHeight === '0px') {
-            // 부모 요소 복원
+        // app 컨테이너도 표시
+        const appContainer = document.querySelector('.app');
+        if (appContainer) {
+          appContainer.style.setProperty('display', 'flex', 'important');
+          appContainer.style.setProperty('flex-direction', 'column', 'important');
+          appContainer.style.setProperty('visibility', 'visible', 'important');
+          appContainer.style.setProperty('opacity', '1', 'important');
+        }
+        
+        // body도 확인
+        document.body.style.setProperty('display', 'block', 'important');
+        document.body.style.setProperty('visibility', 'visible', 'important');
+        document.body.style.setProperty('opacity', '1', 'important');
+        
+        console.log('회원가입 페이지 표시:', pageElement);
+        console.log('회원가입 페이지 computed display:', window.getComputedStyle(pageElement).display);
+        // 회원가입 페이지 내부 요소들도 확인
+        const signupCard = pageElement.querySelector('.card');
+        if (signupCard) {
+          signupCard.style.setProperty('display', 'block', 'important');
+          signupCard.style.setProperty('visibility', 'visible', 'important');
+          signupCard.style.setProperty('opacity', '1', 'important');
+        }
+        
+        // 약간의 지연 후 다시 확인 (렌더링 완료 대기)
+        setTimeout(() => {
+          console.log('회원가입 페이지 offsetHeight (지연 후):', pageElement.offsetHeight);
+          console.log('회원가입 페이지 offsetTop (지연 후):', pageElement.offsetTop);
+          console.log('main-content display:', mainContent ? window.getComputedStyle(mainContent).display : 'N/A');
+          console.log('main-content offsetHeight:', mainContent ? mainContent.offsetHeight : 'N/A');
+          
+          // 여전히 offsetHeight가 0이면 강제로 높이 설정
+          if (pageElement.offsetHeight === 0) {
+            console.warn('회원가입 페이지 높이가 여전히 0입니다. 강제로 설정합니다.');
+            pageElement.style.setProperty('height', '600px', 'important');
+            pageElement.style.setProperty('min-height', '600px', 'important');
+          }
+        }, 100);
+      } else {
+        // 다른 페이지의 경우 기존 로직 사용
+        let parent = pageElement.parentElement;
+        while (parent && parent !== document.body) {
+          const parentStyle = window.getComputedStyle(parent);
+          const parentDisplay = parentStyle.display;
+          const parentVisibility = parentStyle.visibility;
+          const parentOpacity = parentStyle.opacity;
+          const parentHeight = parentStyle.height;
+          
+          // content-section이면서 page-section이 아닌 경우는 의도적으로 숨긴 것이므로 건너뛰기
+          if (parent.classList.contains('content-section') && !parent.classList.contains('page-section')) {
+            parent = parent.parentElement;
+            continue;
+          }
+          
+          // 실제로 숨겨져 있는 경우만 복원
+          if (parentDisplay === 'none' || parentVisibility === 'hidden' || parentOpacity === '0' || parentHeight === '0px') {
             if (parent.classList.contains('main-content')) {
               parent.style.setProperty('display', 'flex', 'important');
               parent.style.setProperty('visibility', 'visible', 'important');
@@ -3094,47 +3152,9 @@ async function navigateToPage(page) {
               parent.style.removeProperty('overflow');
             }
           }
+          parent = parent.parentElement;
         }
-        parent = parent.parentElement;
       }
-      
-      // 회원가입 페이지인 경우 추가 확인
-      if (page === 'signup') {
-        console.log('회원가입 페이지 표시:', pageElement);
-        console.log('회원가입 페이지 computed display:', window.getComputedStyle(pageElement).display);
-        console.log('회원가입 페이지 offsetHeight:', pageElement.offsetHeight);
-        console.log('회원가입 페이지 offsetTop:', pageElement.offsetTop);
-        
-        // 회원가입 페이지의 모든 부모 요소를 명시적으로 복원
-        let currentParent = pageElement.parentElement;
-        while (currentParent && currentParent !== document.body) {
-          // main-content는 항상 표시되어야 함
-          if (currentParent.classList.contains('main-content')) {
-            currentParent.style.setProperty('display', 'flex', 'important');
-            currentParent.style.setProperty('visibility', 'visible', 'important');
-            currentParent.style.setProperty('opacity', '1', 'important');
-            currentParent.style.removeProperty('height');
-            currentParent.style.removeProperty('overflow');
-          }
-          // app 컨테이너도 표시
-          else if (currentParent.classList.contains('app')) {
-            currentParent.style.setProperty('display', 'flex', 'important');
-            currentParent.style.setProperty('visibility', 'visible', 'important');
-            currentParent.style.setProperty('opacity', '1', 'important');
-          }
-          // 다른 부모 요소들도 복원
-          else {
-            const computedStyle = window.getComputedStyle(currentParent);
-            if (computedStyle.display === 'none' || computedStyle.visibility === 'hidden' || computedStyle.opacity === '0') {
-              currentParent.style.setProperty('display', 'block', 'important');
-              currentParent.style.setProperty('visibility', 'visible', 'important');
-              currentParent.style.setProperty('opacity', '1', 'important');
-              currentParent.style.removeProperty('height');
-              currentParent.style.removeProperty('overflow');
-            }
-          }
-          currentParent = currentParent.parentElement;
-        }
         
         // 회원가입 페이지에 적절한 간격 추가 (다른 요소와 겹치지 않도록)
         pageElement.style.setProperty('padding', '40px 20px', 'important');
