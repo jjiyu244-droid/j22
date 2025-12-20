@@ -2792,39 +2792,105 @@ async function navigateToPage(page) {
   // Show the requested page
   if (page === 'dashboard' || page === 'pools' || page === 'faq') {
     // Show main dashboard content (default visible sections)
-    // !important를 덮어쓰기 위해 다시 block으로 설정
-    document.querySelectorAll('.content-section:not(.page-section), .pre-login-welcome').forEach((section) => {
-      // CSS 클래스에 따라 기본 display 값 설정
-      if (section.classList.contains('pre-login-welcome')) {
-        section.style.setProperty('display', 'block', 'important');
-      } else if (section.classList.contains('content-section')) {
-        section.style.setProperty('display', 'block', 'important');
-      }
+    // 모든 content-section 복원
+    document.querySelectorAll('section.content-section:not(.page-section)').forEach((section) => {
+      section.style.removeProperty('display');
+      section.style.removeProperty('visibility');
+      section.style.removeProperty('opacity');
+      section.style.removeProperty('height');
+      section.style.removeProperty('overflow');
+      // 기본 display 값으로 설정
+      section.style.setProperty('display', 'block', 'important');
+      section.style.setProperty('visibility', 'visible', 'important');
+      section.style.setProperty('opacity', '1', 'important');
+      section.style.removeProperty('height');
+      section.style.removeProperty('overflow');
+      
+      // 섹션 내부의 모든 요소도 복원
+      section.querySelectorAll('*').forEach((child) => {
+        child.style.removeProperty('display');
+        child.style.removeProperty('visibility');
+      });
+    });
+    
+    // pre-login-welcome 복원
+    document.querySelectorAll('.pre-login-welcome').forEach((section) => {
+      section.style.removeProperty('display');
+      section.style.removeProperty('visibility');
+      section.style.removeProperty('opacity');
+      section.style.removeProperty('height');
+      section.style.removeProperty('overflow');
+      section.style.setProperty('display', 'block', 'important');
+      section.style.setProperty('visibility', 'visible', 'important');
+      section.style.setProperty('opacity', '1', 'important');
     });
     
     // feature-card들 다시 표시
     document.querySelectorAll('.feature-card').forEach((card) => {
+      card.style.removeProperty('display');
+      card.style.removeProperty('visibility');
+      card.style.removeProperty('opacity');
+      card.style.removeProperty('height');
+      card.style.removeProperty('overflow');
       card.style.setProperty('display', 'flex', 'important');
+      card.style.setProperty('visibility', 'visible', 'important');
+      card.style.setProperty('opacity', '1', 'important');
+    });
+    
+    // grid grid-4 복원
+    document.querySelectorAll('.grid.grid-4').forEach((grid) => {
+      grid.style.removeProperty('display');
+      grid.style.removeProperty('visibility');
+      grid.style.removeProperty('opacity');
+      grid.style.removeProperty('height');
+      grid.style.removeProperty('overflow');
+      grid.style.setProperty('display', 'grid', 'important');
+      grid.style.setProperty('visibility', 'visible', 'important');
+      grid.style.setProperty('opacity', '1', 'important');
     });
     
     // overview 섹션 다시 표시
     document.querySelectorAll('.overview').forEach((section) => {
+      section.style.removeProperty('display');
+      section.style.removeProperty('visibility');
+      section.style.removeProperty('opacity');
+      section.style.removeProperty('height');
       section.style.setProperty('display', 'grid', 'important');
+      section.style.setProperty('visibility', 'visible', 'important');
+      section.style.setProperty('opacity', '1', 'important');
     });
     
     // pools-rewards-container 다시 표시
     document.querySelectorAll('.pools-rewards-container').forEach((container) => {
+      container.style.removeProperty('display');
+      container.style.removeProperty('visibility');
+      container.style.removeProperty('opacity');
+      container.style.removeProperty('height');
       container.style.setProperty('display', 'grid', 'important');
+      container.style.setProperty('visibility', 'visible', 'important');
+      container.style.setProperty('opacity', '1', 'important');
     });
     
     // Footer 섹션도 다시 표시
     document.querySelectorAll('.footer-left, .footer-right').forEach((footer) => {
+      footer.style.removeProperty('display');
+      footer.style.removeProperty('visibility');
+      footer.style.removeProperty('opacity');
+      footer.style.removeProperty('height');
       footer.style.setProperty('display', 'block', 'important');
+      footer.style.setProperty('visibility', 'visible', 'important');
+      footer.style.setProperty('opacity', '1', 'important');
       // 부모 섹션도 찾아서 표시
       let parent = footer.parentElement;
       while (parent && parent !== document.body) {
         if (parent.tagName === 'SECTION' && !parent.classList.contains('page-section')) {
+          parent.style.removeProperty('display');
+          parent.style.removeProperty('visibility');
+          parent.style.removeProperty('opacity');
+          parent.style.removeProperty('height');
           parent.style.setProperty('display', 'block', 'important');
+          parent.style.setProperty('visibility', 'visible', 'important');
+          parent.style.setProperty('opacity', '1', 'important');
           break;
         }
         parent = parent.parentElement;
@@ -2857,36 +2923,74 @@ async function navigateToPage(page) {
   } else {
     // 회원가입 페이지인 경우 모든 메인 콘텐츠를 완전히 숨기기
     if (page === 'signup') {
-      // 모든 content-section 숨기기 (page-section 제외)
-      document.querySelectorAll('.content-section:not(.page-section)').forEach((section) => {
-        section.style.setProperty('display', 'none', 'important');
+      // 모든 section 요소를 확인하여 content-section이면서 page-section이 아닌 것 숨기기
+      document.querySelectorAll('section').forEach((section) => {
+        if (section.classList.contains('content-section') && !section.classList.contains('page-section')) {
+          section.style.setProperty('display', 'none', 'important');
+          section.style.setProperty('visibility', 'hidden', 'important');
+          section.style.setProperty('opacity', '0', 'important');
+          section.style.setProperty('height', '0', 'important');
+          section.style.setProperty('overflow', 'hidden', 'important');
+        }
       });
       
       // pre-login-welcome 숨기기
       document.querySelectorAll('.pre-login-welcome').forEach((section) => {
         section.style.setProperty('display', 'none', 'important');
+        section.style.setProperty('visibility', 'hidden', 'important');
+        section.style.setProperty('opacity', '0', 'important');
+        section.style.setProperty('height', '0', 'important');
+        section.style.setProperty('overflow', 'hidden', 'important');
       });
       
-      // feature-card들 숨기기
+      // feature-card들 숨기기 (더 강력하게)
       document.querySelectorAll('.feature-card').forEach((card) => {
         card.style.setProperty('display', 'none', 'important');
+        card.style.setProperty('visibility', 'hidden', 'important');
+        card.style.setProperty('opacity', '0', 'important');
+        card.style.setProperty('height', '0', 'important');
+        card.style.setProperty('overflow', 'hidden', 'important');
       });
       
-      // Features Section 숨기기
-      document.querySelectorAll('section.content-section').forEach((section) => {
-        if (!section.classList.contains('page-section')) {
-          section.style.setProperty('display', 'none', 'important');
-        }
+      // grid grid-4 클래스를 가진 요소도 숨기기 (Features Section 내부)
+      document.querySelectorAll('.grid.grid-4').forEach((grid) => {
+        grid.style.setProperty('display', 'none', 'important');
+        grid.style.setProperty('visibility', 'hidden', 'important');
+        grid.style.setProperty('opacity', '0', 'important');
+        grid.style.setProperty('height', '0', 'important');
+        grid.style.setProperty('overflow', 'hidden', 'important');
+      });
+      
+      // Features Section의 모든 자식 요소도 숨기기
+      document.querySelectorAll('section.content-section:not(.page-section)').forEach((section) => {
+        // 섹션 자체 숨기기
+        section.style.setProperty('display', 'none', 'important');
+        section.style.setProperty('visibility', 'hidden', 'important');
+        section.style.setProperty('opacity', '0', 'important');
+        section.style.setProperty('height', '0', 'important');
+        section.style.setProperty('overflow', 'hidden', 'important');
+        
+        // 섹션 내부의 모든 요소도 숨기기
+        section.querySelectorAll('*').forEach((child) => {
+          child.style.setProperty('display', 'none', 'important');
+          child.style.setProperty('visibility', 'hidden', 'important');
+        });
       });
       
       // Footer 섹션도 숨기기
       document.querySelectorAll('.footer-left, .footer-right').forEach((footer) => {
         footer.style.setProperty('display', 'none', 'important');
+        footer.style.setProperty('visibility', 'hidden', 'important');
+        footer.style.setProperty('opacity', '0', 'important');
+        footer.style.setProperty('height', '0', 'important');
         // 부모 섹션도 찾아서 숨기기
         let parent = footer.parentElement;
         while (parent && parent !== document.body) {
           if (parent.tagName === 'SECTION' && !parent.classList.contains('page-section')) {
             parent.style.setProperty('display', 'none', 'important');
+            parent.style.setProperty('visibility', 'hidden', 'important');
+            parent.style.setProperty('opacity', '0', 'important');
+            parent.style.setProperty('height', '0', 'important');
             break;
           }
           parent = parent.parentElement;
@@ -2896,11 +3000,17 @@ async function navigateToPage(page) {
       // overview 섹션 숨기기
       document.querySelectorAll('.overview').forEach((section) => {
         section.style.setProperty('display', 'none', 'important');
+        section.style.setProperty('visibility', 'hidden', 'important');
+        section.style.setProperty('opacity', '0', 'important');
+        section.style.setProperty('height', '0', 'important');
       });
       
       // pools-rewards-container 숨기기
       document.querySelectorAll('.pools-rewards-container').forEach((container) => {
         container.style.setProperty('display', 'none', 'important');
+        container.style.setProperty('visibility', 'hidden', 'important');
+        container.style.setProperty('opacity', '0', 'important');
+        container.style.setProperty('height', '0', 'important');
       });
     } else {
       // 다른 페이지들은 기존 로직 사용
