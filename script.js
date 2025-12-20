@@ -3065,6 +3065,79 @@ async function navigateToPage(page) {
       if (page === 'signup') {
         console.log('회원가입 페이지 특별 처리 시작');
         
+        // ===== 단계 0: CSS Injection (다른 스크립트가 덮어쓰는 것을 방지) =====
+        console.log('단계 0 시작: CSS Injection');
+        
+        // 기존 스타일 태그가 있으면 제거
+        const existingStyle = document.getElementById('signup-page-force-styles');
+        if (existingStyle) {
+          existingStyle.remove();
+        }
+        
+        // 새로운 <style> 태그 생성 및 주입
+        const styleTag = document.createElement('style');
+        styleTag.id = 'signup-page-force-styles';
+        styleTag.textContent = `
+          #signup-page, #signup-page * {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            color: #333 !important;
+          }
+          #signup-page input {
+            background: white !important;
+            border: 1px solid #ccc !important;
+            height: 40px !important;
+            color: #333 !important;
+            padding: 10px 12px !important;
+            border-radius: 4px !important;
+          }
+          #signup-page button, #signup-page [type="submit"] {
+            background-color: #007bff !important;
+            color: #ffffff !important;
+            border: 1px solid #007bff !important;
+            padding: 12px 24px !important;
+            border-radius: 4px !important;
+            cursor: pointer !important;
+            font-weight: 600 !important;
+          }
+          #signup-page .link-btn, #signup-page #goToLogin {
+            color: #007bff !important;
+            background-color: transparent !important;
+            border: none !important;
+            text-decoration: underline !important;
+            cursor: pointer !important;
+          }
+          #signup-page {
+            background: rgba(0, 0, 0, 0.05) !important;
+            min-height: 600px !important;
+            padding: 40px 20px !important;
+            margin: 40px auto !important;
+            position: relative !important;
+            z-index: 9999 !important;
+          }
+          #signup-page .card {
+            background-color: #ffffff !important;
+            color: #333333 !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+          #signup-page label, #signup-page h2, #signup-page h3, #signup-page p, #signup-page span, #signup-page small {
+            color: #333333 !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+          #signup-page .form-group {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+        `;
+        document.head.appendChild(styleTag);
+        console.log('✅ CSS Injection 완료: signup-page-force-styles 스타일 태그 주입');
+        
         // ===== 단계 1: DOM 위치 이동 (Re-parenting) =====
         console.log('단계 1 시작: DOM 위치 이동');
         const mainContent = document.getElementById('main-content') || document.querySelector('.main-content');
@@ -3351,6 +3424,94 @@ async function navigateToPage(page) {
         // 스크롤 처리
         setTimeout(() => {
           pageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+        
+        // ===== Timeout 처리: 모든 페이지 전환 로직이 끝난 후 재확인 =====
+        setTimeout(() => {
+          console.log('Timeout 처리 시작: 회원가입 폼 스타일 재확인 및 강제 설정');
+          
+          // #signup-page 자체 재확인
+          pageElement.style.setProperty('display', 'block', 'important');
+          pageElement.style.setProperty('visibility', 'visible', 'important');
+          pageElement.style.setProperty('opacity', '1', 'important');
+          pageElement.style.setProperty('background', 'rgba(0, 0, 0, 0.05)', 'important');
+          pageElement.style.setProperty('min-height', '600px', 'important');
+          pageElement.style.setProperty('z-index', '9999', 'important');
+          
+          // 내부 .card 요소 재확인
+          if (signupCard) {
+            signupCard.style.setProperty('display', 'block', 'important');
+            signupCard.style.setProperty('visibility', 'visible', 'important');
+            signupCard.style.setProperty('opacity', '1', 'important');
+            signupCard.style.setProperty('background-color', '#ffffff', 'important');
+            signupCard.style.setProperty('color', '#333333', 'important');
+          }
+          
+          // 내부 #signupForm 요소 재확인
+          if (signupForm) {
+            signupForm.style.setProperty('display', 'block', 'important');
+            signupForm.style.setProperty('visibility', 'visible', 'important');
+            signupForm.style.setProperty('opacity', '1', 'important');
+          }
+          
+          // 모든 텍스트 요소 재확인
+          const allTextElements = pageElement.querySelectorAll('label, h2, h3, p, span, small, .card-title, .card-subtitle');
+          allTextElements.forEach(el => {
+            el.style.setProperty('display', 'block', 'important');
+            el.style.setProperty('visibility', 'visible', 'important');
+            el.style.setProperty('opacity', '1', 'important');
+            el.style.setProperty('color', '#333333', 'important');
+          });
+          
+          // 모든 input 요소 재확인
+          const allInputs = pageElement.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], input:not([type])');
+          allInputs.forEach(input => {
+            input.style.setProperty('display', 'block', 'important');
+            input.style.setProperty('visibility', 'visible', 'important');
+            input.style.setProperty('opacity', '1', 'important');
+            input.style.setProperty('background', 'white', 'important');
+            input.style.setProperty('border', '1px solid #ccc', 'important');
+            input.style.setProperty('height', '40px', 'important');
+            input.style.setProperty('color', '#333', 'important');
+          });
+          
+          // 모든 button 요소 재확인
+          const allButtons = pageElement.querySelectorAll('button, .btn-primary, [type="submit"]');
+          allButtons.forEach(button => {
+            button.style.setProperty('display', 'block', 'important');
+            button.style.setProperty('visibility', 'visible', 'important');
+            button.style.setProperty('opacity', '1', 'important');
+            button.style.setProperty('background-color', '#007bff', 'important');
+            button.style.setProperty('color', '#ffffff', 'important');
+          });
+          
+          // 강제 렌더링
+          void pageElement.offsetWidth;
+          void pageElement.offsetHeight;
+          if (signupCard) void signupCard.offsetWidth;
+          if (signupForm) void signupForm.offsetWidth;
+          
+          // 최종 상태 확인
+          const finalDisplay = window.getComputedStyle(pageElement).display;
+          const finalVisibility = window.getComputedStyle(pageElement).visibility;
+          const finalOpacity = window.getComputedStyle(pageElement).opacity;
+          const finalHeight = pageElement.offsetHeight;
+          
+          console.log('Timeout 처리 완료:');
+          console.log('  - display:', finalDisplay);
+          console.log('  - visibility:', finalVisibility);
+          console.log('  - opacity:', finalOpacity);
+          console.log('  - offsetHeight:', finalHeight);
+          
+          if (signupCard) {
+            console.log('  - 카드 display:', window.getComputedStyle(signupCard).display);
+            console.log('  - 카드 offsetHeight:', signupCard.offsetHeight);
+          }
+          
+          if (signupForm) {
+            console.log('  - 폼 display:', window.getComputedStyle(signupForm).display);
+            console.log('  - 폼 offsetHeight:', signupForm.offsetHeight);
+          }
         }, 100);
       } else {
         // 다른 페이지의 경우 .active 클래스 사용
