@@ -3155,6 +3155,74 @@ async function navigateToPage(page) {
         
         console.log('단계 2 완료: 내부 콘텐츠 강제 노출 완료');
         
+        // ===== 단계 2-1: 텍스트 색상 및 대비 스타일 강제 적용 =====
+        console.log('단계 2-1 시작: 텍스트 색상 및 대비 스타일 강제 적용');
+        
+        // #signup-page 자체의 텍스트 색상 설정
+        pageElement.style.setProperty('color', '#333333', 'important');
+        
+        // 모든 텍스트 요소(label, h2, p, span, small 등)의 색상 강제 설정
+        const textElements = pageElement.querySelectorAll('label, h2, h3, p, span, small, .card-title, .card-subtitle, .form-group label');
+        textElements.forEach(el => {
+          el.style.setProperty('color', '#333333', 'important');
+        });
+        console.log(`✅ ${textElements.length}개의 텍스트 요소에 색상 적용 완료`);
+        
+        // 모든 input 요소에 테두리 및 배경색 강제 설정
+        const inputElements = pageElement.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], input[type="number"], input:not([type])');
+        inputElements.forEach(input => {
+          input.style.setProperty('border', '1px solid #ccc', 'important');
+          input.style.setProperty('background-color', '#ffffff', 'important');
+          input.style.setProperty('color', '#333333', 'important');
+          input.style.setProperty('padding', '10px 12px', 'important');
+          input.style.setProperty('border-radius', '4px', 'important');
+        });
+        console.log(`✅ ${inputElements.length}개의 input 요소에 테두리 및 배경색 적용 완료`);
+        
+        // 모든 button 요소에 배경색 및 텍스트 색상 강제 설정
+        const buttonElements = pageElement.querySelectorAll('button, .btn-primary, [type="submit"]');
+        buttonElements.forEach(button => {
+          button.style.setProperty('background-color', '#007bff', 'important');
+          button.style.setProperty('color', '#ffffff', 'important');
+          button.style.setProperty('border', '1px solid #007bff', 'important');
+          button.style.setProperty('padding', '12px 24px', 'important');
+          button.style.setProperty('border-radius', '4px', 'important');
+          button.style.setProperty('cursor', 'pointer', 'important');
+          button.style.setProperty('font-weight', '600', 'important');
+        });
+        console.log(`✅ ${buttonElements.length}개의 button 요소에 배경색 및 텍스트 색상 적용 완료`);
+        
+        // link-btn (로그인 링크 버튼) 스타일
+        const linkButtons = pageElement.querySelectorAll('.link-btn, #goToLogin');
+        linkButtons.forEach(linkBtn => {
+          linkBtn.style.setProperty('color', '#007bff', 'important');
+          linkBtn.style.setProperty('background-color', 'transparent', 'important');
+          linkBtn.style.setProperty('border', 'none', 'important');
+          linkBtn.style.setProperty('text-decoration', 'underline', 'important');
+          linkBtn.style.setProperty('cursor', 'pointer', 'important');
+        });
+        console.log(`✅ ${linkButtons.length}개의 링크 버튼에 스타일 적용 완료`);
+        
+        // checkbox 스타일
+        const checkboxes = pageElement.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+          checkbox.style.setProperty('width', '18px', 'important');
+          checkbox.style.setProperty('height', '18px', 'important');
+          checkbox.style.setProperty('cursor', 'pointer', 'important');
+        });
+        console.log(`✅ ${checkboxes.length}개의 checkbox에 스타일 적용 완료`);
+        
+        // .card 요소의 배경색도 명시적으로 설정 (투명하지 않도록)
+        if (signupCard) {
+          const cardBg = window.getComputedStyle(signupCard).backgroundColor;
+          if (!cardBg || cardBg === 'rgba(0, 0, 0, 0)' || cardBg === 'transparent') {
+            signupCard.style.setProperty('background-color', '#ffffff', 'important');
+          }
+          signupCard.style.setProperty('color', '#333333', 'important');
+        }
+        
+        console.log('단계 2-1 완료: 텍스트 색상 및 대비 스타일 강제 적용 완료');
+        
         // ===== 단계 3: CSS 초기화 및 .active 클래스 추가 =====
         console.log('단계 3 시작: CSS 초기화 및 .active 클래스 추가');
         
