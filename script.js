@@ -3061,17 +3061,31 @@ async function navigateToPage(page) {
     if (pageElement) {
       console.log(`페이지 요소 찾음: ${page}-page`, pageElement);
       
-      // 회원가입 페이지인 경우 특별 처리 (4단계 강제 표시)
+      // 회원가입 페이지인 경우 특별 처리 (DOM 이동 + 내부 노출 + 표시)
       if (page === 'signup') {
-        console.log('회원가입 페이지 특별 처리 시작 (4단계)');
+        console.log('회원가입 페이지 특별 처리 시작');
         
-        // ===== 단계 1: 계층 구조 확인 및 flex 설정 =====
-        const mainContent = document.querySelector('.main-content');
+        // ===== 단계 1: DOM 위치 이동 (Re-parenting) =====
+        console.log('단계 1 시작: DOM 위치 이동');
+        const mainContent = document.getElementById('main-content') || document.querySelector('.main-content');
+        
         if (mainContent) {
-          // main-content가 flex 컨테이너인지 확인
-          const mainContentDisplay = window.getComputedStyle(mainContent).display;
-          console.log('main-content display:', mainContentDisplay);
-          console.log('main-content가 #signup-page의 직계 부모인지 확인:', mainContent.contains(pageElement) && pageElement.parentElement === mainContent);
+          // 현재 부모 확인
+          const currentParent = pageElement.parentElement;
+          const isDirectChild = (pageElement.parentElement === mainContent);
+          
+          console.log('현재 부모:', currentParent);
+          console.log('main-content가 #signup-page의 직계 부모인가?', isDirectChild);
+          console.log('main-content가 #signup-page를 포함하는가?', mainContent.contains(pageElement));
+          
+          // main-content의 자식이 아니면 강제로 이동
+          if (!isDirectChild) {
+            console.log('⚠️ #signup-page가 #main-content의 직계 자식이 아닙니다. DOM 위치를 이동합니다.');
+            mainContent.appendChild(pageElement);
+            console.log('✅ DOM 이동 완료. 새로운 부모:', pageElement.parentElement);
+          } else {
+            console.log('✅ #signup-page가 이미 #main-content의 직계 자식입니다.');
+          }
           
           // main-content를 flex로 설정
           mainContent.style.setProperty('display', 'flex', 'important');
@@ -3079,27 +3093,83 @@ async function navigateToPage(page) {
           mainContent.style.setProperty('visibility', 'visible', 'important');
           mainContent.style.setProperty('opacity', '1', 'important');
           mainContent.style.setProperty('min-height', '100vh', 'important');
-          console.log('단계 1 완료: main-content flex 설정');
+          console.log('단계 1 완료: DOM 이동 및 main-content flex 설정');
+        } else {
+          console.error('❌ main-content 요소를 찾을 수 없습니다!');
         }
         
-        // ===== 단계 2: CSS 초기화 - 모든 인라인 스타일 제거 =====
-        console.log('단계 2 시작: 인라인 스타일 제거');
-        // 모든 인라인 스타일 속성 제거
-        const inlineStylesToRemove = [
-          'display', 'visibility', 'opacity', 'height', 'min-height', 'max-height',
-          'width', 'max-width', 'position', 'z-index', 'padding', 'margin',
-          'box-sizing', 'background', 'overflow', 'flex', 'flex-grow', 'flex-shrink', 'flex-basis'
-        ];
-        inlineStylesToRemove.forEach(prop => {
-          pageElement.style.removeProperty(prop);
-        });
-        console.log('단계 2 완료: 인라인 스타일 제거 완료');
+        // ===== 단계 2: 내부 콘텐츠 강제 노출 =====
+        console.log('단계 2 시작: 내부 콘텐츠 강제 노출');
         
-        // ===== 단계 3: .active 클래스 추가 및 기본 스타일 설정 =====
-        console.log('단계 3 시작: .active 클래스 추가');
+        // .card 요소 찾기 및 강제 노출
+        const signupCard = pageElement.querySelector('.card');
+        if (signupCard) {
+          const cardDisplay = window.getComputedStyle(signupCard).display;
+          console.log('회원가입 카드 요소 확인됨:', signupCard);
+          console.log('카드 현재 display:', cardDisplay);
+          
+          // 강제로 노출
+          signupCard.style.setProperty('display', 'block', 'important');
+          signupCard.style.setProperty('visibility', 'visible', 'important');
+          signupCard.style.setProperty('opacity', '1', 'important');
+          signupCard.style.removeProperty('height');
+          signupCard.style.removeProperty('min-height');
+          signupCard.style.removeProperty('max-height');
+          signupCard.style.removeProperty('overflow');
+          
+          console.log('✅ 카드 강제 노출 완료. 새로운 display:', window.getComputedStyle(signupCard).display);
+        } else {
+          console.warn('⚠️ 회원가입 페이지 내부 .card 요소를 찾을 수 없습니다!');
+        }
+        
+        // #signupForm 요소 찾기 및 강제 노출
+        const signupForm = pageElement.querySelector('#signupForm');
+        if (signupForm) {
+          const formDisplay = window.getComputedStyle(signupForm).display;
+          console.log('회원가입 폼 확인됨:', signupForm);
+          console.log('폼 현재 display:', formDisplay);
+          
+          // 강제로 노출
+          signupForm.style.setProperty('display', 'block', 'important');
+          signupForm.style.setProperty('visibility', 'visible', 'important');
+          signupForm.style.setProperty('opacity', '1', 'important');
+          signupForm.style.removeProperty('height');
+          signupForm.style.removeProperty('min-height');
+          signupForm.style.removeProperty('max-height');
+          signupForm.style.removeProperty('overflow');
+          
+          console.log('✅ 폼 강제 노출 완료. 새로운 display:', window.getComputedStyle(signupForm).display);
+        } else {
+          console.warn('⚠️ 회원가입 폼(#signupForm)을 찾을 수 없습니다!');
+        }
+        
+        // 내부의 모든 input, label, button 등도 확인
+        const internalElements = pageElement.querySelectorAll('input, label, button, .form-group, .card-header, .card-title, .card-subtitle');
+        internalElements.forEach(el => {
+          const elDisplay = window.getComputedStyle(el).display;
+          if (elDisplay === 'none') {
+            el.style.setProperty('display', '', 'important');
+            console.log('내부 요소 노출:', el.tagName, el.className || el.id);
+          }
+        });
+        
+        console.log('단계 2 완료: 내부 콘텐츠 강제 노출 완료');
+        
+        // ===== 단계 3: CSS 초기화 및 .active 클래스 추가 =====
+        console.log('단계 3 시작: CSS 초기화 및 .active 클래스 추가');
+        
         // 다른 모든 page-section에서 active 제거
         document.querySelectorAll('.page-section').forEach(section => {
           section.classList.remove('active');
+        });
+        
+        // 인라인 스타일 제거 (일부는 유지해야 하므로 선택적으로)
+        const inlineStylesToRemove = [
+          'visibility', 'opacity', 'height', 'max-height',
+          'width', 'max-width', 'background', 'overflow'
+        ];
+        inlineStylesToRemove.forEach(prop => {
+          pageElement.style.removeProperty(prop);
         });
         
         // 회원가입 페이지에 active 클래스 추가
@@ -3114,6 +3184,11 @@ async function navigateToPage(page) {
         
         // display: block 설정
         pageElement.style.setProperty('display', 'block', 'important');
+        pageElement.style.setProperty('min-height', '600px', 'important');
+        pageElement.style.setProperty('padding', '40px 20px', 'important');
+        pageElement.style.setProperty('margin', '40px auto', 'important');
+        pageElement.style.setProperty('box-sizing', 'border-box', 'important');
+        
         console.log('단계 3 완료: .active 클래스 추가 및 기본 스타일 설정');
         
         // ===== 단계 4: 강제 렌더링 (Force Reflow) =====
@@ -3121,25 +3196,20 @@ async function navigateToPage(page) {
         // void element.offsetWidth를 호출하여 브라우저가 강제로 레이아웃을 다시 계산하게 함
         void pageElement.offsetWidth;
         void pageElement.offsetHeight;
+        if (signupCard) void signupCard.offsetWidth;
+        if (signupForm) void signupForm.offsetWidth;
         console.log('단계 4 완료: 강제 렌더링 완료');
         
-        // ===== 내부 요소 확인 =====
-        const signupCard = pageElement.querySelector('.card');
-        const signupForm = pageElement.querySelector('#signupForm');
-        
-        if (signupCard) {
-          console.log('회원가입 카드 요소 확인됨:', signupCard);
-        } else {
-          console.warn('회원가입 페이지 내부 .card 요소를 찾을 수 없습니다!');
-        }
-        
-        if (signupForm) {
-          console.log('회원가입 폼 확인됨:', signupForm);
-        } else {
-          console.warn('회원가입 폼(#signupForm)을 찾을 수 없습니다!');
-        }
-        
         // ===== 최종 확인 및 로그 =====
+        console.log('=== 회원가입 페이지 최종 상태 확인 ===');
+        
+        // 부모 관계 최종 확인
+        const finalParent = pageElement.parentElement;
+        const isInMainContent = (finalParent === mainContent);
+        console.log('최종 부모:', finalParent);
+        console.log('main-content의 직계 자식인가?', isInMainContent);
+        
+        // 페이지 요소 상태
         const computedDisplay = window.getComputedStyle(pageElement).display;
         const computedVisibility = window.getComputedStyle(pageElement).visibility;
         const computedOpacity = window.getComputedStyle(pageElement).opacity;
@@ -3147,15 +3217,42 @@ async function navigateToPage(page) {
         const offsetHeight = pageElement.offsetHeight;
         const offsetWidth = pageElement.offsetWidth;
         
-        console.log('=== 회원가입 페이지 최종 상태 ===');
-        console.log('computed display:', computedDisplay);
-        console.log('computed visibility:', computedVisibility);
-        console.log('computed opacity:', computedOpacity);
-        console.log('computed z-index:', computedZIndex);
-        console.log('offsetHeight:', offsetHeight);
-        console.log('offsetWidth:', offsetWidth);
-        console.log('has .active class:', pageElement.classList.contains('active'));
-        console.log('main-content offsetHeight:', mainContent ? mainContent.offsetHeight : 'N/A');
+        console.log('페이지 computed display:', computedDisplay);
+        console.log('페이지 computed visibility:', computedVisibility);
+        console.log('페이지 computed opacity:', computedOpacity);
+        console.log('페이지 computed z-index:', computedZIndex);
+        console.log('페이지 offsetHeight:', offsetHeight);
+        console.log('페이지 offsetWidth:', offsetWidth);
+        console.log('페이지 has .active class:', pageElement.classList.contains('active'));
+        
+        // 내부 요소 상태 확인
+        if (signupCard) {
+          const cardDisplay = window.getComputedStyle(signupCard).display;
+          const cardVisibility = window.getComputedStyle(signupCard).visibility;
+          const cardOpacity = window.getComputedStyle(signupCard).opacity;
+          const cardHeight = signupCard.offsetHeight;
+          console.log('카드 computed display:', cardDisplay);
+          console.log('카드 computed visibility:', cardVisibility);
+          console.log('카드 computed opacity:', cardOpacity);
+          console.log('카드 offsetHeight:', cardHeight);
+        }
+        
+        if (signupForm) {
+          const formDisplay = window.getComputedStyle(signupForm).display;
+          const formVisibility = window.getComputedStyle(signupForm).visibility;
+          const formOpacity = window.getComputedStyle(signupForm).opacity;
+          const formHeight = signupForm.offsetHeight;
+          console.log('폼 computed display:', formDisplay);
+          console.log('폼 computed visibility:', formVisibility);
+          console.log('폼 computed opacity:', formOpacity);
+          console.log('폼 offsetHeight:', formHeight);
+        }
+        
+        // main-content 상태
+        if (mainContent) {
+          console.log('main-content display:', window.getComputedStyle(mainContent).display);
+          console.log('main-content offsetHeight:', mainContent.offsetHeight);
+        }
         
         // offsetHeight가 여전히 0이면 추가 조치
         if (offsetHeight === 0) {
@@ -3163,15 +3260,24 @@ async function navigateToPage(page) {
           
           // 다시 한번 강제 렌더링
           void pageElement.offsetWidth;
+          if (signupCard) void signupCard.offsetWidth;
+          if (signupForm) void signupForm.offsetWidth;
           
           // 최소 높이 강제 설정
           pageElement.style.setProperty('height', '600px', 'important');
           pageElement.style.setProperty('min-height', '600px', 'important');
           
+          // 내부 요소도 높이 설정
+          if (signupCard) {
+            signupCard.style.setProperty('min-height', '500px', 'important');
+          }
+          
           // 한번 더 강제 렌더링
           void pageElement.offsetWidth;
           
           console.log('추가 조치 후 offsetHeight:', pageElement.offsetHeight);
+          if (signupCard) console.log('추가 조치 후 카드 offsetHeight:', signupCard.offsetHeight);
+          if (signupForm) console.log('추가 조치 후 폼 offsetHeight:', signupForm.offsetHeight);
         }
         
         // 스크롤 처리
