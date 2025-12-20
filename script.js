@@ -3066,29 +3066,33 @@ async function navigateToPage(page) {
         const parentOpacity = parentStyle.opacity;
         const parentHeight = parentStyle.height;
         
-        // 부모 요소가 숨겨져 있는지 확인 (display, visibility, opacity, height 모두 체크)
+        // content-section이면서 page-section이 아닌 경우는 의도적으로 숨긴 것이므로 건너뛰기
+        // (회원가입 페이지의 부모가 아니므로)
+        if (parent.classList.contains('content-section') && !parent.classList.contains('page-section')) {
+          parent = parent.parentElement;
+          continue;
+        }
+        
+        // 실제로 숨겨져 있는 경우만 복원 (offsetHeight는 제외 - 너무 엄격함)
         if (parentDisplay === 'none' || parentVisibility === 'hidden' || parentOpacity === '0' || parentHeight === '0px') {
-          console.warn('부모 요소가 숨겨져 있습니다:', parent);
-          
-          // 부모 요소 복원
-          if (parent.tagName === 'SECTION' && parent.classList.contains('content-section')) {
-            // content-section이지만 page-section이 아닌 경우는 숨겨야 함
-            // 하지만 회원가입 페이지의 직접 부모는 예외
-            if (!parent.contains(pageElement) || parent === pageElement.parentElement) {
-              // 회원가입 페이지의 직접 부모인 경우만 복원
+            // 부모 요소 복원
+            if (parent.classList.contains('main-content')) {
+              parent.style.setProperty('display', 'flex', 'important');
+              parent.style.setProperty('visibility', 'visible', 'important');
+              parent.style.setProperty('opacity', '1', 'important');
+              parent.style.removeProperty('height');
+              parent.style.removeProperty('overflow');
+            } else if (parent.classList.contains('app')) {
+              parent.style.setProperty('display', 'flex', 'important');
+              parent.style.setProperty('visibility', 'visible', 'important');
+              parent.style.setProperty('opacity', '1', 'important');
+            } else {
               parent.style.setProperty('display', 'block', 'important');
               parent.style.setProperty('visibility', 'visible', 'important');
               parent.style.setProperty('opacity', '1', 'important');
               parent.style.removeProperty('height');
               parent.style.removeProperty('overflow');
             }
-          } else {
-            // 다른 부모 요소는 모두 복원
-            parent.style.setProperty('display', 'block', 'important');
-            parent.style.setProperty('visibility', 'visible', 'important');
-            parent.style.setProperty('opacity', '1', 'important');
-            parent.style.removeProperty('height');
-            parent.style.removeProperty('overflow');
           }
         }
         parent = parent.parentElement;
