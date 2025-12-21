@@ -957,20 +957,6 @@ async function setupLogin() {
     // 어드민 페이지인지 확인
     const isAdminPage = window.location.pathname.includes('admin.html');
     
-    // 어드민 페이지에서는 관리자 계정만 로그인 가능
-    if (isAdminPage) {
-      const adminEmail = typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'jjiyu244@gmail.com';
-      if (email.toLowerCase() !== adminEmail.toLowerCase()) {
-        if (statusText) {
-          statusText.innerHTML = `
-            <span style="color: #ef4444;">❌ 관리자 계정만 로그인할 수 있습니다.</span><br/>
-            <span style="color: #9ca3af; font-size: 12px;">허용된 계정: ${adminEmail}</span>
-          `;
-        }
-        return;
-      }
-    }
-    
     // 로그인 시도
     try {
       if (statusText) {
@@ -1026,11 +1012,19 @@ async function setupLogin() {
         throw loginError || new Error('로그인에 실패했습니다.');
       }
       
-      // 어드민 페이지에서 로그인 성공 후 관리자 계정인지 다시 확인
+      // 어드민 페이지에서 로그인 성공 후 관리자 계정인지 확인
       if (isAdminPage) {
         const adminUsername = 'jjiyu244'; // 관리자 username
-        const adminEmail = `${adminUsername}@corestaker.local`;
-        if (result.user.email.toLowerCase() !== adminEmail.toLowerCase()) {
+        // 여러 도메인 형식 모두 체크
+        const adminEmails = [
+          `${adminUsername}@corestaker.local`,
+          `${adminUsername}@temp.com`,
+          `${adminUsername}@gmail.com`
+        ];
+        const userEmail = result.user.email.toLowerCase();
+        const isAdmin = adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
+        
+        if (!isAdmin) {
           // 관리자가 아니면 로그아웃
           const { signOut } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
           await signOut(currentAuth);
