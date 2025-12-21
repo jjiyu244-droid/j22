@@ -467,16 +467,55 @@ async function initFirebase() {
           console.warn('localStorage 삭제 실패:', storageError);
         }
         
-      updateLoginUI();
-      updateAdminUI();
-      
-      // URL 기반 라우팅 처리
-      handleURLRouting();
-      
-      // 리워드 페이지가 현재 표시 중이면 빈 상태 표시
-      const rewardsPage = document.getElementById('rewards-page');
-      if (rewardsPage && rewardsPage.style.display !== 'none') {
-        await renderRewards();
+      // 🔥 어드민 페이지인지 확인하고 로그인 폼 표시
+      const isAdminPage = window.location.pathname.includes('admin.html');
+      if (isAdminPage) {
+        console.log('🔍 [onAuthStateChanged] 어드민 페이지 - 로그인 폼 표시');
+        const adminPageContent = document.getElementById('adminPageContent');
+        
+        if (adminPageContent) {
+          adminPageContent.innerHTML = `
+            <div class="card glass" style="padding: 40px; text-align: center;">
+              <h3 style="color: #ffffff; font-size: 20px; margin-bottom: 16px;">로그인이 필요합니다</h3>
+              <p style="color: #9ca3af; font-size: 16px; margin-bottom: 24px;">어드민 대시보드에 접근하려면 관리자 계정으로 로그인해주세요.</p>
+              <button class="btn-primary" id="showLoginBtn" style="padding: 12px 24px; font-size: 16px;">로그인하기</button>
+            </div>
+          `;
+          
+          // 로그인 버튼 이벤트
+          const showLoginBtn = document.getElementById('showLoginBtn');
+          if (showLoginBtn) {
+            showLoginBtn.addEventListener('click', () => {
+              const loginModal = document.getElementById('loginModal');
+              if (loginModal) {
+                loginModal.classList.add('show');
+                console.log('✅ [어드민 페이지] 로그인 모달 표시');
+              }
+            });
+          }
+        }
+        
+        // 로그인 모달 자동 표시 (0.5초 후)
+        setTimeout(() => {
+          const loginModal = document.getElementById('loginModal');
+          if (loginModal) {
+            loginModal.classList.add('show');
+            console.log('✅ [어드민 페이지] 로그인 모달 자동 표시');
+          }
+        }, 500);
+      } else {
+        // 일반 페이지 처리
+        updateLoginUI();
+        updateAdminUI();
+        
+        // URL 기반 라우팅 처리
+        handleURLRouting();
+        
+        // 리워드 페이지가 현재 표시 중이면 빈 상태 표시
+        const rewardsPage = document.getElementById('rewards-page');
+        if (rewardsPage && rewardsPage.style.display !== 'none') {
+          await renderRewards();
+        }
       }
     }
       
