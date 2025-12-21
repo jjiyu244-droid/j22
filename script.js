@@ -1218,12 +1218,22 @@ async function setupLogin() {
         성공한_이메일: result.user.email
       });
       
-      // 어드민 페이지에서 로그인 성공 후 관리자 계정인지 확인
+      // 어드민 페이지에서 로그인 성공 후 관리자 계정인지 확인 (여러 도메인 형식 지원)
       if (isAdminPage) {
         const adminUsername = 'jjiyu244'; // 관리자 username
-        const adminEmail = `${adminUsername}@corestaker.local`; // 단일 형식만 사용
+        const adminEmails = [
+          `${adminUsername}@corestaker.local`,
+          `${adminUsername}@temp.com`,
+          `${adminUsername}@gmail.com`
+        ];
         const userEmail = result.user.email.toLowerCase();
-        const isAdmin = userEmail === adminEmail.toLowerCase();
+        const isAdmin = adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
+        
+        console.log('🔍 [로그인 후 어드민 체크]', {
+          userEmail,
+          adminEmails,
+          isAdmin
+        });
         
         if (!isAdmin) {
           // 관리자가 아니면 로그아웃
@@ -1237,6 +1247,8 @@ async function setupLogin() {
           }
           return;
         }
+        
+        console.log('✅ [로그인 후 어드민 체크] 관리자 확인 완료:', userEmail);
       }
       
       // 로그인 성공 시 localStorage에 사용자 정보 저장 (onAuthStateChanged와 충돌 방지)
