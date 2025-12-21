@@ -1104,9 +1104,64 @@ async function setupLogin() {
         throw new Error('로그인 함수를 불러올 수 없습니다. 페이지를 새로고침해주세요.');
       }
       
-      // 🔥 단일 형식만 사용: @corestaker.local (여러 도메인 시도 로직 제거)
-      console.log('🔐 [로그인 시도] Firebase Auth 호출:', email);
-      const result = await signInWithEmailAndPassword(currentAuth, email, password);
+      // 🔥 여러 도메인 시도 (기존 계정 호환성)
+      // Firebase Auth에 실제로 존재하는 계정 형식을 찾기 위해 여러 도메인 시도
+      let result = null;
+      let loginError = null;
+      const attemptedEmails = [email]; // 시도한 이메일 추적
+      
+      // 1차 시도: @corestaker.local (새 형식)
+      try {
+        console.log('🔐 [로그인 시도 1] @corestaker.local:', email);
+        result = await signInWithEmailAndPassword(currentAuth, email, password);
+        console.log('✅ [로그인 성공] @corestaker.local:', email);
+      } catch (error1) {
+        console.log('⚠️ [로그인 실패 1] @corestaker.local:', error1.code);
+        loginError = error1;
+        
+        // 2차 시도: @gmail.com (관리자 계정 등)
+        if (error1.code === 'auth/user-not-found' || 
+            error1.code === 'auth/wrong-password' || 
+            error1.code === 'auth/invalid-credential') {
+          const emailGmail = `${username.toLowerCase()}@gmail.com`;
+          attemptedEmails.push(emailGmail);
+          try {
+            console.log('🔐 [로그인 시도 2] @gmail.com:', emailGmail);
+            result = await signInWithEmailAndPassword(currentAuth, emailGmail, password);
+            email = emailGmail; // 성공한 이메일로 업데이트
+            console.log('✅ [로그인 성공] @gmail.com:', email);
+          } catch (error2) {
+            console.log('⚠️ [로그인 실패 2] @gmail.com:', error2.code);
+            loginError = error2;
+            
+            // 3차 시도: @temp.com (기존 형식)
+            if (error2.code === 'auth/user-not-found' || 
+                error2.code === 'auth/wrong-password' || 
+                error2.code === 'auth/invalid-credential') {
+              const emailTemp = `${username.toLowerCase()}@temp.com`;
+              attemptedEmails.push(emailTemp);
+              try {
+                console.log('🔐 [로그인 시도 3] @temp.com:', emailTemp);
+                result = await signInWithEmailAndPassword(currentAuth, emailTemp, password);
+                email = emailTemp; // 성공한 이메일로 업데이트
+                console.log('✅ [로그인 성공] @temp.com:', email);
+              } catch (error3) {
+                console.log('⚠️ [로그인 실패 3] @temp.com:', error3.code);
+                loginError = error3;
+              }
+            }
+          }
+        }
+      }
+      
+      // 모든 시도 실패
+      if (!result) {
+        const customError = new Error('로그인에 실패했습니다.');
+        customError.code = loginError?.code || 'auth/login-failed';
+        customError.attemptedEmails = attemptedEmails;
+        customError.lastError = loginError;
+        throw customError;
+      }
       
       // 🔍 [디버깅] 로그인 성공 직후 - user 객체의 전체 내용
       console.log('✅ [로그인 성공] user 객체 전체:', {
@@ -1118,7 +1173,9 @@ async function setupLogin() {
         metadata: {
           creationTime: result.user.metadata.creationTime,
           lastSignInTime: result.user.metadata.lastSignInTime
-        }
+        },
+        시도한_이메일들: attemptedEmails,
+        성공한_이메일: result.user.email
       });
       
       // 어드민 페이지에서 로그인 성공 후 관리자 계정인지 확인
