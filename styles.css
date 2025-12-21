@@ -559,6 +559,18 @@ body {
   margin-top: 4px;
 }
 
+/* FAQ 섹션 전체 너비 사용 */
+#faq-section {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
+}
+
+#faq-section > div {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
 .card-title {
   font-size: 15px;
   font-weight: 600;
@@ -1303,11 +1315,15 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .faq-item {
   border-bottom: 1px solid var(--border-subtle);
   overflow: hidden;
+  width: 100% !important;
 }
 
 .faq-item:first-child {
@@ -1315,16 +1331,16 @@ body {
 }
 
 .faq-question {
-  width: 100%;
+  width: 100% !important;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 0;
+  padding: 28px 0;
   background: none;
   border: none;
   text-align: left;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--text);
   transition: color 0.2s ease;
@@ -1358,28 +1374,32 @@ body {
   overflow: hidden;
   transition: max-height 0.3s ease, padding 0.3s ease;
   padding: 0 0;
+  width: 100% !important;
 }
 
 .faq-item.active .faq-answer {
   max-height: 500px;
-  padding: 0 0 24px 0;
+  padding: 0 0 32px 0;
+  margin-top: 8px;
 }
 
 .faq-answer p {
   color: var(--text-soft);
-  line-height: 1.8;
-  font-size: 15px;
-  margin: 0;
+  line-height: 1.9;
+  font-size: 16px;
+  margin: 0 0 12px 0;
 }
 
 .faq-answer ul {
   color: var(--text-soft);
-  line-height: 1.8;
-  font-size: 15px;
+  line-height: 1.9;
+  font-size: 16px;
+  margin: 0;
+  padding-left: 24px;
 }
 
 .faq-answer li {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 @media (max-width: 768px) {
