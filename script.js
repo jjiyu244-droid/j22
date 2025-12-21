@@ -322,19 +322,45 @@ async function initFirebase() {
           if (userSnap.exists()) {
             const userData = userSnap.data();
             username = userData.username || null;
-            // 관리자 확인
-            isAdmin = userData.username === ADMIN_USERNAME || userData.role === 'admin' || user.email === ADMIN_EMAIL;
+            // 관리자 확인 (여러 도메인 형식 지원)
+            const adminEmails = [
+              `${ADMIN_USERNAME}@corestaker.local`,
+              `${ADMIN_USERNAME}@temp.com`,
+              `${ADMIN_USERNAME}@gmail.com`
+            ];
+            const userEmail = user.email ? user.email.toLowerCase() : '';
+            isAdmin = userData.username === ADMIN_USERNAME || 
+                     userData.role === 'admin' || 
+                     adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
           } else {
             // Firestore에 사용자 정보가 없으면 이메일에서 username 추출
             const email = user.email || '';
-            username = email.replace('@corestaker.local', '').replace('@temp.com', '').split('@')[0];
-            isAdmin = email === ADMIN_EMAIL;
+            username = email.replace('@corestaker.local', '').replace('@temp.com', '').replace('@gmail.com', '').split('@')[0];
+            // 관리자 확인 (여러 도메인 형식 지원)
+            const adminEmails = [
+              `${ADMIN_USERNAME}@corestaker.local`,
+              `${ADMIN_USERNAME}@temp.com`,
+              `${ADMIN_USERNAME}@gmail.com`
+            ];
+            isAdmin = adminEmails.some(adminEmail => adminEmail.toLowerCase() === email.toLowerCase());
           }
         } catch (e) {
-          console.warn('username 가져오기 실패:', e);
+          console.warn('username 가져오기 실패 (Firestore 권한 문제일 수 있음):', e);
+          // Firestore 권한 문제가 있어도 이메일에서 username 추출
           const email = user.email || '';
-          username = email.replace('@corestaker.local', '').replace('@temp.com', '').split('@')[0];
-          isAdmin = email === ADMIN_EMAIL;
+          username = email.replace('@corestaker.local', '').replace('@temp.com', '').replace('@gmail.com', '').split('@')[0];
+          // 관리자 확인 (여러 도메인 형식 지원)
+          const adminEmails = [
+            `${ADMIN_USERNAME}@corestaker.local`,
+            `${ADMIN_USERNAME}@temp.com`,
+            `${ADMIN_USERNAME}@gmail.com`
+          ];
+          isAdmin = adminEmails.some(adminEmail => adminEmail.toLowerCase() === email.toLowerCase());
+          console.log('🔍 [어드민 체크 - Firestore 실패] 이메일 기반 체크:', {
+            email,
+            username,
+            isAdmin
+          });
         }
         
         currentUser = { 
@@ -372,9 +398,21 @@ async function initFirebase() {
           `;
           
           try {
-            // 어드민 확인
-            const adminEmail = typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'jjiyu244@corestaker.local';
-            const userIsAdmin = user.email && user.email.toLowerCase() === adminEmail.toLowerCase();
+            // 어드민 확인 (여러 도메인 형식 지원)
+            const adminUsername = 'jjiyu244';
+            const adminEmails = [
+              `${adminUsername}@corestaker.local`,
+              `${adminUsername}@temp.com`,
+              `${adminUsername}@gmail.com`
+            ];
+            const userEmail = user.email ? user.email.toLowerCase() : '';
+            const userIsAdmin = adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
+            
+            console.log('🔍 [어드민 체크]', {
+              userEmail,
+              adminEmails,
+              userIsAdmin
+            });
             
             if (!userIsAdmin) {
               // 관리자가 아니면 로그아웃
@@ -384,7 +422,7 @@ async function initFirebase() {
                 <div class="card glass" style="padding: 40px; text-align: center;">
                   <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 16px;">❌ 어드민 권한이 필요합니다</h3>
                   <p style="color: #9ca3af; font-size: 16px; margin-bottom: 12px;">현재 계정: ${user.email}</p>
-                  <p style="color: #9ca3af; font-size: 14px; margin-bottom: 24px;">허용된 계정: ${adminEmail}</p>
+                  <p style="color: #9ca3af; font-size: 14px; margin-bottom: 24px;">허용된 계정: ${adminUsername}</p>
                   <button class="btn-primary" id="showLoginBtnAgain" style="padding: 12px 24px; font-size: 16px; margin-top: 16px;">다시 로그인하기</button>
                 </div>
               `;
@@ -400,6 +438,8 @@ async function initFirebase() {
               }
               return;
             }
+            
+            console.log('✅ [어드민 체크] 관리자 확인 완료:', userEmail);
             
             // 어드민 대시보드 렌더링
             console.log('🔄 [어드민 대시보드] 데이터 로드 시작');
