@@ -357,20 +357,89 @@ async function initFirebase() {
           console.warn('localStorage 저장 실패:', storageError);
         }
         
-      await loadUserStakesFromFirestore(user.uid);
-      await loadUserRewardsFromFirestore(user.uid);
-      applyUserStakesToPortfolio();
+      // 🔥 어드민 페이지인지 확인하고 어드민 대시보드 렌더링
+      const isAdminPage = window.location.pathname.includes('admin.html');
+      if (isAdminPage) {
+        console.log('🔍 [onAuthStateChanged] 어드민 페이지 감지, 대시보드 렌더링 시작');
+        const adminPageContent = document.getElementById('adminPageContent');
+        
+        if (adminPageContent) {
+          // 로딩 상태 표시
+          adminPageContent.innerHTML = `
+            <div class="card glass" style="padding: 40px; text-align: center;">
+              <p style="color: #9ca3af; font-size: 16px;">데이터를 불러오는 중...</p>
+            </div>
+          `;
+          
+          try {
+            // 어드민 확인
+            const adminEmail = typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'jjiyu244@corestaker.local';
+            const userIsAdmin = user.email && user.email.toLowerCase() === adminEmail.toLowerCase();
+            
+            if (!userIsAdmin) {
+              // 관리자가 아니면 로그아웃
+              const { signOut } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
+              await signOut(auth);
+              adminPageContent.innerHTML = `
+                <div class="card glass" style="padding: 40px; text-align: center;">
+                  <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 16px;">❌ 어드민 권한이 필요합니다</h3>
+                  <p style="color: #9ca3af; font-size: 16px; margin-bottom: 12px;">현재 계정: ${user.email}</p>
+                  <p style="color: #9ca3af; font-size: 14px; margin-bottom: 24px;">허용된 계정: ${adminEmail}</p>
+                  <button class="btn-primary" id="showLoginBtnAgain" style="padding: 12px 24px; font-size: 16px; margin-top: 16px;">다시 로그인하기</button>
+                </div>
+              `;
+              
+              const showLoginBtnAgain = document.getElementById('showLoginBtnAgain');
+              if (showLoginBtnAgain) {
+                showLoginBtnAgain.addEventListener('click', () => {
+                  const loginModal = document.getElementById('loginModal');
+                  if (loginModal) {
+                    loginModal.classList.add('show');
+                  }
+                });
+              }
+              return;
+            }
+            
+            // 어드민 대시보드 렌더링
+            console.log('🔄 [어드민 대시보드] 데이터 로드 시작');
+            const users = await loadAllUserStakes();
+            console.log('✅ [어드민 대시보드] 데이터 로드 완료:', users.length, '명');
+            
+            if (typeof renderAdminDashboardContent === 'function') {
+              await renderAdminDashboardContent(users, adminPageContent);
+              console.log('✅ [어드민 대시보드] 렌더링 완료');
+            } else {
+              throw new Error('renderAdminDashboardContent 함수를 찾을 수 없습니다.');
+            }
+          } catch (error) {
+            console.error('❌ [어드민 대시보드] 렌더링 오류:', error);
+            adminPageContent.innerHTML = `
+              <div class="card glass" style="padding: 40px; text-align: center;">
+                <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 12px;">오류가 발생했습니다</h3>
+                <p style="color: #fca5a5; font-size: 16px; margin-bottom: 8px;">${error.message}</p>
+                <button class="btn-primary" onclick="location.reload()" style="margin-top: 20px; padding: 12px 24px;">새로고침</button>
+              </div>
+            `;
+          }
+        }
+      } else {
+        // 일반 페이지 처리
+        await loadUserStakesFromFirestore(user.uid);
+        await loadUserRewardsFromFirestore(user.uid);
+        applyUserStakesToPortfolio();
         await fetchAndApplyPrices(); // 가격 업데이트 후 포트폴리오 렌더링
-      updateLoginUI();
-      updateAdminUI();
-      
-      // URL 기반 라우팅 처리 (Firebase 초기화 후)
-      handleURLRouting();
-      
-      // 리워드 페이지가 현재 표시 중이면 리워드 렌더링
-      const rewardsPage = document.getElementById('rewards-page');
-      if (rewardsPage && rewardsPage.style.display !== 'none') {
-        await renderRewards();
+        updateLoginUI();
+        updateAdminUI();
+        
+        // URL 기반 라우팅 처리 (Firebase 초기화 후)
+        handleURLRouting();
+        
+        // 리워드 페이지가 현재 표시 중이면 리워드 렌더링
+        const rewardsPage = document.getElementById('rewards-page');
+        if (rewardsPage && rewardsPage.style.display !== 'none') {
+          await renderRewards();
+        }
       }
     } else {
         console.log('❌ [onAuthStateChanged] 로그아웃 상태 확인');

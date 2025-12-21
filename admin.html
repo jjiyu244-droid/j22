@@ -291,27 +291,35 @@
         // 여기서는 별도로 렌더링하지 않음
         // 단, 어드민 페이지 전용 UI 업데이트가 필요하면 여기서 처리
         
-        // 임시: script.js의 onAuthStateChanged가 작동하지 않는 경우를 대비한 폴백
-        // (실제로는 script.js의 onAuthStateChanged가 작동해야 함)
-        const checkAdminDashboard = async () => {
-          const user = firebaseAuth.currentUser;
-          if (user && container) {
-            const adminEmail = typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'jjiyu244@corestaker.local';
-            const userIsAdmin = user.email && user.email.toLowerCase() === adminEmail.toLowerCase();
-            
-            if (userIsAdmin && typeof renderAdminDashboardContent === 'function') {
-              try {
-                const users = await loadAllUserStakes();
-                await renderAdminDashboardContent(users, container);
-              } catch (error) {
-                console.error('어드민 대시보드 렌더링 오류:', error);
-              }
+        // 🔥 로딩 상태 타임아웃 설정 (5초 후 강제 해제)
+        let loadingTimeout = setTimeout(() => {
+          console.warn('⚠️ [admin.html] 로딩 타임아웃 (5초) - 강제 해제');
+          if (container) {
+            const loadingText = container.querySelector('p');
+            if (loadingText && loadingText.textContent.includes('초기화 중') || loadingText.textContent.includes('불러오는 중')) {
+              container.innerHTML = `
+                <div class="card glass" style="padding: 40px; text-align: center;">
+                  <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 12px;">로딩 시간 초과</h3>
+                  <p style="color: #fca5a5; font-size: 16px; margin-bottom: 8px;">데이터를 불러오는 데 시간이 오래 걸리고 있습니다.</p>
+                  <button class="btn-primary" onclick="location.reload()" style="margin-top: 20px; padding: 12px 24px;">새로고침</button>
+                </div>
+              `;
             }
           }
-        };
+        }, 5000);
         
-        // script.js의 onAuthStateChanged가 작동하지 않는 경우를 대비해 1초 후 체크
-        setTimeout(checkAdminDashboard, 1000);
+        // script.js의 onAuthStateChanged가 대시보드를 렌더링하면 타임아웃 취소
+        // (대시보드가 렌더링되면 container.innerHTML이 변경되므로)
+        const checkDashboardRendered = setInterval(() => {
+          if (container) {
+            const loadingText = container.querySelector('p');
+            if (loadingText && !loadingText.textContent.includes('초기화 중') && !loadingText.textContent.includes('불러오는 중')) {
+              clearTimeout(loadingTimeout);
+              clearInterval(checkDashboardRendered);
+              console.log('✅ [admin.html] 대시보드 렌더링 완료, 타임아웃 취소');
+            }
+          }
+        }, 500);
       }
 
 
