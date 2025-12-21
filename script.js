@@ -2880,6 +2880,63 @@ async function navigateToPage(page) {
   if (page === 'faq') {
     console.log('FAQ 페이지: 강제 탈출 모드 - 그리드 구조 파괴');
     
+    // ===== 0. FAQ 섹션 클래스 초기화 및 강제 너비 주입 (가장 먼저 실행) =====
+    const faqSection = document.getElementById('faq-section');
+    if (faqSection) {
+      console.log('FAQ 섹션 발견, 클래스 초기화 시작');
+      
+      // 1. 클래스 초기화 (Hard Reset) - grid, col-, w-로 시작하는 모든 클래스 제거
+      const classesToRemove = [];
+      faqSection.classList.forEach((className) => {
+        if (className.startsWith('grid') || 
+            className.startsWith('col-') || 
+            className.startsWith('w-') ||
+            className.includes('grid-') ||
+            className.includes('col')) {
+          classesToRemove.push(className);
+        }
+      });
+      classesToRemove.forEach(cls => faqSection.classList.remove(cls));
+      console.log('제거된 클래스:', classesToRemove);
+      
+      // 클래스를 깨끗하게 다시 쓰기
+      faqSection.className = 'content-section';
+      console.log('✅ 클래스 초기화 완료:', faqSection.className);
+      
+      // 2. 인라인 스타일 강제 삭제
+      faqSection.removeAttribute('style');
+      console.log('✅ 인라인 스타일 삭제 완료');
+      
+      // 3. 부모 요소의 Grid 속성 파괴
+      const parent = faqSection.parentElement;
+      if (parent) {
+        const parentStyle = window.getComputedStyle(parent);
+        const parentDisplay = parentStyle.display;
+        
+        if (parentDisplay === 'grid') {
+          parent.style.setProperty('display', 'block', 'important');
+          parent.style.setProperty('grid-template-columns', 'none', 'important');
+          parent.style.setProperty('grid-template-rows', 'none', 'important');
+          parent.style.setProperty('grid-gap', '0', 'important');
+          console.log('✅ 부모 요소 Grid 속성 파괴:', parent.tagName, parent.className);
+        }
+      }
+      
+      // 4. 강제 너비 주입 (최종)
+      Object.assign(faqSection.style, {
+        display: 'block',
+        width: '100%',
+        maxWidth: '1200px',
+        margin: '50px auto',
+        padding: '0 20px',
+        boxSizing: 'border-box',
+        float: 'none',
+        clear: 'both',
+        position: 'relative'
+      });
+      console.log('✅ 강제 너비 주입 완료');
+    }
+    
     // ===== 1. 모든 형제 요소 강제 숨김 =====
     const mainContent = document.querySelector('.main-content');
     if (mainContent) {
@@ -2968,25 +3025,11 @@ async function navigateToPage(page) {
       footer.style.setProperty('overflow', 'hidden', 'important');
     });
     
-    // ===== 2. FAQ 섹션 강제 설정 및 부모 제약 해제 =====
-    const faqSection = document.getElementById('faq-section');
+    // ===== 2. FAQ 섹션 추가 설정 및 부모 제약 해제 =====
     if (faqSection) {
-      // 인라인 스타일이나 grid 관련 클래스 제거
-      faqSection.removeAttribute('style');
-      faqSection.classList.remove('grid', 'col-', 'grid-2', 'grid-3', 'grid-4');
-      
-      // FAQ 섹션 강제 스타일 적용
-      faqSection.style.setProperty('display', 'block', 'important');
+      // FAQ 섹션 추가 스타일 적용 (이미 위에서 기본 스타일 적용됨)
       faqSection.style.setProperty('visibility', 'visible', 'important');
       faqSection.style.setProperty('opacity', '1', 'important');
-      faqSection.style.setProperty('width', '100%', 'important');
-      faqSection.style.setProperty('max-width', '1200px', 'important');
-      faqSection.style.setProperty('margin', '50px auto', 'important');
-      faqSection.style.setProperty('padding', '0 40px', 'important');
-      faqSection.style.setProperty('float', 'none', 'important');
-      faqSection.style.setProperty('clear', 'both', 'important');
-      faqSection.style.setProperty('position', 'relative', 'important');
-      faqSection.style.setProperty('box-sizing', 'border-box', 'important');
       
       // ===== 3. 부모 요소들의 grid/flex 강제 해제 =====
       let parent = faqSection.parentElement;
