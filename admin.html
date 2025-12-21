@@ -270,187 +270,48 @@
           window.auth = firebaseAuth;
         }
 
-        const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
+        // 🔥 중복 onAuthStateChanged 리스너 제거
+        // script.js의 initFirebase에서 이미 onAuthStateChanged를 등록하므로
+        // admin.html에서는 별도로 등록하지 않음
+        // 대신 script.js의 전역 변수와 함수를 사용
         
         // 즉시 현재 인증 상태 확인
         const currentAuthUser = firebaseAuth.currentUser;
-        console.log('현재 인증 상태:', currentAuthUser ? currentAuthUser.email : '로그인 안 됨');
+        console.log('🔍 [admin.html] 현재 인증 상태:', currentAuthUser ? currentAuthUser.email : '로그인 안 됨');
         
-        onAuthStateChanged(firebaseAuth, async (user) => {
-          console.log('인증 상태 변경:', user ? user.email : '로그아웃');
-          
-          if (container) {
-            container.innerHTML = `
-              <div class="card glass" style="padding: 40px; text-align: center;">
-                <p style="color: #9ca3af; font-size: 16px;">인증 상태 확인 중...</p>
-              </div>
-            `;
-          }
-          
-          if (user) {
-            // script.js의 전역 변수는 직접 수정할 수 없으므로 로컬 변수 사용
-            const userEmail = user.email;
-            const userUid = user.uid;
+        // script.js의 initFirebase가 완료될 때까지 대기
+        // initFirebase가 onAuthStateChanged를 등록하고 대시보드를 렌더링함
+        if (typeof initFirebase === 'function') {
+          console.log('🔍 [admin.html] initFirebase 호출 대기 중...');
+          await initFirebase();
+          console.log('✅ [admin.html] initFirebase 완료');
+        }
+        
+        // script.js의 onAuthStateChanged가 대시보드를 렌더링하므로
+        // 여기서는 별도로 렌더링하지 않음
+        // 단, 어드민 페이지 전용 UI 업데이트가 필요하면 여기서 처리
+        
+        // 임시: script.js의 onAuthStateChanged가 작동하지 않는 경우를 대비한 폴백
+        // (실제로는 script.js의 onAuthStateChanged가 작동해야 함)
+        const checkAdminDashboard = async () => {
+          const user = firebaseAuth.currentUser;
+          if (user && container) {
+            const adminEmail = typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'jjiyu244@corestaker.local';
+            const userIsAdmin = user.email && user.email.toLowerCase() === adminEmail.toLowerCase();
             
-            // ADMIN_EMAIL은 script.js에서 전역으로 선언됨
-            const adminEmail = typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'jjiyu244@gmail.com';
-            const userIsAdmin = userEmail && userEmail.toLowerCase() === adminEmail.toLowerCase();
-            
-            if (!userIsAdmin) {
-              // 관리자가 아니면 자동 로그아웃
-              const { signOut } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
-              await signOut(firebaseAuth);
-              
-              if (container) {
-                container.innerHTML = `
-                  <div class="card glass" style="padding: 40px; text-align: center;">
-                    <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 16px;">❌ 어드민 권한이 필요합니다</h3>
-                    <p style="color: #9ca3af; font-size: 16px; margin-bottom: 12px;">현재 계정: ${user.email}</p>
-                    <p style="color: #9ca3af; font-size: 14px; margin-bottom: 24px;">허용된 계정: ${adminEmail}</p>
-                    <button class="btn-primary" id="showLoginBtnAgain" style="padding: 12px 24px; font-size: 16px; margin-top: 16px;">다시 로그인하기</button>
-                  </div>
-                `;
-                
-                // 다시 로그인 버튼 이벤트
-                const showLoginBtnAgain = $('#showLoginBtnAgain');
-                if (showLoginBtnAgain) {
-                  showLoginBtnAgain.addEventListener('click', () => {
-                    const loginModal = $('#loginModal');
-                    if (loginModal) {
-                      loginModal.classList.add('show');
-                    }
-                  });
-                }
-              }
-              
-              // 로그인 모달 자동 표시
-              setTimeout(() => {
-                const loginModal = $('#loginModal');
-                if (loginModal) {
-                  loginModal.classList.add('show');
-                }
-              }, 500);
-              return;
-            }
-            
-            // 어드민 대시보드 렌더링
-            if (container) {
-              container.innerHTML = '<div class="card glass" style="padding: 40px; text-align: center;"><p style="color: #9ca3af; font-size: 16px;">데이터를 불러오는 중...</p></div>';
-            }
-            
-            try {
-              console.log('어드민 데이터 로딩 시작...');
-              
-              // script.js의 db를 사용하기 위해 전역 변수 설정
-              if (typeof window !== 'undefined' && !window.db) {
-                window.db = firebaseDb;
-              }
-              
-              // loadAllUserStakes 함수가 존재하는지 확인
-              if (typeof loadAllUserStakes !== 'function') {
-                throw new Error('loadAllUserStakes 함수를 찾을 수 없습니다. script.js가 제대로 로드되었는지 확인하세요.');
-              }
-              
-              console.log('loadAllUserStakes 함수 호출 중...');
-              let users;
+            if (userIsAdmin && typeof renderAdminDashboardContent === 'function') {
               try {
-                users = await loadAllUserStakes();
-                console.log('로드된 사용자 수:', users.length);
-                if (users.length === 0) {
-                  console.warn('⚠️ 사용자 데이터가 0명입니다. 다음을 확인하세요:');
-                  console.warn('1. Firestore 콘솔에서 stake 컬렉션에 데이터가 있는지 확인');
-                  console.warn('2. Firestore 보안 규칙에서 stake 컬렉션 읽기 권한 확인');
-                  console.warn('3. 브라우저 콘솔에서 loadAllUserStakes 관련 에러 확인');
-                }
-              } catch (error) {
-                console.error('❌ loadAllUserStakes 호출 중 에러 발생:', error);
-                console.error('에러 메시지:', error.message);
-                console.error('에러 코드:', error.code);
-                users = [];
-              }
-              
-              if (container) {
-                // renderAdminDashboardContent 함수가 존재하는지 확인
-                if (typeof renderAdminDashboardContent !== 'function') {
-                  throw new Error('renderAdminDashboardContent 함수를 찾을 수 없습니다.');
-                }
-                
-                console.log('대시보드 렌더링 중...');
+                const users = await loadAllUserStakes();
                 await renderAdminDashboardContent(users, container);
-                console.log('대시보드 렌더링 완료');
-              }
-              
-              // 리워드 수정 모달 설정 (script.js의 함수 사용)
-              if (typeof setupRewardEditModal === 'function') {
-                setupRewardEditModal();
-              }
-            } catch (error) {
-              console.error('어드민 페이지 렌더링 중 상세 오류:', error);
-              console.error('오류 스택:', error.stack);
-              console.error('어드민 페이지 렌더링 중 오류:', error);
-              if (container) {
-                let errorMessage = error.message;
-                let errorDetails = '';
-                
-                // Firestore 권한 오류인 경우
-                if (error.message && (error.message.includes('Permission denied') || 
-                    error.message.includes('Missing or insufficient permissions'))) {
-                  errorMessage = 'Firestore 보안 규칙 오류';
-                  errorDetails = `
-                    <div style="background: rgba(239, 68, 68, 0.1); padding: 16px; border-radius: 8px; margin-top: 16px; text-align: left;">
-                      <p style="color: #fca5a5; font-size: 14px; margin: 0 0 8px 0;"><strong>해결 방법:</strong></p>
-                      <ol style="color: #fca5a5; font-size: 14px; margin: 0; padding-left: 20px;">
-                        <li>Firebase 콘솔 접속: <a href="https://console.firebase.google.com/project/j22j22/firestore/rules" target="_blank" style="color: #93c5fd;">Firestore 규칙 설정</a></li>
-                        <li>어드민 계정(jjiyu244@gmail.com)이 모든 userStakes 데이터를 읽을 수 있도록 규칙 수정</li>
-                        <li>규칙 저장 후 페이지 새로고침</li>
-                      </ol>
-                      <p style="color: #fca5a5; font-size: 12px; margin: 12px 0 0 0;">자세한 내용은 FIREBASE_FIX_GUIDE.md 파일을 참고하세요.</p>
-                    </div>
-                  `;
-                }
-                
-                container.innerHTML = `
-                  <div class="card glass" style="padding: 40px; text-align: center;">
-                    <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 12px;">오류가 발생했습니다</h3>
-                    <p style="color: #fca5a5; font-size: 16px; margin-bottom: 8px;">${errorMessage}</p>
-                    ${errorDetails}
-                    <button class="btn-primary" onclick="location.reload()" style="margin-top: 20px; padding: 12px 24px;">새로고침</button>
-                  </div>
-                `;
+              } catch (error) {
+                console.error('어드민 대시보드 렌더링 오류:', error);
               }
             }
-          } else {
-            // 로그인하지 않은 상태
-            if (container) {
-              container.innerHTML = `
-                <div class="card glass" style="padding: 40px; text-align: center;">
-                  <h3 style="color: #ffffff; font-size: 20px; margin-bottom: 16px;">로그인이 필요합니다</h3>
-                  <p style="color: #9ca3af; font-size: 16px; margin-bottom: 24px;">어드민 대시보드에 접근하려면 관리자 계정으로 로그인해주세요.</p>
-                  <button class="btn-primary" id="showLoginBtn" style="padding: 12px 24px; font-size: 16px;">로그인하기</button>
-                </div>
-              `;
-              
-              // 로그인 버튼 이벤트
-              const showLoginBtn = $('#showLoginBtn');
-              if (showLoginBtn) {
-                showLoginBtn.addEventListener('click', () => {
-                  const loginModal = $('#loginModal');
-                  if (loginModal) {
-                    loginModal.classList.add('show');
-                  }
-                });
-              }
-            }
-            
-            // 로그인 모달 자동 표시
-            setTimeout(() => {
-              const loginModal = $('#loginModal');
-              if (loginModal) {
-                loginModal.classList.add('show');
-              }
-            }, 300);
           }
-        });
+        };
+        
+        // script.js의 onAuthStateChanged가 작동하지 않는 경우를 대비해 1초 후 체크
+        setTimeout(checkAdminDashboard, 1000);
       }
 
 

@@ -300,7 +300,15 @@ async function initFirebase() {
     let isFirstCall = true;
     
   onAuthStateChanged(auth, async (user) => {
-      console.log('🔄 onAuthStateChanged 호출됨:', user ? `로그인됨 (${user.email})` : '로그아웃됨');
+      // 🔍 [디버깅] onAuthStateChanged가 호출될 때마다 어떤 이벤트로 호출되었는지 추적
+      const stackTrace = new Error().stack;
+      const callerInfo = stackTrace ? stackTrace.split('\n')[2]?.trim() : 'unknown';
+      console.log('🔄 [onAuthStateChanged] 호출됨:', {
+        상태: user ? `로그인됨 (${user.email})` : '로그아웃됨',
+        호출자: callerInfo,
+        timestamp: new Date().toISOString(),
+        uid: user?.uid || 'N/A'
+      });
       
     if (user) {
         console.log('✅ 로그인 상태 확인:', user.email, user.uid);
@@ -343,6 +351,7 @@ async function initFirebase() {
         };
         try {
           localStorage.setItem('user', JSON.stringify(userData));
+          localStorage.setItem('lastLoginTime', Date.now().toString()); // 로그인 시간 저장 (즉시 로그아웃 방지용)
           console.log('✅ 로그인 상태 복구: localStorage 업데이트 완료');
         } catch (storageError) {
           console.warn('localStorage 저장 실패:', storageError);
@@ -364,7 +373,17 @@ async function initFirebase() {
         await renderRewards();
       }
     } else {
-        console.log('❌ 로그아웃 상태 확인');
+        console.log('❌ [onAuthStateChanged] 로그아웃 상태 확인');
+        
+        // 🔥 로그인 직후 즉시 로그아웃되는 것을 방지하기 위한 체크
+        // 로그인 성공 직후에만 발생하는 로그아웃 이벤트는 무시
+        const lastLoginTime = localStorage.getItem('lastLoginTime');
+        const now = Date.now();
+        if (lastLoginTime && (now - parseInt(lastLoginTime)) < 2000) {
+          console.warn('⚠️ [onAuthStateChanged] 로그인 직후 로그아웃 이벤트 감지 - 무시합니다 (2초 이내)');
+          return; // 로그인 직후 로그아웃 이벤트는 무시
+        }
+        
       currentUser = null;
       isAdmin = false;
         userStakes = { BTC: 0, ETH: 0, XRP: 0, SOL: 0 };
@@ -373,6 +392,7 @@ async function initFirebase() {
         // localStorage에서 사용자 정보 삭제
         try {
           localStorage.removeItem('user');
+          localStorage.removeItem('lastLoginTime'); // 로그인 시간도 삭제
           console.log('✅ 로그아웃 상태: localStorage에서 사용자 정보 삭제 완료');
         } catch (storageError) {
           console.warn('localStorage 삭제 실패:', storageError);
@@ -934,7 +954,10 @@ async function setupLogin() {
       return;
     }
     
-    // username을 이메일 형식으로 변환 (통일된 함수 사용)
+    // 🔍 [디버깅] 로그인 함수 시작 - 입력받은 원본 아이디값
+    console.log('🔐 [로그인 시작] 입력받은 원본 아이디:', username);
+    
+    // username을 이메일 형식으로 변환 (단일 형식만 사용: @corestaker.local)
     let email = usernameToEmail(username);
     
     if (!email) {
@@ -944,7 +967,12 @@ async function setupLogin() {
       return;
     }
     
-    console.log('🔐 로그인 시도:', { username, email });
+    // 🔍 [디버깅] Firebase Auth 호출 직전 - 실제로 전송되는 credential 정보
+    console.log('🔐 [로그인 시도] 전송할 credential:', { 
+      email, 
+      passwordLength: password.length,
+      username 
+    });
     
     // 비밀번호 길이 체크 (Firebase 최소 6자)
     if (password.length < 6) {
@@ -968,82 +996,29 @@ async function setupLogin() {
         throw new Error('로그인 함수를 불러올 수 없습니다. 페이지를 새로고침해주세요.');
       }
       
-      // Firebase 로그인 API 호출 (여러 도메인 시도 - 기존 계정 호환성)
-      let result = null;
-      let loginError = null;
-      const attemptedEmails = []; // 시도한 모든 이메일 추적
+      // 🔥 단일 형식만 사용: @corestaker.local (여러 도메인 시도 로직 제거)
+      console.log('🔐 [로그인 시도] Firebase Auth 호출:', email);
+      const result = await signInWithEmailAndPassword(currentAuth, email, password);
       
-      // 1차 시도: @corestaker.local (새 형식)
-      attemptedEmails.push(email);
-      try {
-        console.log('🔐 로그인 시도 1: @corestaker.local');
-        result = await signInWithEmailAndPassword(currentAuth, email, password);
-        console.log('✅ 로그인 성공:', email);
-      } catch (error1) {
-        console.log('⚠️ @corestaker.local 로그인 실패:', error1.code);
-        loginError = error1;
-        
-        // 2차 시도: @temp.com (기존 형식)
-        // user-not-found, wrong-password, invalid-credential 모두 시도
-        const shouldRetry = error1.code === 'auth/user-not-found' || 
-                           error1.code === 'auth/wrong-password' || 
-                           error1.code === 'auth/invalid-credential';
-        
-        if (shouldRetry) {
-          const emailTemp = `${username.toLowerCase()}@temp.com`;
-          attemptedEmails.push(emailTemp);
-          try {
-            console.log('🔐 로그인 시도 2: @temp.com');
-            result = await signInWithEmailAndPassword(currentAuth, emailTemp, password);
-            email = emailTemp; // 성공한 이메일로 업데이트
-            console.log('✅ 로그인 성공:', email);
-          } catch (error2) {
-            console.log('⚠️ @temp.com 로그인 실패:', error2.code);
-            loginError = error2;
-            
-            // 3차 시도: @gmail.com (관리자 계정 등)
-            const shouldRetry2 = error2.code === 'auth/user-not-found' || 
-                                error2.code === 'auth/wrong-password' || 
-                                error2.code === 'auth/invalid-credential';
-            
-            if (shouldRetry2) {
-              const emailGmail = `${username.toLowerCase()}@gmail.com`;
-              attemptedEmails.push(emailGmail);
-              try {
-                console.log('🔐 로그인 시도 3: @gmail.com');
-                result = await signInWithEmailAndPassword(currentAuth, emailGmail, password);
-                email = emailGmail; // 성공한 이메일로 업데이트
-                console.log('✅ 로그인 성공:', email);
-              } catch (error3) {
-                console.log('⚠️ @gmail.com 로그인 실패:', error3.code);
-                loginError = error3;
-              }
-            }
-          }
+      // 🔍 [디버깅] 로그인 성공 직후 - user 객체의 전체 내용
+      console.log('✅ [로그인 성공] user 객체 전체:', {
+        uid: result.user.uid,
+        email: result.user.email,
+        emailVerified: result.user.emailVerified,
+        displayName: result.user.displayName,
+        photoURL: result.user.photoURL,
+        metadata: {
+          creationTime: result.user.metadata.creationTime,
+          lastSignInTime: result.user.metadata.lastSignInTime
         }
-      }
-      
-      // 모든 시도 실패
-      if (!result) {
-        // 여러 도메인을 시도했다는 정보를 포함한 커스텀 에러 생성
-        const customError = new Error('로그인에 실패했습니다.');
-        customError.code = loginError?.code || 'auth/login-failed';
-        customError.attemptedEmails = attemptedEmails;
-        customError.lastError = loginError;
-        throw customError;
-      }
+      });
       
       // 어드민 페이지에서 로그인 성공 후 관리자 계정인지 확인
       if (isAdminPage) {
         const adminUsername = 'jjiyu244'; // 관리자 username
-        // 여러 도메인 형식 모두 체크
-        const adminEmails = [
-          `${adminUsername}@corestaker.local`,
-          `${adminUsername}@temp.com`,
-          `${adminUsername}@gmail.com`
-        ];
+        const adminEmail = `${adminUsername}@corestaker.local`; // 단일 형식만 사용
         const userEmail = result.user.email.toLowerCase();
-        const isAdmin = adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
+        const isAdmin = userEmail === adminEmail.toLowerCase();
         
         if (!isAdmin) {
           // 관리자가 아니면 로그아웃
@@ -1059,7 +1034,8 @@ async function setupLogin() {
         }
       }
       
-      // 로그인 성공 시 localStorage에 사용자 정보 저장
+      // 로그인 성공 시 localStorage에 사용자 정보 저장 (onAuthStateChanged와 충돌 방지)
+      // 주의: onAuthStateChanged에서도 localStorage를 업데이트하므로, 여기서는 최소한만 저장
       const userData = {
         email: result.user.email,
         uid: result.user.uid,
@@ -1067,41 +1043,54 @@ async function setupLogin() {
       };
       try {
         localStorage.setItem('user', JSON.stringify(userData));
-        console.log('✅ 사용자 정보를 localStorage에 저장했습니다.');
+        localStorage.setItem('lastLoginTime', Date.now().toString()); // 로그인 시간 저장 (즉시 로그아웃 방지용)
+        console.log('✅ [로그인 성공] localStorage에 사용자 정보 저장 완료');
       } catch (storageError) {
         console.warn('localStorage 저장 실패 (사생활 보호 모드일 수 있음):', storageError);
       }
       
-      // 성공 메시지 및 모달 닫기
+      // 성공 메시지 표시
       if (statusText) {
         statusText.textContent = '로그인 되었습니다.';
       }
       
-      // 모달 닫기 (여러 방법 시도)
+      // 🔥 어드민 페이지인 경우 대시보드 자동 표시
+      if (isAdminPage) {
+        console.log('✅ [어드민 로그인] 대시보드 자동 표시 준비');
+        // onAuthStateChanged가 대시보드를 렌더링할 때까지 잠시 대기
+        // (페이지 리로드 없이 자동으로 대시보드가 표시되도록)
+      }
+      
+      // 모달 닫기 (즉시 닫기 - onAuthStateChanged가 UI를 업데이트할 때까지 대기하지 않음)
       setTimeout(() => {
         // 방법 1: loginModal ID로 찾기
         const modal = $('#loginModal');
         if (modal) {
           modal.classList.remove('show');
-          // 추가로 display: none도 설정 (더 확실하게)
           modal.style.display = 'none';
+          modal.style.visibility = 'hidden';
+          modal.style.opacity = '0';
         }
         
         // 방법 2: class로 찾기 (backdrop 포함)
         const modalBackdrop = document.querySelector('.modal-backdrop');
-        if (modalBackdrop) {
+        if (modalBackdrop && modalBackdrop.id === 'loginModal') {
           modalBackdrop.classList.remove('show');
           modalBackdrop.style.display = 'none';
+          modalBackdrop.style.visibility = 'hidden';
+          modalBackdrop.style.opacity = '0';
         }
         
         // 방법 3: 모든 loginModal 관련 요소 닫기
         document.querySelectorAll('[id*="loginModal"], [class*="login-modal"]').forEach(el => {
           el.classList.remove('show');
           el.style.display = 'none';
+          el.style.visibility = 'hidden';
+          el.style.opacity = '0';
         });
         
-        console.log('✅ 로그인 모달 닫기 완료');
-      }, 300); // 500ms에서 300ms로 단축
+        console.log('✅ [로그인 성공] 모달 닫기 완료');
+      }, 200); // 200ms로 더 빠르게 닫기
     } catch (error) {
       // 에러 로깅
       console.error('로그인 에러:', {

@@ -1,10 +1,32 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 어드민 이메일 확인 함수
+    // 어드민 이메일 확인 함수 (여러 형식 지원)
     function isAdmin() {
-      return request.auth != null && 
-             request.auth.token.email == 'jjiyu244@gmail.com';
+      return request.auth != null && (
+        request.auth.token.email == 'jjiyu244@corestaker.local' ||
+        request.auth.token.email == 'jjiyu244@temp.com' ||
+        request.auth.token.email == 'jjiyu244@gmail.com'
+      );
+    }
+    
+    // users 컬렉션 (사용자 정보)
+    match /users/{userId} {
+      // 본인 데이터는 읽기/쓰기 가능
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // 어드민은 모든 사용자 데이터 읽기 가능
+      allow read: if isAdmin();
+    }
+    
+    // staking_requests 컬렉션 (스테이킹 신청)
+    match /staking_requests/{requestId} {
+      // 본인 신청은 읽기 가능
+      allow read: if request.auth != null && 
+                     request.auth.uid == resource.data.userId;
+      // 로그인한 사용자는 신청 작성 가능
+      allow create: if request.auth != null;
+      // 어드민은 모든 신청 읽기/쓰기 가능
+      allow read, write: if isAdmin();
     }
     
     // userStakes 컬렉션
