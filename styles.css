@@ -559,16 +559,22 @@ body {
   margin-top: 4px;
 }
 
-/* FAQ 섹션 전체 너비 사용 - 부모 제약 무시 */
+/* FAQ 섹션 전체 너비 사용 - 부모 제약 무시 (강제 탈출) */
 #faq-section {
   width: 100% !important;
   max-width: 1200px !important;
-  margin: 0 auto !important;
+  margin: 50px auto !important;
+  padding: 0 40px !important;
   float: none !important;
   clear: both !important;
   display: block !important;
   box-sizing: border-box !important;
   position: relative !important;
+}
+
+.faq-item {
+  width: 100% !important;
+  margin-bottom: 15px !important;
 }
 
 /* FAQ 래퍼 - 내부 컨테이너를 위한 공간 */

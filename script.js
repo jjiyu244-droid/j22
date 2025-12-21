@@ -2876,15 +2876,33 @@ async function navigateToPage(page) {
   });
 
   // Show the requested page
-  // FAQ 페이지는 별도 처리 (단일 컬럼 레이아웃)
+  // FAQ 페이지는 별도 처리 (단일 컬럼 레이아웃 - 강제 탈출)
   if (page === 'faq') {
-    console.log('FAQ 페이지: 단일 컬럼 레이아웃 적용');
+    console.log('FAQ 페이지: 강제 탈출 모드 - 그리드 구조 파괴');
+    
+    // ===== 1. 모든 형제 요소 강제 숨김 =====
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      // main-content의 모든 직접 자식 요소 중 FAQ가 아닌 것들 숨기기
+      Array.from(mainContent.children).forEach((child) => {
+        if (child.id !== 'faq-section' && !child.classList.contains('page-section')) {
+          child.style.setProperty('display', 'none', 'important');
+          child.style.setProperty('visibility', 'hidden', 'important');
+          child.style.setProperty('opacity', '0', 'important');
+          child.style.setProperty('height', '0', 'important');
+          child.style.setProperty('overflow', 'hidden', 'important');
+          console.log('형제 요소 숨김:', child.tagName, child.className || child.id);
+        }
+      });
+    }
     
     // 모든 다른 content-section 숨기기
     document.querySelectorAll('section.content-section:not(#faq-section)').forEach((section) => {
       section.style.setProperty('display', 'none', 'important');
       section.style.setProperty('visibility', 'hidden', 'important');
       section.style.setProperty('opacity', '0', 'important');
+      section.style.setProperty('height', '0', 'important');
+      section.style.setProperty('overflow', 'hidden', 'important');
     });
     
     // pre-login-welcome 숨기기
@@ -2892,6 +2910,8 @@ async function navigateToPage(page) {
       section.style.setProperty('display', 'none', 'important');
       section.style.setProperty('visibility', 'hidden', 'important');
       section.style.setProperty('opacity', '0', 'important');
+      section.style.setProperty('height', '0', 'important');
+      section.style.setProperty('overflow', 'hidden', 'important');
     });
     
     // feature-card들 숨기기
@@ -2899,13 +2919,17 @@ async function navigateToPage(page) {
       card.style.setProperty('display', 'none', 'important');
       card.style.setProperty('visibility', 'hidden', 'important');
       card.style.setProperty('opacity', '0', 'important');
+      card.style.setProperty('height', '0', 'important');
+      card.style.setProperty('overflow', 'hidden', 'important');
     });
     
     // grid grid-4 숨기기
-    document.querySelectorAll('.grid.grid-4').forEach((grid) => {
+    document.querySelectorAll('.grid.grid-4, .grid.grid-3, .grid.grid-2').forEach((grid) => {
       grid.style.setProperty('display', 'none', 'important');
       grid.style.setProperty('visibility', 'hidden', 'important');
       grid.style.setProperty('opacity', '0', 'important');
+      grid.style.setProperty('height', '0', 'important');
+      grid.style.setProperty('overflow', 'hidden', 'important');
     });
     
     // overview 섹션 숨기기
@@ -2913,6 +2937,8 @@ async function navigateToPage(page) {
       section.style.setProperty('display', 'none', 'important');
       section.style.setProperty('visibility', 'hidden', 'important');
       section.style.setProperty('opacity', '0', 'important');
+      section.style.setProperty('height', '0', 'important');
+      section.style.setProperty('overflow', 'hidden', 'important');
     });
     
     // pools-rewards-container 숨기기
@@ -2920,6 +2946,8 @@ async function navigateToPage(page) {
       container.style.setProperty('display', 'none', 'important');
       container.style.setProperty('visibility', 'hidden', 'important');
       container.style.setProperty('opacity', '0', 'important');
+      container.style.setProperty('height', '0', 'important');
+      container.style.setProperty('overflow', 'hidden', 'important');
     });
     
     // 트랜잭션 히스토리 등 다른 카드들 숨기기
@@ -2927,6 +2955,8 @@ async function navigateToPage(page) {
       element.style.setProperty('display', 'none', 'important');
       element.style.setProperty('visibility', 'hidden', 'important');
       element.style.setProperty('opacity', '0', 'important');
+      element.style.setProperty('height', '0', 'important');
+      element.style.setProperty('overflow', 'hidden', 'important');
     });
     
     // Footer 섹션 숨기기
@@ -2934,44 +2964,76 @@ async function navigateToPage(page) {
       footer.style.setProperty('display', 'none', 'important');
       footer.style.setProperty('visibility', 'hidden', 'important');
       footer.style.setProperty('opacity', '0', 'important');
+      footer.style.setProperty('height', '0', 'important');
+      footer.style.setProperty('overflow', 'hidden', 'important');
     });
     
-    // FAQ 섹션만 표시 및 부모 요소 제약 해제
+    // ===== 2. FAQ 섹션 강제 설정 및 부모 제약 해제 =====
     const faqSection = document.getElementById('faq-section');
     if (faqSection) {
-      // FAQ 섹션 표시
+      // 인라인 스타일이나 grid 관련 클래스 제거
+      faqSection.removeAttribute('style');
+      faqSection.classList.remove('grid', 'col-', 'grid-2', 'grid-3', 'grid-4');
+      
+      // FAQ 섹션 강제 스타일 적용
       faqSection.style.setProperty('display', 'block', 'important');
       faqSection.style.setProperty('visibility', 'visible', 'important');
       faqSection.style.setProperty('opacity', '1', 'important');
       faqSection.style.setProperty('width', '100%', 'important');
       faqSection.style.setProperty('max-width', '1200px', 'important');
-      faqSection.style.setProperty('margin', '0 auto', 'important');
+      faqSection.style.setProperty('margin', '50px auto', 'important');
+      faqSection.style.setProperty('padding', '0 40px', 'important');
       faqSection.style.setProperty('float', 'none', 'important');
       faqSection.style.setProperty('clear', 'both', 'important');
+      faqSection.style.setProperty('position', 'relative', 'important');
+      faqSection.style.setProperty('box-sizing', 'border-box', 'important');
       
-      // 부모 요소들의 grid/flex 제약 해제
+      // ===== 3. 부모 요소들의 grid/flex 강제 해제 =====
       let parent = faqSection.parentElement;
       while (parent && parent !== document.body) {
         const parentStyle = window.getComputedStyle(parent);
         const parentDisplay = parentStyle.display;
         
+        // grid나 flex인 경우 무조건 block으로 변경
         if (parentDisplay === 'grid' || parentDisplay === 'flex') {
           parent.style.setProperty('display', 'block', 'important');
-          console.log('부모 요소 display 변경:', parent.tagName, parent.className, parentDisplay, '-> block');
+          parent.style.setProperty('grid-template-columns', 'none', 'important');
+          parent.style.setProperty('grid-template-rows', 'none', 'important');
+          parent.style.setProperty('flex-direction', 'unset', 'important');
+          parent.style.setProperty('width', '100%', 'important');
+          parent.style.setProperty('max-width', '100%', 'important');
+          console.log('✅ 부모 요소 grid/flex 해제:', parent.tagName, parent.className, parentDisplay, '-> block');
         }
         
-        // main-content도 block으로 변경
+        // main-content 강제 설정
         if (parent.classList.contains('main-content')) {
           parent.style.setProperty('display', 'block', 'important');
           parent.style.setProperty('flex-direction', 'unset', 'important');
           parent.style.setProperty('width', '100%', 'important');
           parent.style.setProperty('max-width', '100%', 'important');
+          parent.style.setProperty('grid-template-columns', 'none', 'important');
+          parent.style.setProperty('grid-template-rows', 'none', 'important');
+          console.log('✅ main-content를 block으로 강제 변경');
+        }
+        
+        // app 컨테이너도 확인
+        if (parent.classList.contains('app')) {
+          parent.style.setProperty('display', 'block', 'important');
+          parent.style.setProperty('flex-direction', 'unset', 'important');
         }
         
         parent = parent.parentElement;
       }
       
-      // FAQ 컨테이너 강제 설정
+      // ===== 4. FAQ 래퍼 및 컨테이너 강제 설정 =====
+      const faqWrapper = faqSection.querySelector('.faq-wrapper');
+      if (faqWrapper) {
+        faqWrapper.style.setProperty('width', '100%', 'important');
+        faqWrapper.style.setProperty('max-width', '100%', 'important');
+        faqWrapper.style.setProperty('margin', '0', 'important');
+        faqWrapper.style.setProperty('padding', '0', 'important');
+      }
+      
       const faqContainer = faqSection.querySelector('.faq-container');
       if (faqContainer) {
         faqContainer.style.setProperty('width', '100%', 'important');
@@ -2979,20 +3041,29 @@ async function navigateToPage(page) {
         faqContainer.style.setProperty('margin', '0 auto', 'important');
         faqContainer.style.setProperty('float', 'none', 'important');
         faqContainer.style.setProperty('clear', 'both', 'important');
+        faqContainer.style.setProperty('padding', '0 20px', 'important');
+        faqContainer.style.setProperty('box-sizing', 'border-box', 'important');
       }
       
-      // FAQ 아이템들 전체 너비 사용
+      // ===== 5. FAQ 아이템들 전체 너비 사용 =====
       faqSection.querySelectorAll('.faq-item').forEach((item) => {
         item.style.setProperty('width', '100%', 'important');
         item.style.setProperty('max-width', '100%', 'important');
+        item.style.setProperty('margin-bottom', '15px', 'important');
+        item.style.setProperty('box-sizing', 'border-box', 'important');
       });
       
       faqSection.querySelectorAll('.faq-question').forEach((question) => {
         question.style.setProperty('width', '100%', 'important');
         question.style.setProperty('max-width', '100%', 'important');
+        question.style.setProperty('box-sizing', 'border-box', 'important');
       });
       
-      // 스크롤 처리
+      // ===== 6. 강제 렌더링 =====
+      void faqSection.offsetWidth;
+      void faqSection.offsetHeight;
+      
+      // ===== 7. 스크롤 처리 =====
       setTimeout(() => {
         const offsetTop = faqSection.offsetTop - 80;
         window.scrollTo({ top: offsetTop, behavior: 'smooth' });
