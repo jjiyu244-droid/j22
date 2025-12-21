@@ -2876,7 +2876,133 @@ async function navigateToPage(page) {
   });
 
   // Show the requested page
-  if (page === 'dashboard' || page === 'pools' || page === 'faq') {
+  // FAQ 페이지는 별도 처리 (단일 컬럼 레이아웃)
+  if (page === 'faq') {
+    console.log('FAQ 페이지: 단일 컬럼 레이아웃 적용');
+    
+    // 모든 다른 content-section 숨기기
+    document.querySelectorAll('section.content-section:not(#faq-section)').forEach((section) => {
+      section.style.setProperty('display', 'none', 'important');
+      section.style.setProperty('visibility', 'hidden', 'important');
+      section.style.setProperty('opacity', '0', 'important');
+    });
+    
+    // pre-login-welcome 숨기기
+    document.querySelectorAll('.pre-login-welcome').forEach((section) => {
+      section.style.setProperty('display', 'none', 'important');
+      section.style.setProperty('visibility', 'hidden', 'important');
+      section.style.setProperty('opacity', '0', 'important');
+    });
+    
+    // feature-card들 숨기기
+    document.querySelectorAll('.feature-card').forEach((card) => {
+      card.style.setProperty('display', 'none', 'important');
+      card.style.setProperty('visibility', 'hidden', 'important');
+      card.style.setProperty('opacity', '0', 'important');
+    });
+    
+    // grid grid-4 숨기기
+    document.querySelectorAll('.grid.grid-4').forEach((grid) => {
+      grid.style.setProperty('display', 'none', 'important');
+      grid.style.setProperty('visibility', 'hidden', 'important');
+      grid.style.setProperty('opacity', '0', 'important');
+    });
+    
+    // overview 섹션 숨기기
+    document.querySelectorAll('.overview').forEach((section) => {
+      section.style.setProperty('display', 'none', 'important');
+      section.style.setProperty('visibility', 'hidden', 'important');
+      section.style.setProperty('opacity', '0', 'important');
+    });
+    
+    // pools-rewards-container 숨기기
+    document.querySelectorAll('.pools-rewards-container').forEach((container) => {
+      container.style.setProperty('display', 'none', 'important');
+      container.style.setProperty('visibility', 'hidden', 'important');
+      container.style.setProperty('opacity', '0', 'important');
+    });
+    
+    // 트랜잭션 히스토리 등 다른 카드들 숨기기
+    document.querySelectorAll('.auth-required, .activity-list').forEach((element) => {
+      element.style.setProperty('display', 'none', 'important');
+      element.style.setProperty('visibility', 'hidden', 'important');
+      element.style.setProperty('opacity', '0', 'important');
+    });
+    
+    // Footer 섹션 숨기기
+    document.querySelectorAll('.footer-left, .footer-right').forEach((footer) => {
+      footer.style.setProperty('display', 'none', 'important');
+      footer.style.setProperty('visibility', 'hidden', 'important');
+      footer.style.setProperty('opacity', '0', 'important');
+    });
+    
+    // FAQ 섹션만 표시 및 부모 요소 제약 해제
+    const faqSection = document.getElementById('faq-section');
+    if (faqSection) {
+      // FAQ 섹션 표시
+      faqSection.style.setProperty('display', 'block', 'important');
+      faqSection.style.setProperty('visibility', 'visible', 'important');
+      faqSection.style.setProperty('opacity', '1', 'important');
+      faqSection.style.setProperty('width', '100%', 'important');
+      faqSection.style.setProperty('max-width', '1200px', 'important');
+      faqSection.style.setProperty('margin', '0 auto', 'important');
+      faqSection.style.setProperty('float', 'none', 'important');
+      faqSection.style.setProperty('clear', 'both', 'important');
+      
+      // 부모 요소들의 grid/flex 제약 해제
+      let parent = faqSection.parentElement;
+      while (parent && parent !== document.body) {
+        const parentStyle = window.getComputedStyle(parent);
+        const parentDisplay = parentStyle.display;
+        
+        if (parentDisplay === 'grid' || parentDisplay === 'flex') {
+          parent.style.setProperty('display', 'block', 'important');
+          console.log('부모 요소 display 변경:', parent.tagName, parent.className, parentDisplay, '-> block');
+        }
+        
+        // main-content도 block으로 변경
+        if (parent.classList.contains('main-content')) {
+          parent.style.setProperty('display', 'block', 'important');
+          parent.style.setProperty('flex-direction', 'unset', 'important');
+          parent.style.setProperty('width', '100%', 'important');
+          parent.style.setProperty('max-width', '100%', 'important');
+        }
+        
+        parent = parent.parentElement;
+      }
+      
+      // FAQ 컨테이너 강제 설정
+      const faqContainer = faqSection.querySelector('.faq-container');
+      if (faqContainer) {
+        faqContainer.style.setProperty('width', '100%', 'important');
+        faqContainer.style.setProperty('max-width', '1200px', 'important');
+        faqContainer.style.setProperty('margin', '0 auto', 'important');
+        faqContainer.style.setProperty('float', 'none', 'important');
+        faqContainer.style.setProperty('clear', 'both', 'important');
+      }
+      
+      // FAQ 아이템들 전체 너비 사용
+      faqSection.querySelectorAll('.faq-item').forEach((item) => {
+        item.style.setProperty('width', '100%', 'important');
+        item.style.setProperty('max-width', '100%', 'important');
+      });
+      
+      faqSection.querySelectorAll('.faq-question').forEach((question) => {
+        question.style.setProperty('width', '100%', 'important');
+        question.style.setProperty('max-width', '100%', 'important');
+      });
+      
+      // 스크롤 처리
+      setTimeout(() => {
+        const offsetTop = faqSection.offsetTop - 80;
+        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+      }, 100);
+    }
+    
+    return; // FAQ 페이지는 여기서 종료
+  }
+  
+  if (page === 'dashboard' || page === 'pools') {
     // Show main dashboard content (default visible sections)
     // 모든 content-section 복원
     document.querySelectorAll('section.content-section:not(.page-section)').forEach((section) => {
@@ -2992,19 +3118,6 @@ async function navigateToPage(page) {
         }
       }, 100);
       return; // Don't scroll to top for pools
-    }
-    
-    // If FAQ page, scroll to FAQ section
-    if (page === 'faq') {
-      setTimeout(() => {
-        const faqSection = document.getElementById('faq-section');
-        if (faqSection) {
-          // 약간의 오프셋을 추가하여 네비게이션 바에 가려지지 않도록
-          const offsetTop = faqSection.offsetTop - 80;
-          window.scrollTo({ top: offsetTop, behavior: 'smooth' });
-        }
-      }, 100);
-      return; // Don't scroll to top for FAQ
     }
   } else {
     // 회원가입 페이지인 경우 모든 메인 콘텐츠를 완전히 숨기기
