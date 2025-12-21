@@ -1408,7 +1408,7 @@ function openStakeModal(poolId) {
     </div>
   `;
   $('#stakeAmount').value = '';
-  $('#stakeHelper').textContent = 'Firebase Auth 로그인 시 Firestore에 저장됩니다.';
+  $('#stakeHelper').textContent = '';
 
   $('#stakeModal').classList.add('show');
 }
@@ -1447,7 +1447,7 @@ function setupStakeModal() {
 
     if (!currentUser) {
       helper.classList.remove('text-danger');
-      helper.textContent = '로그인 후에만 스테이킹 수량이 Firestore에 저장됩니다.';
+      helper.textContent = '로그인 후에만 스테이킹이 가능합니다.';
       return;
     }
 
@@ -1465,7 +1465,7 @@ function setupStakeModal() {
     // prepend virtual activity
     activity.unshift({
       type: '스테이킹',
-      status: 'Firestore 저장',
+      status: '완료',
       time: '방금 전',
       desc: currentPool.name,
       amount: `+${amount} ${currentPool.symbol}`,
@@ -2271,7 +2271,7 @@ async function renderAdminDashboardContent(users, container) {
         <div style="font-size: 64px; margin-bottom: 24px; line-height: 1;">📊</div>
         <h3 style="font-size: 28px; font-weight: 700; color: #ffffff; margin-bottom: 16px; line-height: 1.4;">등록된 회원이 없습니다</h3>
         <p style="font-size: 18px; color: #9ca3af; margin-bottom: 12px; line-height: 1.6;">
-          현재 Firestore에 저장된 스테이킹 데이터가 없습니다.
+          현재 등록된 스테이킹 데이터가 없습니다.
         </p>
         <p style="font-size: 16px; color: #6b7280; margin-top: 24px; line-height: 1.6;">
           회원들이 스테이킹을 시작하면 여기에 데이터가 표시됩니다.
