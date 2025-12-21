@@ -615,10 +615,15 @@ body {
 .select {
   background: rgba(15, 23, 42, 0.9);
   border-radius: 999px;
-  color: var(--text);
+  color: #ffffff !important;
   border: 1px solid rgba(148, 163, 184, 0.65);
   padding: 6px 10px;
   font-size: 11px;
+}
+
+.select option {
+  background: rgba(15, 23, 42, 0.95);
+  color: #ffffff;
 }
 
 .portfolio {
@@ -670,12 +675,13 @@ body {
   display: block;
   font-size: 22px;
   font-weight: 600;
+  color: #ffffff !important;
 }
 
 .donut-label {
   display: block;
   font-size: 11px;
-  color: var(--text-soft);
+  color: #e2e8f0 !important;
 }
 
 .portfolio-list {
