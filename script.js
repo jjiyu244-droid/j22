@@ -2776,6 +2776,22 @@ function setupAdminModal() {
 
 // Page navigation
 async function navigateToPage(page) {
+  // ===== body 클래스 관리 (조건부 스타일 적용) =====
+  if (page === 'signup') {
+    document.body.classList.add('is-signup-page');
+    console.log('✅ body에 is-signup-page 클래스 추가');
+  } else {
+    document.body.classList.remove('is-signup-page');
+    // 회원가입 페이지가 아닐 때는 확실하게 숨기기
+    const signupPage = document.getElementById('signup-page');
+    if (signupPage) {
+      signupPage.style.setProperty('display', 'none', 'important');
+      signupPage.style.setProperty('visibility', 'hidden', 'important');
+      signupPage.style.setProperty('opacity', '0', 'important');
+      console.log('✅ 회원가입 페이지 숨김 처리 완료');
+    }
+  }
+  
   // Hide all page sections (will be shown later if needed)
   document.querySelectorAll('.page-section').forEach((section) => {
     section.style.display = 'none';
@@ -3065,8 +3081,8 @@ async function navigateToPage(page) {
       if (page === 'signup') {
         console.log('회원가입 페이지 특별 처리 시작');
         
-        // ===== 단계 0: CSS Injection (다른 스크립트가 덮어쓰는 것을 방지) =====
-        console.log('단계 0 시작: CSS Injection');
+        // ===== 단계 0: 조건부 CSS Injection (Scoped CSS) =====
+        console.log('단계 0 시작: 조건부 CSS Injection');
         
         // 기존 스타일 태그가 있으면 제거
         const existingStyle = document.getElementById('signup-page-force-styles');
@@ -3074,17 +3090,17 @@ async function navigateToPage(page) {
           existingStyle.remove();
         }
         
-        // 새로운 <style> 태그 생성 및 주입
+        // 새로운 <style> 태그 생성 및 주입 (.is-signup-page로 스코프 제한)
         const styleTag = document.createElement('style');
         styleTag.id = 'signup-page-force-styles';
         styleTag.textContent = `
-          #signup-page, #signup-page * {
+          .is-signup-page #signup-page, .is-signup-page #signup-page * {
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
             color: #333 !important;
           }
-          #signup-page input {
+          .is-signup-page #signup-page input {
             background: white !important;
             border: 1px solid #ccc !important;
             height: 40px !important;
@@ -3092,7 +3108,7 @@ async function navigateToPage(page) {
             padding: 10px 12px !important;
             border-radius: 4px !important;
           }
-          #signup-page button, #signup-page [type="submit"] {
+          .is-signup-page #signup-page button, .is-signup-page #signup-page [type="submit"] {
             background-color: #007bff !important;
             color: #ffffff !important;
             border: 1px solid #007bff !important;
@@ -3101,54 +3117,55 @@ async function navigateToPage(page) {
             cursor: pointer !important;
             font-weight: 600 !important;
           }
-          #signup-page .link-btn, #signup-page #goToLogin {
+          .is-signup-page #signup-page .link-btn, .is-signup-page #signup-page #goToLogin {
             color: #007bff !important;
             background-color: transparent !important;
             border: none !important;
             text-decoration: underline !important;
             cursor: pointer !important;
           }
-          #signup-page {
-            background: rgba(0, 0, 0, 0.05) !important;
+          .is-signup-page #signup-page {
+            background: #f8f9fa !important;
             min-height: 600px !important;
             padding: 40px 20px !important;
-            margin-top: 80px !important;
+            padding-top: 100px !important;
+            margin-top: 0 !important;
             margin-bottom: 40px !important;
             margin-left: auto !important;
             margin-right: auto !important;
             position: relative !important;
-            z-index: 1 !important;
+            z-index: 100 !important;
             height: auto !important;
           }
-          header.top-navbar, .top-navbar, header, .navbar-container, nav {
-            z-index: 10000 !important;
+          .is-signup-page header.top-navbar, .is-signup-page .top-navbar, .is-signup-page header, .is-signup-page .navbar-container, .is-signup-page nav {
+            z-index: 1000 !important;
             position: sticky !important;
             top: 0 !important;
           }
-          header.top-navbar * {
+          .is-signup-page header.top-navbar * {
             z-index: inherit !important;
           }
-          #signup-page .card {
+          .is-signup-page #signup-page .card {
             background-color: #ffffff !important;
             color: #333333 !important;
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
           }
-          #signup-page label, #signup-page h2, #signup-page h3, #signup-page p, #signup-page span, #signup-page small {
+          .is-signup-page #signup-page label, .is-signup-page #signup-page h2, .is-signup-page #signup-page h3, .is-signup-page #signup-page p, .is-signup-page #signup-page span, .is-signup-page #signup-page small {
             color: #333333 !important;
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
           }
-          #signup-page .form-group {
+          .is-signup-page #signup-page .form-group {
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
           }
         `;
         document.head.appendChild(styleTag);
-        console.log('✅ CSS Injection 완료: signup-page-force-styles 스타일 태그 주입');
+        console.log('✅ 조건부 CSS Injection 완료: .is-signup-page 스코프로 제한');
         
         // ===== 단계 1: DOM 위치 이동 (Re-parenting) =====
         console.log('단계 1 시작: DOM 위치 이동');
@@ -3331,8 +3348,8 @@ async function navigateToPage(page) {
         // flex: 1 0 auto 추가 (main-content가 flex일 때 높이 문제 해결)
         pageElement.style.setProperty('flex', '1 0 auto', 'important');
         
-        // z-index를 1로 설정 (네비게이션 바보다 낮게)
-        pageElement.style.setProperty('z-index', '1', 'important');
+        // z-index를 100으로 설정 (네비게이션 바보다 낮게)
+        pageElement.style.setProperty('z-index', '100', 'important');
         pageElement.style.setProperty('position', 'relative', 'important');
         
         // display: block 설정
@@ -3340,10 +3357,12 @@ async function navigateToPage(page) {
         pageElement.style.setProperty('min-height', '600px', 'important');
         pageElement.style.setProperty('height', 'auto', 'important');
         pageElement.style.setProperty('padding', '40px 20px', 'important');
-        pageElement.style.setProperty('margin-top', '80px', 'important');
+        pageElement.style.setProperty('padding-top', '100px', 'important');
+        pageElement.style.setProperty('margin-top', '0', 'important');
         pageElement.style.setProperty('margin-bottom', '40px', 'important');
         pageElement.style.setProperty('margin-left', 'auto', 'important');
         pageElement.style.setProperty('margin-right', 'auto', 'important');
+        pageElement.style.setProperty('background', '#f8f9fa', 'important');
         pageElement.style.setProperty('box-sizing', 'border-box', 'important');
         
         // 네비게이션 바(헤더) 고정 설정 - 여러 선택자 시도
@@ -3363,12 +3382,12 @@ async function navigateToPage(page) {
         }
         
         if (header) {
-          header.style.setProperty('z-index', '10000', 'important');
+          header.style.setProperty('z-index', '1000', 'important');
           header.style.setProperty('position', 'sticky', 'important');
           header.style.setProperty('top', '0', 'important');
           header.style.setProperty('background-color', window.getComputedStyle(header).backgroundColor || 'rgba(255, 255, 255, 0.95)', 'important');
           header.style.setProperty('backdrop-filter', 'blur(10px)', 'important');
-          console.log('✅ 네비게이션 바 고정 설정 완료:', header.tagName, header.className);
+          console.log('✅ 네비게이션 바 고정 설정 완료 (z-index: 1000):', header.tagName, header.className);
         } else {
           console.warn('⚠️ 네비게이션 바를 찾을 수 없습니다!');
         }
@@ -3477,11 +3496,12 @@ async function navigateToPage(page) {
           pageElement.style.setProperty('display', 'block', 'important');
           pageElement.style.setProperty('visibility', 'visible', 'important');
           pageElement.style.setProperty('opacity', '1', 'important');
-          pageElement.style.setProperty('background', 'rgba(0, 0, 0, 0.05)', 'important');
+          pageElement.style.setProperty('background', '#f8f9fa', 'important');
           pageElement.style.setProperty('min-height', '600px', 'important');
           pageElement.style.setProperty('height', 'auto', 'important');
-          pageElement.style.setProperty('z-index', '1', 'important');
-          pageElement.style.setProperty('margin-top', '80px', 'important');
+          pageElement.style.setProperty('z-index', '100', 'important');
+          pageElement.style.setProperty('padding-top', '100px', 'important');
+          pageElement.style.setProperty('margin-top', '0', 'important');
           pageElement.style.setProperty('margin-bottom', '40px', 'important');
           pageElement.style.setProperty('margin-left', 'auto', 'important');
           pageElement.style.setProperty('margin-right', 'auto', 'important');
@@ -3503,12 +3523,12 @@ async function navigateToPage(page) {
           }
           
           if (header) {
-            header.style.setProperty('z-index', '10000', 'important');
+            header.style.setProperty('z-index', '1000', 'important');
             header.style.setProperty('position', 'sticky', 'important');
             header.style.setProperty('top', '0', 'important');
             header.style.setProperty('background-color', window.getComputedStyle(header).backgroundColor || 'rgba(255, 255, 255, 0.95)', 'important');
             header.style.setProperty('backdrop-filter', 'blur(10px)', 'important');
-            console.log('Timeout: 네비게이션 바 재확인 완료');
+            console.log('Timeout: 네비게이션 바 재확인 완료 (z-index: 1000)');
           }
           
           // 내부 .card 요소 재확인
