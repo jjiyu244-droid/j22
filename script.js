@@ -1,4 +1,4 @@
-// Demo data for staking portfolio
+// Staking portfolio data
 const portfolioData = [
   {
     symbol: 'BTC',
@@ -1405,9 +1405,6 @@ function openStakeModal(poolId) {
     currentPool.lockup
   }</div>
       </div>
-      <div class="badge badge-success">
-        <span>데모 모드</span>
-      </div>
     </div>
   `;
   $('#stakeAmount').value = '';
@@ -1512,11 +1509,11 @@ function setupThemeToggle() {
   });
 }
 
-// Wallet button (demo)
+// Wallet button
 function setupWalletButton() {
   const walletBtn = $('#walletBtn');
   walletBtn.addEventListener('click', () => {
-    walletBtn.textContent = '0xF3...D92A (Demo)';
+    walletBtn.textContent = '0xF3...D92A';
   });
 }
 
