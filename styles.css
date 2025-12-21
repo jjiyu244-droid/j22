@@ -735,6 +735,20 @@ body {
   padding: 6px;
 }
 
+/* XRP 로고의 하얀색 배경 제거 */
+.token-icon img.xrp-logo {
+  mix-blend-mode: multiply;
+  filter: contrast(1.2);
+}
+
+/* 다크 모드에서도 잘 보이도록 조정 */
+@media (prefers-color-scheme: dark) {
+  .token-icon img.xrp-logo {
+    mix-blend-mode: screen;
+    filter: brightness(1.1) contrast(1.2);
+  }
+}
+
 .token-meta {
   display: flex;
   flex-direction: column;

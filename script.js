@@ -31,7 +31,7 @@ const portfolioData = [
     amount: 4200,
     usd: 4100,
     percent: 15,
-    logoUrl: 'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
+    logoUrl: 'https://assets.coingecko.com/coins/images/44/small/xrp.png',
   },
   {
     symbol: 'SOL',
@@ -955,7 +955,7 @@ function renderPortfolio() {
     const el = document.createElement('div');
     el.className = 'portfolio-item';
     const iconContent = item.logoUrl 
-      ? `<img src="${item.logoUrl}" alt="${item.symbol}" style="width: 100%; height: 100%; object-fit: contain;" />`
+      ? `<img src="${item.logoUrl}" alt="${item.symbol}" class="token-logo ${item.symbol.toLowerCase()}-logo" style="width: 100%; height: 100%; object-fit: contain;" />`
       : (item.label ? item.label[0] : item.symbol[0]);
     el.innerHTML = `
       <div class="token-info">
