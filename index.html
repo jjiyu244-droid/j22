@@ -854,11 +854,13 @@
     <!-- Firebase core (Auth/Firestore/Analytics) 초기화 -->
     <script type="module">
       // Import the functions you need from the SDKs you need
-      import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js';
+      import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js';
       // Analytics 비활성화 (IndexedDB 경고 방지)
       // import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js';
       import {
         getAuth,
+        setPersistence,
+        browserLocalPersistence,
         createUserWithEmailAndPassword,
         signInWithEmailAndPassword,
         signOut,
@@ -884,8 +886,8 @@
         // measurementId: 'G-2BEJP8J1VT', // Analytics 비활성화
       };
 
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
+      // Initialize Firebase (중복 초기화 방지)
+      const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
       
       // Analytics 완전 비활성화 (IndexedDB 경고 방지)
       // Analytics는 사용하지 않으므로 초기화하지 않음
@@ -894,6 +896,16 @@
 
       const auth = getAuth(app);
       const db = getFirestore(app);
+
+      // 🔥 핵심: Firebase Auth Persistence 설정 (새로고침 후에도 로그인 유지)
+      // 이 설정은 auth 인스턴스 생성 직후에 해야 함
+      setPersistence(auth, browserLocalPersistence)
+        .then(() => {
+          console.log('✅ [index.html] Firebase Auth Persistence 설정 완료 (browserLocalPersistence)');
+        })
+        .catch((error) => {
+          console.error('❌ [index.html] Firebase Auth Persistence 설정 실패:', error);
+        });
 
       // 나중에 Auth/Firestore 연동 시 재사용할 수 있도록 전역에 노출
       window.__firebase = {
