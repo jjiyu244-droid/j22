@@ -1575,6 +1575,44 @@ function setupSimulator() {
   });
 }
 
+// 스테이킹 신청 저장 (유저가 신청만 가능)
+async function createStakingRequest(poolId, amount) {
+  if (!currentUser || !currentUser.uid) {
+    throw new Error('로그인이 필요합니다.');
+  }
+  
+  const pool = pools.find((p) => p.id === poolId);
+  if (!pool) {
+    throw new Error('스테이킹 풀을 찾을 수 없습니다.');
+  }
+  
+  try {
+    const { collection, addDoc, serverTimestamp } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const requestsRef = collection(db, 'staking_requests');
+    
+    await addDoc(requestsRef, {
+      userId: currentUser.uid,
+      userEmail: currentUser.email,
+      poolId: poolId,
+      symbol: pool.symbol,
+      amount: parseFloat(amount),
+      network: pool.network,
+      requestedApy: pool.apr, // 풀의 기본 APY
+      status: 'pending', // pending, approved, rejected
+      createdAt: serverTimestamp(),
+      approvedAt: null,
+      approvedBy: null,
+    });
+    
+    return true;
+  } catch (e) {
+    console.error('스테이킹 신청 저장 실패:', e);
+    throw e;
+  }
+}
+
 // Staking modal logic
 let currentPool = null;
 
@@ -1640,34 +1678,42 @@ function setupStakeModal() {
     }
 
     helper.classList.remove('text-danger');
-    helper.textContent = `${currentPool.name} 풀에 ${amount} ${currentPool.symbol}를 스테이킹합니다.`;
+    
+    // 스테이킹 신청 (관리자 승인 대기)
+    try {
+      $('#stakeConfirmBtn').textContent = '신청 중...';
+      $('#stakeConfirmBtn').disabled = true;
+      
+      await createStakingRequest(currentPool.id, amount);
+      
+      helper.textContent = `✅ 스테이킹 신청이 완료되었습니다. 관리자 승인 후 반영됩니다.`;
+      helper.style.color = '#10b981';
+      
+      // prepend virtual activity
+      activity.unshift({
+        type: '스테이킹 신청',
+        status: '대기중',
+        time: '방금 전',
+        desc: currentPool.name,
+        amount: `+${amount} ${currentPool.symbol}`,
+        positive: true,
+      });
+      if (activity.length > 12) activity.pop();
+      renderActivity();
 
-    // 유저별 스테이킹 수량 업데이트
-    userStakes[currentPool.symbol] = (userStakes[currentPool.symbol] || 0) + amount;
-    await saveUserStakesToFirestore();
-
-    // 포트폴리오/요약 수치 갱신
-    applyUserStakesToPortfolio();
-    renderPortfolio();
-
-    // prepend virtual activity
-    activity.unshift({
-      type: '스테이킹',
-      status: '완료',
-      time: '방금 전',
-      desc: currentPool.name,
-      amount: `+${amount} ${currentPool.symbol}`,
-      positive: true,
-    });
-    if (activity.length > 12) activity.pop();
-    renderActivity();
-
-    // light feedback
-    $('#stakeConfirmBtn').textContent = '완료 (Firebase)';
-    setTimeout(() => {
-      $('#stakeConfirmBtn').textContent = '가상 스테이킹 실행';
-      closeStakeModal();
-    }, 900);
+      // light feedback
+      $('#stakeConfirmBtn').textContent = '신청 완료';
+      setTimeout(() => {
+        closeStakeModal();
+        $('#stakeConfirmBtn').textContent = '스테이킹 신청';
+        $('#stakeConfirmBtn').disabled = false;
+      }, 1500);
+    } catch (error) {
+      helper.textContent = `❌ 신청 실패: ${error.message}`;
+      helper.classList.add('text-danger');
+      $('#stakeConfirmBtn').textContent = '스테이킹 신청';
+      $('#stakeConfirmBtn').disabled = false;
+    }
   });
 }
 
@@ -1965,8 +2011,71 @@ async function renderAdminDashboard(users) {
   const inquiries = await loadAllInquiries();
   const pendingInquiries = inquiries.filter(inq => inq.status === '대기중');
 
+  // 스테이킹 신청 목록 불러오기
+  const stakingRequests = await loadStakingRequests();
+  const pendingRequests = stakingRequests.filter(req => req.status === 'pending');
+
   // 통계 섹션
   let html = `
+    <!-- 스테이킹 신청 목록 섹션 -->
+    <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(59, 130, 246, 0.3);">
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+        📝 스테이킹 신청 목록
+        ${pendingRequests.length > 0 ? `<span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${pendingRequests.length}건 대기</span>` : ''}
+      </h3>
+      ${pendingRequests.length > 0 ? `
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">이메일</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">코인</th>
+                <th style="padding: 12px; text-align: right; color: #9ca3af; font-weight: 600;">신청 수량</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">네트워크</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">신청일</th>
+                <th style="padding: 12px; text-align: center; color: #9ca3af; font-weight: 600;">작업</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pendingRequests.map((req) => {
+                const dateStr = req.createdAt?.toDate ? req.createdAt.toDate().toLocaleDateString('ko-KR') : '날짜 없음';
+                return `
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 12px;">${req.userEmail || '이메일 없음'}</td>
+                    <td style="padding: 12px; font-weight: 600;">${req.symbol}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
+                    <td style="padding: 12px; color: #9ca3af;">${req.network}</td>
+                    <td style="padding: 12px; color: #9ca3af;">${dateStr}</td>
+                    <td style="padding: 12px; text-align: center;">
+                      <button 
+                        class="btn-primary" 
+                        style="padding: 6px 12px; font-size: 12px; margin-right: 8px;"
+                        onclick="handleApproveStakingRequest('${req.id}', '${req.userId}', '${req.symbol}', ${req.amount}, '${req.userEmail || ''}')"
+                      >
+                        승인
+                      </button>
+                      <button 
+                        class="btn-outline" 
+                        style="padding: 6px 12px; font-size: 12px;"
+                        onclick="handleRejectStakingRequest('${req.id}')"
+                      >
+                        거절
+                      </button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : `
+        <div style="padding: 20px; text-align: center; color: #9ca3af;">
+          대기 중인 스테이킹 신청이 없습니다.
+        </div>
+      `}
+    </div>
+    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">🔍 사용자 검색</h3>
     <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
       <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">📊 전체 통계</h3>
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;">
@@ -2515,8 +2624,69 @@ async function renderAdminDashboardContent(users, container) {
   const inquiries = await loadAllInquiries();
   const pendingInquiries = inquiries.filter(inq => inq.status === '대기중');
 
+  // 스테이킹 신청 목록 불러오기
+  const stakingRequests = await loadStakingRequests();
+  const pendingRequests = stakingRequests.filter(req => req.status === 'pending');
+
   // 통계 섹션
   let html = `
+    <!-- 스테이킹 신청 목록 섹션 -->
+    <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(59, 130, 246, 0.3);">
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+        📝 스테이킹 신청 목록
+        ${pendingRequests.length > 0 ? `<span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${pendingRequests.length}건 대기</span>` : ''}
+      </h3>
+      ${pendingRequests.length > 0 ? `
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">이메일</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">코인</th>
+                <th style="padding: 12px; text-align: right; color: #9ca3af; font-weight: 600;">신청 수량</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">네트워크</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">신청일</th>
+                <th style="padding: 12px; text-align: center; color: #9ca3af; font-weight: 600;">작업</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pendingRequests.map((req) => {
+                const dateStr = req.createdAt?.toDate ? req.createdAt.toDate().toLocaleDateString('ko-KR') : '날짜 없음';
+                return `
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 12px;">${req.userEmail || '이메일 없음'}</td>
+                    <td style="padding: 12px; font-weight: 600;">${req.symbol}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
+                    <td style="padding: 12px; color: #9ca3af;">${req.network}</td>
+                    <td style="padding: 12px; color: #9ca3af;">${dateStr}</td>
+                    <td style="padding: 12px; text-align: center;">
+                      <button 
+                        class="btn-primary" 
+                        style="padding: 6px 12px; font-size: 12px; margin-right: 8px;"
+                        onclick="handleApproveStakingRequest('${req.id}', '${req.userId}', '${req.symbol}', ${req.amount}, '${req.userEmail || ''}')"
+                      >
+                        승인
+                      </button>
+                      <button 
+                        class="btn-outline" 
+                        style="padding: 6px 12px; font-size: 12px;"
+                        onclick="handleRejectStakingRequest('${req.id}')"
+                      >
+                        거절
+                      </button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      ` : `
+        <div style="padding: 20px; text-align: center; color: #9ca3af;">
+          대기 중인 스테이킹 신청이 없습니다.
+        </div>
+      `}
+    </div>
     <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
       <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">🔍 사용자 검색</h3>
       <div style="display: flex; gap: 12px; margin-bottom: 20px;">
