@@ -224,7 +224,8 @@ async function fetchAndApplyPrices() {
 let auth, db;
 let currentUser = null;
 let isAdmin = false;
-const ADMIN_EMAIL = 'jjiyu244@gmail.com';
+const ADMIN_USERNAME = 'jjiyu244'; // 관리자 username
+const ADMIN_EMAIL = `${ADMIN_USERNAME}@corestaker.local`; // Firebase Auth용 이메일
 let userStakes = {
   BTC: 0,
   ETH: 0,
@@ -291,8 +292,36 @@ async function initFirebase() {
       
       if (user) {
         console.log('✅ 로그인 상태 확인:', user.email, user.uid);
-        currentUser = { email: user.email, uid: user.uid };
-        isAdmin = user.email === ADMIN_EMAIL;
+        
+        // Firestore에서 username 가져오기
+        let username = null;
+        try {
+          const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            username = userData.username || null;
+            // 관리자 확인
+            isAdmin = userData.username === ADMIN_USERNAME || userData.role === 'admin' || user.email === ADMIN_EMAIL;
+          } else {
+            // Firestore에 사용자 정보가 없으면 이메일에서 username 추출
+            const email = user.email || '';
+            username = email.replace('@corestaker.local', '').replace('@temp.com', '').split('@')[0];
+            isAdmin = email === ADMIN_EMAIL;
+          }
+        } catch (e) {
+          console.warn('username 가져오기 실패:', e);
+          const email = user.email || '';
+          username = email.replace('@corestaker.local', '').replace('@temp.com', '').split('@')[0];
+          isAdmin = email === ADMIN_EMAIL;
+        }
+        
+        currentUser = { 
+          email: user.email, 
+          uid: user.uid,
+          username: username
+        };
         
         // localStorage에 사용자 정보 저장 (최신 정보로 업데이트)
         const userData = {
@@ -667,20 +696,57 @@ async function loadStakingRequests() {
   }
 }
 
+// Firestore에서 username 가져오기
+async function getUsernameFromFirestore(uid) {
+  if (!db || !uid) return null;
+  try {
+    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+    const userRef = doc(db, 'users', uid);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      return userData.username || null;
+    }
+  } catch (e) {
+    console.warn('username 가져오기 실패:', e);
+  }
+  return null;
+}
+
 function updateLoginUI() {
   const loginBtn = $('#loginBtn');
   if (!loginBtn) return;
   
   // 로그인 버튼 텍스트 업데이트
   if (currentUser) {
-    // 이메일에서 @ 앞부분만 표시 (일반 계정은 @temp.com 제거)
-    const displayEmail = currentUser.email.replace('@temp.com', '').split('@')[0];
-    loginBtn.textContent = `${displayEmail} (로그아웃)`;
+    // username 가져오기 (비동기이므로 일단 이메일에서 추출)
+    const email = currentUser.email || '';
+    const displayName = email.replace('@corestaker.local', '').replace('@temp.com', '').split('@')[0];
+    
+    // Firestore에서 username 가져오기 (비동기)
+    getUsernameFromFirestore(currentUser.uid).then(username => {
+      if (username) {
+        loginBtn.textContent = `${username} (로그아웃)`;
+      } else {
+        loginBtn.textContent = `${displayName} (로그아웃)`;
+      }
+    }).catch(() => {
+      loginBtn.textContent = `${displayName} (로그아웃)`;
+    });
     
     // 문의 폼 이메일 자동 입력 (문의 페이지가 표시 중인 경우)
+    // username 기반이므로 이메일 대신 username 표시
     const inquiryEmailInput = $('#inquiryEmail');
     if (inquiryEmailInput) {
-      inquiryEmailInput.value = currentUser.email;
+      getUsernameFromFirestore(currentUser.uid).then(username => {
+        if (username) {
+          inquiryEmailInput.value = username;
+        } else {
+          inquiryEmailInput.value = displayName;
+        }
+      }).catch(() => {
+        inquiryEmailInput.value = displayName;
+      });
     }
   } else {
     loginBtn.textContent = '로그인';
@@ -835,20 +901,29 @@ async function setupLogin() {
       return;
     }
     
-    // 입력 값 가져오기 및 검증
-    let email = emailInput.value.trim();
+    // 입력 값 가져오기 및 검증 (username 기반)
+    let username = emailInput.value.trim();
     const password = passwordInput.value.trim();
     
     // 빈 값 체크
-    if (!email || !password) {
+    if (!username || !password) {
       if (statusText) {
-        statusText.textContent = '아이디(또는 이메일)와 비밀번호를 모두 입력해주세요.';
+        statusText.textContent = '아이디와 비밀번호를 모두 입력해주세요.';
       }
       return;
     }
     
-    // 이메일 형식 검증 및 변환
-    email = email.toLowerCase().trim();
+    // username 유효성 검사 (영문, 숫자, 언더스코어만 허용)
+    const usernamePattern = /^[A-Za-z0-9_]+$/;
+    if (!usernamePattern.test(username)) {
+      if (statusText) {
+        statusText.textContent = '아이디는 영문, 숫자, 언더스코어(_)만 사용 가능합니다.';
+      }
+      return;
+    }
+    
+    // username을 이메일 형식으로 변환 (Firebase Auth는 이메일 형식 필요)
+    const email = `${username.toLowerCase()}@corestaker.local`;
     
     // 일반 아이디 형식 체크 (소문자, 숫자, 언더스코어, 하이픈만 허용)
     const isGeneralId = /^[a-z0-9_-]+$/.test(email) && !email.includes('@');
@@ -911,7 +986,8 @@ async function setupLogin() {
       
       // 어드민 페이지에서 로그인 성공 후 관리자 계정인지 다시 확인
       if (isAdminPage) {
-        const adminEmail = typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : 'jjiyu244@gmail.com';
+        const adminUsername = 'jjiyu244'; // 관리자 username
+        const adminEmail = `${adminUsername}@corestaker.local`;
         if (result.user.email.toLowerCase() !== adminEmail.toLowerCase()) {
           // 관리자가 아니면 로그아웃
           const { signOut } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
@@ -919,7 +995,7 @@ async function setupLogin() {
           if (statusText) {
             statusText.innerHTML = `
               <span style="color: #ef4444;">❌ 관리자 계정만 로그인할 수 있습니다.</span><br/>
-              <span style="color: #9ca3af; font-size: 12px;">허용된 계정: ${adminEmail}</span>
+              <span style="color: #9ca3af; font-size: 12px;">허용된 계정: ${adminUsername}</span>
             `;
           }
           return;
@@ -1467,20 +1543,68 @@ function setupSignupForm() {
           return;
         }
         
-        // 사용자명을 이메일 형식으로 변환 (Firebase는 이메일 형식 필요)
-        // 실제로는 이메일 형식이 필요하지만, 임시로 사용자명+@temp.com 형식 사용
-        const email = `${username}@temp.com`;
+      // username 유효성 검사 (영문, 숫자, 언더스코어만 허용)
+      const usernamePattern = /^[A-Za-z0-9_]+$/;
+      if (!usernamePattern.test(username)) {
+        alert('사용자명은 영문, 숫자, 언더스코어(_)만 사용 가능합니다.');
+        return;
+      }
+      
+      // username 중복 검사
+      try {
+        const { collection, query, where, getDocs } = await import(
+          'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+        );
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('username', '==', username.toLowerCase()));
+        const querySnapshot = await getDocs(q);
         
-        await createUserWithEmailAndPassword(currentAuth, email, password);
+        if (!querySnapshot.empty) {
+          alert('이미 사용 중인 아이디입니다.');
+          return;
+        }
+      } catch (checkError) {
+        console.warn('username 중복 검사 실패 (계속 진행):', checkError);
+        // 중복 검사 실패해도 계속 진행 (Firebase Auth에서 중복 체크됨)
+      }
+      
+      // username을 이메일 형식으로 변환 (Firebase Auth는 이메일 형식 필요)
+      const email = `${username.toLowerCase()}@corestaker.local`;
         
-        // 성공 메시지 (Firebase Auth는 회원가입 후 자동 로그인됨)
-        alert('회원가입이 완료되었습니다!');
+      await createUserWithEmailAndPassword(currentAuth, email, password);
+      
+      // Firestore users 컬렉션에 username 저장
+      try {
+        const { doc, setDoc, serverTimestamp } = await import(
+          'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+        );
+        // onAuthStateChanged에서 user.uid를 사용할 수 있도록 대기
+        // 회원가입 후 자동 로그인되므로 잠시 대기 후 저장
+        setTimeout(async () => {
+          if (auth && auth.currentUser) {
+            const userRef = doc(db, 'users', auth.currentUser.uid);
+            await setDoc(userRef, {
+              username: username.toLowerCase(),
+              email: email,
+              role: 'user',
+              createdAt: serverTimestamp(),
+            }, { merge: true });
+            console.log('✅ Firestore에 username 저장 완료');
+          }
+        }, 500);
+      } catch (userSaveError) {
+        console.error('Firestore users 저장 실패:', userSaveError);
+        // 저장 실패해도 회원가입은 성공으로 처리
+      }
         
-        // 회원가입 페이지 닫고 대시보드로 이동
-        navigateToPage('dashboard');
+      // 성공 메시지 (Firebase Auth는 회원가입 후 자동 로그인됨)
+      alert('회원가입이 완료되었습니다!');
         
-        // 폼 초기화
-        signupForm.reset();
+      // 회원가입 페이지 닫고 대시보드로 이동
+      navigateToPage('dashboard');
+        
+      // 폼 초기화
+      signupForm.reset();
         
       } catch (error) {
         console.error('회원가입 오류 상세:', error);
@@ -1490,7 +1614,7 @@ function setupSignupForm() {
         let errorMessage = '회원가입 중 오류가 발생했습니다.';
         
         if (error.code === 'auth/email-already-in-use') {
-          errorMessage = '이미 사용 중인 사용자명입니다.';
+          errorMessage = '이미 사용 중인 아이디입니다.';
         } else if (error.code === 'auth/weak-password') {
           errorMessage = '비밀번호가 너무 약합니다. 더 복잡한 비밀번호를 사용해주세요.';
         } else if (error.code === 'auth/invalid-email') {
@@ -2735,8 +2859,9 @@ async function renderAdminDashboardContent(users, container) {
           type="text"
           id="adminUserSearch"
           class="input"
-          placeholder="이메일 주소로 사용자 검색..."
+          placeholder="아이디(username)로 사용자 검색..."
           style="flex: 1; padding: 12px; font-size: 14px;"
+          pattern="[A-Za-z0-9_]+"
         />
         <button
           class="btn-primary"
@@ -2970,63 +3095,70 @@ async function setupAdminUserSearch(users, prices) {
   if (!searchInput || !searchBtn || !searchResult) return;
   
   const performSearch = async () => {
-    const searchEmail = searchInput.value.trim().toLowerCase();
-    if (!searchEmail) {
+    const searchUsername = searchInput.value.trim().toLowerCase();
+    if (!searchUsername) {
       searchResult.style.display = 'none';
       return;
     }
     
-    // users 배열에서 이메일로 검색
-    const foundUser = users.find(u => u.email && u.email.toLowerCase() === searchEmail);
-    
-    if (!foundUser) {
-      // Firestore에서 직접 검색 시도
-      try {
-        const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db);
-        if (!firestoreDb) {
-          searchResult.innerHTML = `
-            <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
-              사용자를 찾을 수 없습니다: ${searchEmail}
-            </div>
-          `;
-          searchResult.style.display = 'block';
-          return;
-        }
-        
-        const { collection, query, where, getDocs } = await import(
-          'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
-        );
-        const q = query(collection(firestoreDb, 'userStakes'), where('email', '==', searchEmail));
-        const querySnapshot = await getDocs(q);
-        
-        if (querySnapshot.empty) {
-          searchResult.innerHTML = `
-            <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
-              사용자를 찾을 수 없습니다: ${searchEmail}
-            </div>
-          `;
-          searchResult.style.display = 'block';
-          return;
-        }
-        
-        const doc = querySnapshot.docs[0];
-        const userData = {
-          uid: doc.id,
-          ...doc.data(),
-        };
-        
-        displayUserEditForm(userData, prices);
-      } catch (error) {
-        console.error('사용자 검색 오류:', error);
+    // Firestore users 컬렉션에서 username으로 검색
+    try {
+      const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db);
+      if (!firestoreDb) {
         searchResult.innerHTML = `
           <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
-            검색 중 오류가 발생했습니다: ${error.message}
+            사용자를 찾을 수 없습니다: ${searchUsername}
           </div>
         `;
         searchResult.style.display = 'block';
+        return;
       }
-    } else {
-      displayUserEditForm(foundUser, prices);
+      
+      const { collection, query, where, getDocs, doc, getDoc } = await import(
+        'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+      );
+      
+      // users 컬렉션에서 username으로 검색
+      const usersRef = collection(firestoreDb, 'users');
+      const q = query(usersRef, where('username', '==', searchUsername));
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        searchResult.innerHTML = `
+          <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
+            사용자를 찾을 수 없습니다: ${searchUsername}
+          </div>
+        `;
+        searchResult.style.display = 'block';
+        return;
+      }
+      
+      const userDoc = querySnapshot.docs[0];
+      const userData = {
+        uid: userDoc.id,
+        ...userDoc.data(),
+      };
+      
+      // userStakes 데이터도 가져오기
+      const userStakesRef = doc(firestoreDb, 'userStakes', userData.uid);
+      const userStakesSnap = await getDoc(userStakesRef);
+      if (userStakesSnap.exists()) {
+        const stakesData = userStakesSnap.data();
+        userData.BTC = stakesData.BTC || 0;
+        userData.ETH = stakesData.ETH || 0;
+        userData.XRP = stakesData.XRP || 0;
+        userData.SOL = stakesData.SOL || 0;
+      }
+      
+      displayUserEditForm(userData, prices);
+    } catch (error) {
+      console.error('사용자 검색 오류:', error);
+      searchResult.innerHTML = `
+        <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
+          검색 중 오류가 발생했습니다: ${error.message}
+        </div>
+      `;
+      searchResult.style.display = 'block';
     }
   };
   
@@ -3045,7 +3177,7 @@ async function setupAdminUserSearch(users, prices) {
     searchResult.innerHTML = `
       <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
         <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #fff;">
-          사용자: ${user.email || '이메일 없음'} (UID: ${user.uid.substring(0, 16)}...)
+          사용자: ${user.username || user.email || '정보 없음'} (UID: ${user.uid.substring(0, 16)}...)
         </h4>
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px;">
           <div>
@@ -3128,7 +3260,7 @@ async function setupAdminUserSearch(users, prices) {
           BTC: newBTC,
           ETH: newETH,
           XRP: newXRP,
-        }, user.email);
+        }, user.username || user.email);
         
         if (success) {
           if (statusText) {
