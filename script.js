@@ -1,4 +1,4 @@
-// Staking portfolio data
+// Staking portfolio data (템플릿 - 실제 데이터는 userStakes에서 가져옴)
 const portfolioData = [
   {
     symbol: 'BTC',
@@ -6,9 +6,10 @@ const portfolioData = [
     network: '비트코인 메인넷',
     color: '#f97316',
     bg: '#ffedd5',
-    amount: 1.2,
-    usd: 14500,
-    percent: 52,
+    amount: 0, // 기본값 0 - userStakes에서 실제 값으로 업데이트됨
+    amountBase: 0,
+    usd: 0,
+    percent: 0,
     logoUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
   },
   {
@@ -17,9 +18,10 @@ const portfolioData = [
     network: '이더리움 메인넷',
     color: '#4f46e5',
     bg: '#e0e7ff',
-    amount: 8.3,
-    usd: 9300,
-    percent: 33,
+    amount: 0,
+    amountBase: 0,
+    usd: 0,
+    percent: 0,
     logoUrl: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
   },
   {
@@ -28,9 +30,10 @@ const portfolioData = [
     network: '리플 네트워크',
     color: '#06b6d4',
     bg: '#cffafe',
-    amount: 4200,
-    usd: 4100,
-    percent: 15,
+    amount: 0,
+    amountBase: 0,
+    usd: 0,
+    percent: 0,
     logoUrl: 'https://assets.coingecko.com/coins/images/44/small/xrp.png',
   },
   {
@@ -39,9 +42,10 @@ const portfolioData = [
     network: '솔라나 메인넷',
     color: '#9945FF',
     bg: '#f3e8ff',
-    amount: 50,
-    usd: 8500,
-    percent: 12,
+    amount: 0,
+    amountBase: 0,
+    usd: 0,
+    percent: 0,
     logoUrl: 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
   },
 ];
@@ -145,6 +149,27 @@ const priceSource = {
 window.priceSource = priceSource;
 
 async function fetchAndApplyPrices() {
+  // 스테이킹이 있는지 확인
+  const hasStaking = Object.values(userStakes).some(amount => amount > 0);
+  if (!hasStaking) {
+    // 스테이킹이 없으면 0으로 설정하고 렌더링
+    portfolioData.forEach((item) => {
+      item.usd = 0;
+      item.percent = 0;
+    });
+    renderPortfolio();
+    if ($('#totalStaked')) {
+      $('#totalStaked').textContent = formatUSD(0);
+    }
+    if ($('#estApy')) {
+      $('#estApy').textContent = '0%';
+    }
+    if ($('#pendingRewards')) {
+      $('#pendingRewards').textContent = '0';
+    }
+    return;
+  }
+
   try {
     const ids = Object.values(priceSource).join(',');
     const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
@@ -156,14 +181,23 @@ async function fetchAndApplyPrices() {
     portfolioData.forEach((item) => {
       const id = priceSource[item.symbol];
       const price = data[id]?.usd;
-      if (!price) return;
-      item.usd = item.amount * price;
+      if (!price) {
+        item.usd = 0;
+        return;
+      }
+      // 스테이킹 수량이 있는 경우만 USD 계산
+      const stakeAmount = userStakes[item.symbol] || 0;
+      item.usd = stakeAmount * price;
       total += item.usd;
     });
 
     if (total > 0) {
       portfolioData.forEach((item) => {
         item.percent = Math.round((item.usd / total) * 100);
+      });
+    } else {
+      portfolioData.forEach((item) => {
+        item.percent = 0;
       });
     }
 
@@ -173,9 +207,16 @@ async function fetchAndApplyPrices() {
       $('#totalStaked').textContent = formatUSD(total);
     }
   } catch (e) {
-    // 네트워크 에러 시에는 그냥 더미 데이터 그대로 사용
+    // 네트워크 에러 시에는 0으로 설정
     console.error('가격 데이터를 불러오지 못했습니다:', e);
-    // 사용자에게는 조용히 실패 (기존 더미 데이터 사용)
+    portfolioData.forEach((item) => {
+      item.usd = 0;
+      item.percent = 0;
+    });
+    renderPortfolio();
+    if ($('#totalStaked')) {
+      $('#totalStaked').textContent = formatUSD(0);
+    }
   }
 }
 
@@ -269,7 +310,7 @@ async function initFirebase() {
         await loadUserStakesFromFirestore(user.uid);
         await loadUserRewardsFromFirestore(user.uid);
         applyUserStakesToPortfolio();
-        renderPortfolio();
+        await fetchAndApplyPrices(); // 가격 업데이트 후 포트폴리오 렌더링
         updateLoginUI();
         updateAdminUI();
         
@@ -336,11 +377,13 @@ async function loadUserStakesFromFirestore(uid) {
       userStakes.BTC = data.BTC || 0;
       userStakes.ETH = data.ETH || 0;
       userStakes.XRP = data.XRP || 0;
+      userStakes.SOL = data.SOL || 0;
     } else {
       userStakes = { BTC: 0, ETH: 0, XRP: 0, SOL: 0 };
     }
   } catch (e) {
     console.error('Firestore에서 데이터를 불러오지 못했습니다:', e);
+    userStakes = { BTC: 0, ETH: 0, XRP: 0, SOL: 0 };
   }
 }
 
@@ -614,11 +657,11 @@ function updateLoginUI() {
 }
 
 function applyUserStakesToPortfolio() {
-  // userStakes 수량을 포트폴리오 amount에 더해줌
+  // userStakes 수량을 포트폴리오 amount에 설정
   portfolioData.forEach((item) => {
-    const extra = userStakes[item.symbol] || 0;
-    item.amountBase = item.amountBase ?? item.amount;
-    item.amount = item.amountBase + extra;
+    const stakeAmount = userStakes[item.symbol] || 0;
+    item.amount = stakeAmount;
+    item.amountBase = stakeAmount; // 기본값도 실제 스테이킹 수량으로 설정
   });
 }
 
@@ -959,12 +1002,46 @@ function renderPortfolio() {
   if (!list) return; // admin.html에는 포트폴리오 요소가 없음
   list.innerHTML = '';
 
-  // 도넛 차트 동적 렌더링
+  // 스테이킹이 있는지 확인 (userStakes의 합이 0보다 큰지)
+  const hasStaking = Object.values(userStakes).some(amount => amount > 0);
+  const stakingItems = portfolioData.filter(item => (userStakes[item.symbol] || 0) > 0);
+
+  // 스테이킹이 없으면 빈 상태 표시
+  if (!hasStaking || stakingItems.length === 0) {
+    list.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-soft);">
+        <div style="font-size: 16px; margin-bottom: 8px; color: var(--text);">아직 스테이킹 내역이 없습니다</div>
+        <div style="font-size: 14px; margin-bottom: 24px;">스테이킹을 시작하여 수익을 창출하세요</div>
+        <button class="btn-primary" onclick="document.querySelector('[data-stake-id]')?.click();" style="padding: 12px 24px; font-size: 14px; font-weight: 600;">
+          스테이킹 시작하기
+        </button>
+      </div>
+    `;
+    
+    // 도넛 차트도 빈 상태로
+    const donutChart = $('#donutChart');
+    if (donutChart) {
+      donutChart.style.background = 'conic-gradient(rgba(148, 163, 184, 0.2) 0deg 360deg)';
+      const donutValue = donutChart.querySelector('.donut-value');
+      const donutLabel = donutChart.querySelector('.donut-label');
+      if (donutValue) donutValue.textContent = '0%';
+      if (donutLabel) donutLabel.textContent = 'Staked';
+    }
+    
+    // 총 스테이킹 자산도 0으로 업데이트
+    if ($('#totalStaked')) {
+      $('#totalStaked').textContent = formatUSD(0);
+    }
+    
+    return;
+  }
+
+  // 도넛 차트 동적 렌더링 (스테이킹이 있는 경우만)
   const donutChart = $('#donutChart');
   if (donutChart) {
     // 각 자산의 각도 계산
     let currentAngle = 0;
-    const segments = portfolioData
+    const segments = stakingItems
       .filter(item => item.percent > 0)
       .map((item) => {
         const angle = (item.percent / 100) * 360;
@@ -986,9 +1063,21 @@ function renderPortfolio() {
       
       donutChart.style.background = `conic-gradient(${gradientParts})`;
     }
+    
+    // 도넛 차트 중앙 텍스트 업데이트
+    const donutValue = donutChart.querySelector('.donut-value');
+    const donutLabel = donutChart.querySelector('.donut-label');
+    if (donutValue) {
+      const totalPercent = stakingItems.reduce((sum, item) => sum + (item.percent || 0), 0);
+      donutValue.textContent = `${Math.min(100, totalPercent)}%`;
+    }
+    if (donutLabel) {
+      donutLabel.textContent = 'Staked';
+    }
   }
 
-  portfolioData.forEach((item) => {
+  // 스테이킹이 있는 항목만 표시
+  stakingItems.forEach((item) => {
     const el = document.createElement('div');
     el.className = 'portfolio-item';
     const iconContent = item.logoUrl 
