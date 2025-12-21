@@ -57,6 +57,7 @@ const pools = [
     type: 'stable',
     network: '비트코인 메인넷',
     lockup: '30일',
+    logoUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
   },
   {
     id: 'eth-stake',
@@ -68,6 +69,7 @@ const pools = [
     type: 'volatile',
     network: '이더리움 메인넷',
     lockup: '14일',
+    logoUrl: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
   },
   {
     id: 'xrp-stake',
@@ -79,6 +81,7 @@ const pools = [
     type: 'stable',
     network: '리플 네트워크',
     lockup: '7일',
+    logoUrl: 'https://assets.coingecko.com/coins/images/44/small/xrp.png',
   },
   {
     id: 'sol-stake',
@@ -90,6 +93,7 @@ const pools = [
     type: 'volatile',
     network: '솔라나 메인넷',
     lockup: '14일',
+    logoUrl: 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
   },
 ];
 
@@ -1020,10 +1024,13 @@ function renderPools(filter = 'all') {
     .forEach((pool) => {
       const el = document.createElement('div');
       el.className = 'pool-card';
+      const iconContent = pool.logoUrl 
+        ? `<img src="${pool.logoUrl}" alt="${pool.symbol}" class="pool-logo ${pool.symbol.toLowerCase()}-logo" style="width: 100%; height: 100%; object-fit: contain;" />`
+        : pool.symbol[0];
       el.innerHTML = `
         <div class="pool-main">
           <div class="token-icon" style="background:rgba(148,163,184,0.2);color:#e5e7eb">
-            ${pool.symbol[0]}
+            ${iconContent}
           </div>
           <div>
             <div class="pool-apr">${pool.name}</div>
