@@ -626,6 +626,47 @@ async function loadAllInquiries() {
   }
 }
 
+// 어드민용: 모든 스테이킹 신청 불러오기
+async function loadStakingRequests() {
+  if (!db) return [];
+  
+  try {
+    const { collection, query, getDocs, orderBy } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const requestsRef = collection(db, 'staking_requests');
+    
+    let q = query(requestsRef, orderBy('createdAt', 'desc'));
+    
+    try {
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    } catch (indexError) {
+      // 인덱스가 없으면 orderBy 없이 조회 후 클라이언트에서 정렬
+      const querySnapshot = await getDocs(requestsRef);
+      const requests = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      
+      // 클라이언트에서 날짜순 정렬
+      requests.sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+        return dateB.getTime() - dateA.getTime(); // 최신순
+      });
+      
+      return requests;
+    }
+  } catch (e) {
+    console.error('스테이킹 신청 목록 로드 실패:', e);
+    return [];
+  }
+}
+
 function updateLoginUI() {
   const loginBtn = $('#loginBtn');
   if (!loginBtn) return;
