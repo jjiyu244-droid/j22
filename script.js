@@ -170,6 +170,29 @@ async function initFirebase() {
   db = window.__firebase.db;
   window.__firebaseInitialized = true; // Firebase 초기화 완료 플래그
 
+  // 페이지 로드 시 localStorage에서 사용자 정보 복구 시도
+  try {
+    const savedUserData = localStorage.getItem('user');
+    if (savedUserData) {
+      const userData = JSON.parse(savedUserData);
+      const now = Date.now();
+      const oneDay = 24 * 60 * 60 * 1000; // 24시간
+      
+      // 저장된 데이터가 24시간 이내인지 확인 (선택적)
+      if (userData.timestamp && (now - userData.timestamp) < oneDay) {
+        console.log('✅ localStorage에서 사용자 정보를 찾았습니다:', userData.email);
+        // Firebase Auth가 자동으로 세션을 복구하므로 여기서는 로그만 남김
+        // 실제 인증 상태는 onAuthStateChanged에서 확인됨
+      } else {
+        // 오래된 데이터는 삭제
+        localStorage.removeItem('user');
+        console.log('⚠️ 저장된 사용자 정보가 만료되어 삭제했습니다.');
+      }
+    }
+  } catch (storageError) {
+    console.warn('localStorage 읽기 실패:', storageError);
+  }
+
   // Auth 상태 변화 감지
   const { onAuthStateChanged } = await import(
     'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js'
@@ -178,6 +201,20 @@ async function initFirebase() {
     if (user) {
       currentUser = { email: user.email, uid: user.uid };
       isAdmin = user.email === ADMIN_EMAIL;
+      
+      // localStorage에 사용자 정보 저장 (최신 정보로 업데이트)
+      const userData = {
+        email: user.email,
+        uid: user.uid,
+        timestamp: Date.now()
+      };
+      try {
+        localStorage.setItem('user', JSON.stringify(userData));
+        console.log('✅ 로그인 상태 복구: localStorage 업데이트 완료');
+      } catch (storageError) {
+        console.warn('localStorage 저장 실패:', storageError);
+      }
+      
       await loadUserStakesFromFirestore(user.uid);
       await loadUserRewardsFromFirestore(user.uid);
       applyUserStakesToPortfolio();
@@ -198,6 +235,15 @@ async function initFirebase() {
       isAdmin = false;
       userStakes = { BTC: 0, ETH: 0, XRP: 0 };
       userRewards = [];
+      
+      // localStorage에서 사용자 정보 삭제
+      try {
+        localStorage.removeItem('user');
+        console.log('✅ 로그아웃 상태: localStorage에서 사용자 정보 삭제 완료');
+      } catch (storageError) {
+        console.warn('localStorage 삭제 실패:', storageError);
+      }
+      
       updateLoginUI();
       updateAdminUI();
       
@@ -562,7 +608,18 @@ async function setupLogin() {
         try {
           await signOut(auth);
           currentUser = null;
+          isAdmin = false;
           userStakes = { BTC: 0, ETH: 0, XRP: 0 };
+          userRewards = [];
+          
+          // localStorage에서 사용자 정보 삭제
+          try {
+            localStorage.removeItem('user');
+            console.log('✅ 로그아웃: localStorage에서 사용자 정보 삭제 완료');
+          } catch (storageError) {
+            console.warn('localStorage 삭제 실패:', storageError);
+          }
+          
           window.location.reload();
         } catch (e) {
           console.error('로그아웃 실패:', e);
@@ -719,6 +776,19 @@ async function setupLogin() {
           }
           return;
         }
+      }
+      
+      // 로그인 성공 시 localStorage에 사용자 정보 저장
+      const userData = {
+        email: result.user.email,
+        uid: result.user.uid,
+        timestamp: Date.now()
+      };
+      try {
+        localStorage.setItem('user', JSON.stringify(userData));
+        console.log('✅ 사용자 정보를 localStorage에 저장했습니다.');
+      } catch (storageError) {
+        console.warn('localStorage 저장 실패 (사생활 보호 모드일 수 있음):', storageError);
       }
       
       // 성공 메시지 및 모달 닫기
