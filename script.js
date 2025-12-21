@@ -3112,9 +3112,21 @@ async function navigateToPage(page) {
             background: rgba(0, 0, 0, 0.05) !important;
             min-height: 600px !important;
             padding: 40px 20px !important;
-            margin: 40px auto !important;
+            margin-top: 80px !important;
+            margin-bottom: 40px !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
             position: relative !important;
-            z-index: 9999 !important;
+            z-index: 1 !important;
+            height: auto !important;
+          }
+          header.top-navbar, .top-navbar, header, .navbar-container, nav {
+            z-index: 10000 !important;
+            position: sticky !important;
+            top: 0 !important;
+          }
+          header.top-navbar * {
+            z-index: inherit !important;
           }
           #signup-page .card {
             background-color: #ffffff !important;
@@ -3319,16 +3331,47 @@ async function navigateToPage(page) {
         // flex: 1 0 auto 추가 (main-content가 flex일 때 높이 문제 해결)
         pageElement.style.setProperty('flex', '1 0 auto', 'important');
         
-        // z-index를 9999로 설정 (최상단)
-        pageElement.style.setProperty('z-index', '9999', 'important');
+        // z-index를 1로 설정 (네비게이션 바보다 낮게)
+        pageElement.style.setProperty('z-index', '1', 'important');
         pageElement.style.setProperty('position', 'relative', 'important');
         
         // display: block 설정
         pageElement.style.setProperty('display', 'block', 'important');
         pageElement.style.setProperty('min-height', '600px', 'important');
+        pageElement.style.setProperty('height', 'auto', 'important');
         pageElement.style.setProperty('padding', '40px 20px', 'important');
-        pageElement.style.setProperty('margin', '40px auto', 'important');
+        pageElement.style.setProperty('margin-top', '80px', 'important');
+        pageElement.style.setProperty('margin-bottom', '40px', 'important');
+        pageElement.style.setProperty('margin-left', 'auto', 'important');
+        pageElement.style.setProperty('margin-right', 'auto', 'important');
         pageElement.style.setProperty('box-sizing', 'border-box', 'important');
+        
+        // 네비게이션 바(헤더) 고정 설정 - 여러 선택자 시도
+        const headerSelectors = [
+          'header.top-navbar',
+          '.top-navbar',
+          'header',
+          '.navbar-container',
+          'nav'
+        ];
+        let header = null;
+        for (const selector of headerSelectors) {
+          header = document.querySelector(selector);
+          if (header) {
+            break;
+          }
+        }
+        
+        if (header) {
+          header.style.setProperty('z-index', '10000', 'important');
+          header.style.setProperty('position', 'sticky', 'important');
+          header.style.setProperty('top', '0', 'important');
+          header.style.setProperty('background-color', window.getComputedStyle(header).backgroundColor || 'rgba(255, 255, 255, 0.95)', 'important');
+          header.style.setProperty('backdrop-filter', 'blur(10px)', 'important');
+          console.log('✅ 네비게이션 바 고정 설정 완료:', header.tagName, header.className);
+        } else {
+          console.warn('⚠️ 네비게이션 바를 찾을 수 없습니다!');
+        }
         
         console.log('단계 3 완료: .active 클래스 추가 및 기본 스타일 설정');
         
@@ -3436,7 +3479,37 @@ async function navigateToPage(page) {
           pageElement.style.setProperty('opacity', '1', 'important');
           pageElement.style.setProperty('background', 'rgba(0, 0, 0, 0.05)', 'important');
           pageElement.style.setProperty('min-height', '600px', 'important');
-          pageElement.style.setProperty('z-index', '9999', 'important');
+          pageElement.style.setProperty('height', 'auto', 'important');
+          pageElement.style.setProperty('z-index', '1', 'important');
+          pageElement.style.setProperty('margin-top', '80px', 'important');
+          pageElement.style.setProperty('margin-bottom', '40px', 'important');
+          pageElement.style.setProperty('margin-left', 'auto', 'important');
+          pageElement.style.setProperty('margin-right', 'auto', 'important');
+          
+          // 네비게이션 바 재확인 - 여러 선택자 시도
+          const headerSelectors = [
+            'header.top-navbar',
+            '.top-navbar',
+            'header',
+            '.navbar-container',
+            'nav'
+          ];
+          let header = null;
+          for (const selector of headerSelectors) {
+            header = document.querySelector(selector);
+            if (header) {
+              break;
+            }
+          }
+          
+          if (header) {
+            header.style.setProperty('z-index', '10000', 'important');
+            header.style.setProperty('position', 'sticky', 'important');
+            header.style.setProperty('top', '0', 'important');
+            header.style.setProperty('background-color', window.getComputedStyle(header).backgroundColor || 'rgba(255, 255, 255, 0.95)', 'important');
+            header.style.setProperty('backdrop-filter', 'blur(10px)', 'important');
+            console.log('Timeout: 네비게이션 바 재확인 완료');
+          }
           
           // 내부 .card 요소 재확인
           if (signupCard) {
