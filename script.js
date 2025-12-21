@@ -30,6 +30,16 @@ const portfolioData = [
     usd: 4100,
     percent: 15,
   },
+  {
+    symbol: 'SOL',
+    label: '솔라나 (SOL)',
+    network: '솔라나 메인넷',
+    color: '#9945FF',
+    bg: '#f3e8ff',
+    amount: 50,
+    usd: 8500,
+    percent: 12,
+  },
 ];
 
 const pools = [
@@ -65,6 +75,17 @@ const pools = [
     type: 'stable',
     network: '리플 네트워크',
     lockup: '7일',
+  },
+  {
+    id: 'sol-stake',
+    name: '솔라나 스테이킹 (SOL)',
+    symbol: 'SOL',
+    apr: 7.2,
+    tvl: 75_000_000,
+    risk: '중간',
+    type: 'volatile',
+    network: '솔라나 메인넷',
+    lockup: '14일',
   },
 ];
 
@@ -109,6 +130,7 @@ const priceSource = {
   BTC: 'bitcoin',
   ETH: 'ethereum',
   XRP: 'ripple',
+  SOL: 'solana',
 };
 
 // 전역으로 노출 (admin.html에서 사용)
@@ -158,6 +180,7 @@ let userStakes = {
   BTC: 0,
   ETH: 0,
   XRP: 0,
+  SOL: 0,
 };
 
 // Firebase 모듈 가져오기 (index.html에서 window.__firebase로 노출)
@@ -233,7 +256,7 @@ async function initFirebase() {
     } else {
       currentUser = null;
       isAdmin = false;
-      userStakes = { BTC: 0, ETH: 0, XRP: 0 };
+      userStakes = { BTC: 0, ETH: 0, XRP: 0, SOL: 0 };
       userRewards = [];
       
       // localStorage에서 사용자 정보 삭제
@@ -273,7 +296,7 @@ async function loadUserStakesFromFirestore(uid) {
       userStakes.ETH = data.ETH || 0;
       userStakes.XRP = data.XRP || 0;
     } else {
-      userStakes = { BTC: 0, ETH: 0, XRP: 0 };
+      userStakes = { BTC: 0, ETH: 0, XRP: 0, SOL: 0 };
     }
   } catch (e) {
     console.error('Firestore에서 데이터를 불러오지 못했습니다:', e);
@@ -295,7 +318,7 @@ async function saveUserStakesToFirestore() {
     
     // 각 코인별로 스테이킹 시작일 설정 (처음 스테이킹할 때만)
     const stakeStartDates = existingData.stakeStartDates || {};
-    ['BTC', 'ETH', 'XRP'].forEach((symbol) => {
+    ['BTC', 'ETH', 'XRP', 'SOL'].forEach((symbol) => {
       const currentAmount = userStakes[symbol] || 0;
       const previousAmount = existingData[symbol] || 0;
       
@@ -609,7 +632,7 @@ async function setupLogin() {
           await signOut(auth);
           currentUser = null;
           isAdmin = false;
-          userStakes = { BTC: 0, ETH: 0, XRP: 0 };
+          userStakes = { BTC: 0, ETH: 0, XRP: 0, SOL: 0 };
           userRewards = [];
           
           // localStorage에서 사용자 정보 삭제
@@ -894,6 +917,35 @@ function renderPortfolio() {
   const list = $('#portfolioList');
   if (!list) return; // admin.html에는 포트폴리오 요소가 없음
   list.innerHTML = '';
+
+  // 도넛 차트 동적 렌더링
+  const donutChart = $('#donutChart');
+  if (donutChart) {
+    // 각 자산의 각도 계산
+    let currentAngle = 0;
+    const segments = portfolioData
+      .filter(item => item.percent > 0)
+      .map((item) => {
+        const angle = (item.percent / 100) * 360;
+        const startAngle = currentAngle;
+        const endAngle = currentAngle + angle;
+        currentAngle = endAngle;
+        return {
+          color: item.color,
+          start: startAngle,
+          end: endAngle
+        };
+      });
+
+    // conic-gradient 생성
+    if (segments.length > 0) {
+      const gradientParts = segments.map(seg => 
+        `${seg.color} ${seg.start}deg ${seg.end}deg`
+      ).join(', ');
+      
+      donutChart.style.background = `conic-gradient(${gradientParts})`;
+    }
+  }
 
   portfolioData.forEach((item) => {
     const el = document.createElement('div');
@@ -1919,7 +1971,7 @@ async function renderAdminDashboard(users) {
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
     `;
 
-    ['BTC', 'ETH', 'XRP'].forEach((symbol) => {
+    ['BTC', 'ETH', 'XRP', 'SOL'].forEach((symbol) => {
       const amount = u[symbol] || 0;
       const startDate = u.stakeStartDates?.[symbol];
       const period = startDate ? calculateStakingPeriod(startDate) : '-';
@@ -2432,7 +2484,7 @@ async function renderAdminDashboardContent(users, container) {
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
     `;
 
-    ['BTC', 'ETH', 'XRP'].forEach((symbol) => {
+    ['BTC', 'ETH', 'XRP', 'SOL'].forEach((symbol) => {
       const amount = u[symbol] || 0;
       const startDate = u.stakeStartDates?.[symbol];
       const period = startDate ? calculateStakingPeriod(startDate) : '-';
@@ -2781,7 +2833,7 @@ async function updateUserStakes(userId, stakes, userEmail) {
     
     // 스테이킹 시작일 업데이트 로직
     const stakeStartDates = existingData.stakeStartDates || {};
-    ['BTC', 'ETH', 'XRP'].forEach((symbol) => {
+    ['BTC', 'ETH', 'XRP', 'SOL'].forEach((symbol) => {
       const currentAmount = stakes[symbol] || 0;
       const previousAmount = existingData[symbol] || 0;
       
