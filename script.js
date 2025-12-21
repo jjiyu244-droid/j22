@@ -226,6 +226,18 @@ let currentUser = null;
 let isAdmin = false;
 const ADMIN_USERNAME = 'jjiyu244'; // 관리자 username
 const ADMIN_EMAIL = `${ADMIN_USERNAME}@corestaker.local`; // Firebase Auth용 이메일
+
+// username을 이메일 형식으로 변환하는 통일된 함수
+function usernameToEmail(username) {
+  if (!username) return null;
+  // 소문자 변환 및 공백 제거
+  const cleanUsername = username.toLowerCase().trim();
+  // 영문, 숫자, 언더스코어만 허용
+  if (!/^[a-z0-9_]+$/.test(cleanUsername)) {
+    return null;
+  }
+  return `${cleanUsername}@corestaker.local`;
+}
 let userStakes = {
   BTC: 0,
   ETH: 0,
@@ -287,10 +299,10 @@ async function initFirebase() {
   const authStatePromise = new Promise((resolve) => {
     let isFirstCall = true;
     
-    onAuthStateChanged(auth, async (user) => {
+  onAuthStateChanged(auth, async (user) => {
       console.log('🔄 onAuthStateChanged 호출됨:', user ? `로그인됨 (${user.email})` : '로그아웃됨');
       
-      if (user) {
+    if (user) {
         console.log('✅ 로그인 상태 확인:', user.email, user.uid);
         
         // Firestore에서 username 가져오기
@@ -336,27 +348,27 @@ async function initFirebase() {
           console.warn('localStorage 저장 실패:', storageError);
         }
         
-        await loadUserStakesFromFirestore(user.uid);
-        await loadUserRewardsFromFirestore(user.uid);
-        applyUserStakesToPortfolio();
+      await loadUserStakesFromFirestore(user.uid);
+      await loadUserRewardsFromFirestore(user.uid);
+      applyUserStakesToPortfolio();
         await fetchAndApplyPrices(); // 가격 업데이트 후 포트폴리오 렌더링
-        updateLoginUI();
-        updateAdminUI();
-        
-        // URL 기반 라우팅 처리 (Firebase 초기화 후)
-        handleURLRouting();
-        
-        // 리워드 페이지가 현재 표시 중이면 리워드 렌더링
-        const rewardsPage = document.getElementById('rewards-page');
-        if (rewardsPage && rewardsPage.style.display !== 'none') {
-          await renderRewards();
-        }
-      } else {
+      updateLoginUI();
+      updateAdminUI();
+      
+      // URL 기반 라우팅 처리 (Firebase 초기화 후)
+      handleURLRouting();
+      
+      // 리워드 페이지가 현재 표시 중이면 리워드 렌더링
+      const rewardsPage = document.getElementById('rewards-page');
+      if (rewardsPage && rewardsPage.style.display !== 'none') {
+        await renderRewards();
+      }
+    } else {
         console.log('❌ 로그아웃 상태 확인');
-        currentUser = null;
-        isAdmin = false;
+      currentUser = null;
+      isAdmin = false;
         userStakes = { BTC: 0, ETH: 0, XRP: 0, SOL: 0 };
-        userRewards = [];
+      userRewards = [];
         
         // localStorage에서 사용자 정보 삭제
         try {
@@ -366,18 +378,18 @@ async function initFirebase() {
           console.warn('localStorage 삭제 실패:', storageError);
         }
         
-        updateLoginUI();
-        updateAdminUI();
-        
-        // URL 기반 라우팅 처리
-        handleURLRouting();
-        
-        // 리워드 페이지가 현재 표시 중이면 빈 상태 표시
-        const rewardsPage = document.getElementById('rewards-page');
-        if (rewardsPage && rewardsPage.style.display !== 'none') {
-          await renderRewards();
-        }
+      updateLoginUI();
+      updateAdminUI();
+      
+      // URL 기반 라우팅 처리
+      handleURLRouting();
+      
+      // 리워드 페이지가 현재 표시 중이면 빈 상태 표시
+      const rewardsPage = document.getElementById('rewards-page');
+      if (rewardsPage && rewardsPage.style.display !== 'none') {
+        await renderRewards();
       }
+    }
       
       // 첫 번째 호출 완료 시 Promise resolve
       if (isFirstCall) {
@@ -922,28 +934,17 @@ async function setupLogin() {
       return;
     }
     
-    // username을 이메일 형식으로 변환 (Firebase Auth는 이메일 형식 필요)
-    const email = `${username.toLowerCase()}@corestaker.local`;
+    // username을 이메일 형식으로 변환 (통일된 함수 사용)
+    let email = usernameToEmail(username);
     
-    // 일반 아이디 형식 체크 (소문자, 숫자, 언더스코어, 하이픈만 허용)
-    const isGeneralId = /^[a-z0-9_-]+$/.test(email) && !email.includes('@');
-    
-    if (isGeneralId) {
-      // 일반 아이디 형식인 경우 @temp.com 도메인 추가
-      email = `${email}@temp.com`;
-    } else {
-      // 이메일 형식인지 확인
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        if (statusText) {
-          statusText.textContent = '유효한 아이디(소문자, 숫자) 또는 이메일 주소를 입력해주세요.';
-        }
-        return;
+    if (!email) {
+      if (statusText) {
+        statusText.textContent = '아이디는 영문, 숫자, 언더스코어(_)만 사용 가능합니다.';
       }
+      return;
     }
     
-    // input 필드에 최종 이메일 반영
-    emailInput.value = email;
+    console.log('🔐 로그인 시도:', { username, email });
     
     // 비밀번호 길이 체크 (Firebase 최소 6자)
     if (password.length < 6) {
@@ -981,8 +982,49 @@ async function setupLogin() {
         throw new Error('로그인 함수를 불러올 수 없습니다. 페이지를 새로고침해주세요.');
       }
       
-      // Firebase 로그인 API 호출
-      const result = await signInWithEmailAndPassword(currentAuth, email, password);
+      // Firebase 로그인 API 호출 (여러 도메인 시도 - 기존 계정 호환성)
+      let result = null;
+      let loginError = null;
+      
+      // 1차 시도: @corestaker.local (새 형식)
+      try {
+        console.log('🔐 로그인 시도 1: @corestaker.local');
+        result = await signInWithEmailAndPassword(currentAuth, email, password);
+      } catch (error1) {
+        console.log('⚠️ @corestaker.local 로그인 실패:', error1.code);
+        loginError = error1;
+        
+        // 2차 시도: @temp.com (기존 형식)
+        if (error1.code === 'auth/user-not-found' || error1.code === 'auth/wrong-password') {
+          const emailTemp = `${username.toLowerCase()}@temp.com`;
+          try {
+            console.log('🔐 로그인 시도 2: @temp.com');
+            result = await signInWithEmailAndPassword(currentAuth, emailTemp, password);
+            email = emailTemp; // 성공한 이메일로 업데이트
+          } catch (error2) {
+            console.log('⚠️ @temp.com 로그인 실패:', error2.code);
+            loginError = error2;
+            
+            // 3차 시도: @gmail.com (관리자 계정 등)
+            if (error2.code === 'auth/user-not-found' || error2.code === 'auth/wrong-password') {
+              const emailGmail = `${username.toLowerCase()}@gmail.com`;
+              try {
+                console.log('🔐 로그인 시도 3: @gmail.com');
+                result = await signInWithEmailAndPassword(currentAuth, emailGmail, password);
+                email = emailGmail; // 성공한 이메일로 업데이트
+              } catch (error3) {
+                console.log('⚠️ @gmail.com 로그인 실패:', error3.code);
+                loginError = error3;
+              }
+            }
+          }
+        }
+      }
+      
+      // 모든 시도 실패
+      if (!result) {
+        throw loginError || new Error('로그인에 실패했습니다.');
+      }
       
       // 어드민 페이지에서 로그인 성공 후 관리자 계정인지 다시 확인
       if (isAdminPage) {
@@ -1568,10 +1610,16 @@ function setupSignupForm() {
         // 중복 검사 실패해도 계속 진행 (Firebase Auth에서 중복 체크됨)
       }
       
-      // username을 이메일 형식으로 변환 (Firebase Auth는 이메일 형식 필요)
-      const email = `${username.toLowerCase()}@corestaker.local`;
+      // username을 이메일 형식으로 변환 (통일된 함수 사용)
+      const email = usernameToEmail(username);
+      if (!email) {
+        alert('사용자명은 영문, 숫자, 언더스코어(_)만 사용 가능합니다.');
+        return;
+      }
+      
+      console.log('📝 회원가입 시도:', { username, email });
         
-      await createUserWithEmailAndPassword(currentAuth, email, password);
+        await createUserWithEmailAndPassword(currentAuth, email, password);
       
       // Firestore users 컬렉션에 username 저장
       try {
@@ -1597,14 +1645,14 @@ function setupSignupForm() {
         // 저장 실패해도 회원가입은 성공으로 처리
       }
         
-      // 성공 메시지 (Firebase Auth는 회원가입 후 자동 로그인됨)
-      alert('회원가입이 완료되었습니다!');
+        // 성공 메시지 (Firebase Auth는 회원가입 후 자동 로그인됨)
+        alert('회원가입이 완료되었습니다!');
         
-      // 회원가입 페이지 닫고 대시보드로 이동
-      navigateToPage('dashboard');
+        // 회원가입 페이지 닫고 대시보드로 이동
+        navigateToPage('dashboard');
         
-      // 폼 초기화
-      signupForm.reset();
+        // 폼 초기화
+        signupForm.reset();
         
       } catch (error) {
         console.error('회원가입 오류 상세:', error);
@@ -1614,7 +1662,7 @@ function setupSignupForm() {
         let errorMessage = '회원가입 중 오류가 발생했습니다.';
         
         if (error.code === 'auth/email-already-in-use') {
-          errorMessage = '이미 사용 중인 아이디입니다.';
+          errorMessage = '이미 사용 중인 아이디입니다. 다른 아이디를 사용해주세요.';
         } else if (error.code === 'auth/weak-password') {
           errorMessage = '비밀번호가 너무 약합니다. 더 복잡한 비밀번호를 사용해주세요.';
         } else if (error.code === 'auth/invalid-email') {
@@ -1853,23 +1901,23 @@ function setupStakeModal() {
       
       helper.textContent = `✅ 스테이킹 신청이 완료되었습니다. 관리자 승인 후 반영됩니다.`;
       helper.style.color = '#10b981';
-      
-      // prepend virtual activity
-      activity.unshift({
+
+    // prepend virtual activity
+    activity.unshift({
         type: '스테이킹 신청',
         status: '대기중',
-        time: '방금 전',
-        desc: currentPool.name,
-        amount: `+${amount} ${currentPool.symbol}`,
-        positive: true,
-      });
-      if (activity.length > 12) activity.pop();
-      renderActivity();
+      time: '방금 전',
+      desc: currentPool.name,
+      amount: `+${amount} ${currentPool.symbol}`,
+      positive: true,
+    });
+    if (activity.length > 12) activity.pop();
+    renderActivity();
 
-      // light feedback
+    // light feedback
       $('#stakeConfirmBtn').textContent = '신청 완료';
-      setTimeout(() => {
-        closeStakeModal();
+    setTimeout(() => {
+      closeStakeModal();
         $('#stakeConfirmBtn').textContent = '스테이킹 신청';
         $('#stakeConfirmBtn').disabled = false;
       }, 1500);
@@ -3102,42 +3150,42 @@ async function setupAdminUserSearch(users, prices) {
     }
     
     // Firestore users 컬렉션에서 username으로 검색
-    try {
-      const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db);
-      if (!firestoreDb) {
-        searchResult.innerHTML = `
-          <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
+      try {
+        const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db);
+        if (!firestoreDb) {
+          searchResult.innerHTML = `
+            <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
             사용자를 찾을 수 없습니다: ${searchUsername}
-          </div>
-        `;
-        searchResult.style.display = 'block';
-        return;
-      }
-      
+            </div>
+          `;
+          searchResult.style.display = 'block';
+          return;
+        }
+        
       const { collection, query, where, getDocs, doc, getDoc } = await import(
-        'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
-      );
+          'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+        );
       
       // users 컬렉션에서 username으로 검색
       const usersRef = collection(firestoreDb, 'users');
       const q = query(usersRef, where('username', '==', searchUsername));
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        searchResult.innerHTML = `
-          <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          searchResult.innerHTML = `
+            <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
             사용자를 찾을 수 없습니다: ${searchUsername}
-          </div>
-        `;
-        searchResult.style.display = 'block';
-        return;
-      }
-      
+            </div>
+          `;
+          searchResult.style.display = 'block';
+          return;
+        }
+        
       const userDoc = querySnapshot.docs[0];
-      const userData = {
+        const userData = {
         uid: userDoc.id,
         ...userDoc.data(),
-      };
+        };
       
       // userStakes 데이터도 가져오기
       const userStakesRef = doc(firestoreDb, 'userStakes', userData.uid);
@@ -3149,16 +3197,16 @@ async function setupAdminUserSearch(users, prices) {
         userData.XRP = stakesData.XRP || 0;
         userData.SOL = stakesData.SOL || 0;
       }
-      
-      displayUserEditForm(userData, prices);
-    } catch (error) {
-      console.error('사용자 검색 오류:', error);
-      searchResult.innerHTML = `
-        <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
-          검색 중 오류가 발생했습니다: ${error.message}
-        </div>
-      `;
-      searchResult.style.display = 'block';
+        
+        displayUserEditForm(userData, prices);
+      } catch (error) {
+        console.error('사용자 검색 오류:', error);
+        searchResult.innerHTML = `
+          <div style="padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; color: #fca5a5;">
+            검색 중 오류가 발생했습니다: ${error.message}
+          </div>
+        `;
+        searchResult.style.display = 'block';
     }
   };
   
@@ -3626,12 +3674,12 @@ async function navigateToPage(page) {
         container.style.setProperty('opacity', '0', 'important');
         container.style.setProperty('height', '0', 'important');
       });
-    } else {
+  } else {
       // 다른 페이지들은 기존 로직 사용
-      document.querySelectorAll('.content-section:not(.page-section), .pre-login-welcome').forEach((section) => {
-        section.style.display = 'none';
-      });
-      
+    document.querySelectorAll('.content-section:not(.page-section), .pre-login-welcome').forEach((section) => {
+      section.style.display = 'none';
+    });
+    
       // Footer 섹션도 숨기기
       document.querySelectorAll('.footer-left, .footer-right').forEach((footer) => {
         footer.style.display = 'none';
@@ -4511,7 +4559,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const signupBtn = $('#signupNavBtn');
     if (signupBtn || retryCount >= maxRetries) {
       console.log('회원가입 버튼 확인됨, setupNavigation 호출:', !!signupBtn, 'retryCount:', retryCount);
-      setupNavigation();
+  setupNavigation();
     } else {
       retryCount++;
       setTimeout(checkAndSetupNavigation, 100);
