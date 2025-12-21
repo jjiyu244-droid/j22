@@ -197,6 +197,18 @@ async function initFirebase() {
   db = window.__firebase.db;
   window.__firebaseInitialized = true; // Firebase 초기화 완료 플래그
 
+  // 🔥 핵심: Firebase Auth Persistence 설정 (새로고침 후에도 로그인 유지)
+  try {
+    const authModule = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
+    const { setPersistence, browserLocalPersistence } = authModule;
+    
+    await setPersistence(auth, browserLocalPersistence);
+    console.log('✅ Firebase Auth Persistence 설정 완료 (browserLocalPersistence)');
+  } catch (persistenceError) {
+    console.error('❌ Firebase Auth Persistence 설정 실패:', persistenceError);
+    // Persistence 설정 실패해도 계속 진행 (기본값 사용)
+  }
+
   // 페이지 로드 시 localStorage에서 사용자 정보 복구 시도
   try {
     const savedUserData = localStorage.getItem('user');
