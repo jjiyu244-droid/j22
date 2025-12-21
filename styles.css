@@ -559,30 +559,36 @@ body {
   margin-top: 4px;
 }
 
-/* FAQ 섹션 전체 너비 사용 - 부모 제약 무시 (강제 탈출) */
+/* FAQ 섹션 - 카드들과 동일한 컨테이너 폭 사용 */
 #faq-section {
-  width: 100% !important;
-  max-width: 1200px !important;
-  margin: 50px auto !important;
-  padding: 0 40px !important;
-  float: none !important;
-  clear: both !important;
-  display: block !important;
-  box-sizing: border-box !important;
-  position: relative !important;
+  /* grid 내에서 전체 폭 차지 */
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 0;
+  box-sizing: border-box;
+}
+
+/* FAQ 래퍼 - 카드들과 동일한 패딩 */
+#faq-section .faq-wrapper {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* FAQ 컨테이너 - 카드들과 동일한 max-width */
+.faq-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
 .faq-item {
-  width: 100% !important;
-  margin-bottom: 15px !important;
-}
-
-/* FAQ 래퍼 - 내부 컨테이너를 위한 공간 */
-#faq-section .faq-wrapper {
-  width: 100% !important;
-  max-width: 100% !important;
-  padding: 40px 20px !important;
-  box-sizing: border-box !important;
+  width: 100%;
+  margin-bottom: 15px;
 }
 
 /* FAQ 타이틀 */
