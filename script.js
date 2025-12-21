@@ -1076,12 +1076,32 @@ async function setupLogin() {
       if (statusText) {
         statusText.textContent = '로그인 되었습니다.';
       }
+      
+      // 모달 닫기 (여러 방법 시도)
       setTimeout(() => {
+        // 방법 1: loginModal ID로 찾기
         const modal = $('#loginModal');
         if (modal) {
           modal.classList.remove('show');
+          // 추가로 display: none도 설정 (더 확실하게)
+          modal.style.display = 'none';
         }
-      }, 500);
+        
+        // 방법 2: class로 찾기 (backdrop 포함)
+        const modalBackdrop = document.querySelector('.modal-backdrop');
+        if (modalBackdrop) {
+          modalBackdrop.classList.remove('show');
+          modalBackdrop.style.display = 'none';
+        }
+        
+        // 방법 3: 모든 loginModal 관련 요소 닫기
+        document.querySelectorAll('[id*="loginModal"], [class*="login-modal"]').forEach(el => {
+          el.classList.remove('show');
+          el.style.display = 'none';
+        });
+        
+        console.log('✅ 로그인 모달 닫기 완료');
+      }, 300); // 500ms에서 300ms로 단축
     } catch (error) {
       // 에러 로깅
       console.error('로그인 에러:', {
