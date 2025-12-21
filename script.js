@@ -971,33 +971,49 @@ async function setupLogin() {
       // Firebase 로그인 API 호출 (여러 도메인 시도 - 기존 계정 호환성)
       let result = null;
       let loginError = null;
+      const attemptedEmails = []; // 시도한 모든 이메일 추적
       
       // 1차 시도: @corestaker.local (새 형식)
+      attemptedEmails.push(email);
       try {
         console.log('🔐 로그인 시도 1: @corestaker.local');
         result = await signInWithEmailAndPassword(currentAuth, email, password);
+        console.log('✅ 로그인 성공:', email);
       } catch (error1) {
         console.log('⚠️ @corestaker.local 로그인 실패:', error1.code);
         loginError = error1;
         
         // 2차 시도: @temp.com (기존 형식)
-        if (error1.code === 'auth/user-not-found' || error1.code === 'auth/wrong-password') {
+        // user-not-found, wrong-password, invalid-credential 모두 시도
+        const shouldRetry = error1.code === 'auth/user-not-found' || 
+                           error1.code === 'auth/wrong-password' || 
+                           error1.code === 'auth/invalid-credential';
+        
+        if (shouldRetry) {
           const emailTemp = `${username.toLowerCase()}@temp.com`;
+          attemptedEmails.push(emailTemp);
           try {
             console.log('🔐 로그인 시도 2: @temp.com');
             result = await signInWithEmailAndPassword(currentAuth, emailTemp, password);
             email = emailTemp; // 성공한 이메일로 업데이트
+            console.log('✅ 로그인 성공:', email);
           } catch (error2) {
             console.log('⚠️ @temp.com 로그인 실패:', error2.code);
             loginError = error2;
             
             // 3차 시도: @gmail.com (관리자 계정 등)
-            if (error2.code === 'auth/user-not-found' || error2.code === 'auth/wrong-password') {
+            const shouldRetry2 = error2.code === 'auth/user-not-found' || 
+                                error2.code === 'auth/wrong-password' || 
+                                error2.code === 'auth/invalid-credential';
+            
+            if (shouldRetry2) {
               const emailGmail = `${username.toLowerCase()}@gmail.com`;
+              attemptedEmails.push(emailGmail);
               try {
                 console.log('🔐 로그인 시도 3: @gmail.com');
                 result = await signInWithEmailAndPassword(currentAuth, emailGmail, password);
                 email = emailGmail; // 성공한 이메일로 업데이트
+                console.log('✅ 로그인 성공:', email);
               } catch (error3) {
                 console.log('⚠️ @gmail.com 로그인 실패:', error3.code);
                 loginError = error3;
@@ -1009,7 +1025,12 @@ async function setupLogin() {
       
       // 모든 시도 실패
       if (!result) {
-        throw loginError || new Error('로그인에 실패했습니다.');
+        // 여러 도메인을 시도했다는 정보를 포함한 커스텀 에러 생성
+        const customError = new Error('로그인에 실패했습니다.');
+        customError.code = loginError?.code || 'auth/login-failed';
+        customError.attemptedEmails = attemptedEmails;
+        customError.lastError = loginError;
+        throw customError;
       }
       
       // 어드민 페이지에서 로그인 성공 후 관리자 계정인지 확인
@@ -1093,13 +1114,27 @@ async function setupLogin() {
         errorMessage = '비밀번호가 올바르지 않습니다.<br/><br/>Firebase 콘솔에서 설정한 비밀번호를 확인해주세요.';
       } else if (errorCode === 'auth/invalid-email') {
         errorMessage = '유효한 이메일 주소를 입력해주세요. (예: user@example.com)';
-      } else if (errorCode === 'auth/invalid-credential') {
-        errorMessage = `이메일 또는 비밀번호가 올바르지 않습니다.<br/><br/>
-          입력한 이메일: <strong>${email}</strong><br/><br/>
-          확인 사항:<br/>
-          1. Firebase 콘솔에 정확히 <strong>"${email}"</strong> 계정이 있는지<br/>
-          2. 비밀번호가 정확한지<br/>
-          3. 계정이 삭제되지 않았는지`;
+      } else if (errorCode === 'auth/invalid-credential' || errorCode === 'auth/login-failed') {
+        // 여러 도메인을 시도한 경우 시도한 모든 이메일 표시
+        const attemptedEmails = error.attemptedEmails || [email];
+        const emailsList = attemptedEmails.map(e => `<strong>${e}</strong>`).join('<br/>');
+        
+        if (attemptedEmails.length > 1) {
+          errorMessage = `로그인에 실패했습니다. 다음 이메일 형식들을 시도했습니다:<br/><br/>
+            ${emailsList}<br/><br/>
+            <strong>확인 사항:</strong><br/>
+            1. Firebase 콘솔(Authentication → Users)에 위 이메일 중 하나가 정확히 존재하는지<br/>
+            2. 비밀번호가 정확한지<br/>
+            3. 계정이 삭제되지 않았는지<br/><br/>
+            <small style="color: #9ca3af;">💡 팁: Firebase 콘솔에서 사용자 목록을 확인하여 정확한 이메일 주소를 확인하세요.</small>`;
+        } else {
+          errorMessage = `이메일 또는 비밀번호가 올바르지 않습니다.<br/><br/>
+            입력한 이메일: ${emailsList}<br/><br/>
+            <strong>확인 사항:</strong><br/>
+            1. Firebase 콘솔에 정확히 "${attemptedEmails[0]}" 계정이 있는지<br/>
+            2. 비밀번호가 정확한지<br/>
+            3. 계정이 삭제되지 않았는지`;
+        }
       } else {
         errorMessage = `로그인 실패: <strong>${errorCode || errorMsg || '알 수 없는 오류'}</strong><br/><br/>
           페이지를 새로고침하거나 Firebase 콘솔에서 계정 상태를 확인해주세요.`;
