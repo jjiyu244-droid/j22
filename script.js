@@ -9,6 +9,7 @@ const portfolioData = [
     amount: 1.2,
     usd: 14500,
     percent: 52,
+    logoUrl: 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png',
   },
   {
     symbol: 'ETH',
@@ -19,6 +20,7 @@ const portfolioData = [
     amount: 8.3,
     usd: 9300,
     percent: 33,
+    logoUrl: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
   },
   {
     symbol: 'XRP',
@@ -29,6 +31,7 @@ const portfolioData = [
     amount: 4200,
     usd: 4100,
     percent: 15,
+    logoUrl: 'https://assets.coingecko.com/coins/images/44/small/xrp-symbol-white-128.png',
   },
   {
     symbol: 'SOL',
@@ -39,6 +42,7 @@ const portfolioData = [
     amount: 50,
     usd: 8500,
     percent: 12,
+    logoUrl: 'https://assets.coingecko.com/coins/images/4128/small/solana.png',
   },
 ];
 
@@ -950,10 +954,13 @@ function renderPortfolio() {
   portfolioData.forEach((item) => {
     const el = document.createElement('div');
     el.className = 'portfolio-item';
+    const iconContent = item.logoUrl 
+      ? `<img src="${item.logoUrl}" alt="${item.symbol}" style="width: 100%; height: 100%; object-fit: contain;" />`
+      : (item.label ? item.label[0] : item.symbol[0]);
     el.innerHTML = `
       <div class="token-info">
         <div class="token-icon" style="background:${item.bg};color:${item.color}">
-          ${item.label ? item.label[0] : item.symbol[0]}
+          ${iconContent}
         </div>
         <div class="token-meta">
           <span class="token-symbol">${item.label || item.symbol}</span>
