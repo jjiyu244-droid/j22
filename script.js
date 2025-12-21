@@ -236,66 +236,87 @@ async function initFirebase() {
   const { onAuthStateChanged } = await import(
     'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js'
   );
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      currentUser = { email: user.email, uid: user.uid };
-      isAdmin = user.email === ADMIN_EMAIL;
+  
+  // 🔥 핵심: onAuthStateChanged를 Promise로 감싸서 첫 번째 인증 상태 확인 완료를 기다림
+  const authStatePromise = new Promise((resolve) => {
+    let isFirstCall = true;
+    
+    onAuthStateChanged(auth, async (user) => {
+      console.log('🔄 onAuthStateChanged 호출됨:', user ? `로그인됨 (${user.email})` : '로그아웃됨');
       
-      // localStorage에 사용자 정보 저장 (최신 정보로 업데이트)
-      const userData = {
-        email: user.email,
-        uid: user.uid,
-        timestamp: Date.now()
-      };
-      try {
-        localStorage.setItem('user', JSON.stringify(userData));
-        console.log('✅ 로그인 상태 복구: localStorage 업데이트 완료');
-      } catch (storageError) {
-        console.warn('localStorage 저장 실패:', storageError);
+      if (user) {
+        console.log('✅ 로그인 상태 확인:', user.email, user.uid);
+        currentUser = { email: user.email, uid: user.uid };
+        isAdmin = user.email === ADMIN_EMAIL;
+        
+        // localStorage에 사용자 정보 저장 (최신 정보로 업데이트)
+        const userData = {
+          email: user.email,
+          uid: user.uid,
+          timestamp: Date.now()
+        };
+        try {
+          localStorage.setItem('user', JSON.stringify(userData));
+          console.log('✅ 로그인 상태 복구: localStorage 업데이트 완료');
+        } catch (storageError) {
+          console.warn('localStorage 저장 실패:', storageError);
+        }
+        
+        await loadUserStakesFromFirestore(user.uid);
+        await loadUserRewardsFromFirestore(user.uid);
+        applyUserStakesToPortfolio();
+        renderPortfolio();
+        updateLoginUI();
+        updateAdminUI();
+        
+        // URL 기반 라우팅 처리 (Firebase 초기화 후)
+        handleURLRouting();
+        
+        // 리워드 페이지가 현재 표시 중이면 리워드 렌더링
+        const rewardsPage = document.getElementById('rewards-page');
+        if (rewardsPage && rewardsPage.style.display !== 'none') {
+          await renderRewards();
+        }
+      } else {
+        console.log('❌ 로그아웃 상태 확인');
+        currentUser = null;
+        isAdmin = false;
+        userStakes = { BTC: 0, ETH: 0, XRP: 0, SOL: 0 };
+        userRewards = [];
+        
+        // localStorage에서 사용자 정보 삭제
+        try {
+          localStorage.removeItem('user');
+          console.log('✅ 로그아웃 상태: localStorage에서 사용자 정보 삭제 완료');
+        } catch (storageError) {
+          console.warn('localStorage 삭제 실패:', storageError);
+        }
+        
+        updateLoginUI();
+        updateAdminUI();
+        
+        // URL 기반 라우팅 처리
+        handleURLRouting();
+        
+        // 리워드 페이지가 현재 표시 중이면 빈 상태 표시
+        const rewardsPage = document.getElementById('rewards-page');
+        if (rewardsPage && rewardsPage.style.display !== 'none') {
+          await renderRewards();
+        }
       }
       
-      await loadUserStakesFromFirestore(user.uid);
-      await loadUserRewardsFromFirestore(user.uid);
-      applyUserStakesToPortfolio();
-      renderPortfolio();
-      updateLoginUI();
-      updateAdminUI();
-      
-      // URL 기반 라우팅 처리 (Firebase 초기화 후)
-      handleURLRouting();
-      
-      // 리워드 페이지가 현재 표시 중이면 리워드 렌더링
-      const rewardsPage = document.getElementById('rewards-page');
-      if (rewardsPage && rewardsPage.style.display !== 'none') {
-        await renderRewards();
+      // 첫 번째 호출 완료 시 Promise resolve
+      if (isFirstCall) {
+        isFirstCall = false;
+        console.log('✅ 첫 번째 인증 상태 확인 완료');
+        resolve();
       }
-    } else {
-      currentUser = null;
-      isAdmin = false;
-      userStakes = { BTC: 0, ETH: 0, XRP: 0, SOL: 0 };
-      userRewards = [];
-      
-      // localStorage에서 사용자 정보 삭제
-      try {
-        localStorage.removeItem('user');
-        console.log('✅ 로그아웃 상태: localStorage에서 사용자 정보 삭제 완료');
-      } catch (storageError) {
-        console.warn('localStorage 삭제 실패:', storageError);
-      }
-      
-      updateLoginUI();
-      updateAdminUI();
-      
-      // URL 기반 라우팅 처리
-      handleURLRouting();
-      
-      // 리워드 페이지가 현재 표시 중이면 빈 상태 표시
-      const rewardsPage = document.getElementById('rewards-page');
-      if (rewardsPage && rewardsPage.style.display !== 'none') {
-        await renderRewards();
-      }
-    }
+    });
   });
+  
+  // 첫 번째 인증 상태 확인이 완료될 때까지 대기
+  await authStatePromise;
+  console.log('✅ initFirebase 완료: 인증 상태 확인됨');
 }
 
 // Firestore에서 유저 스테이킹 데이터 불러오기
@@ -4068,10 +4089,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   
   // Firebase 초기화 (Auth 상태 감지 시작) - 먼저 초기화
+  // initFirebase 내부에서 onAuthStateChanged의 첫 번째 호출이 완료될 때까지 대기
   await initFirebase();
   
-  // Firebase 초기화 후 URL 라우팅 처리 (onAuthStateChanged에서도 호출됨)
-  // 로그인 상태가 확인된 후 어드민 접근을 처리
+  // Firebase 초기화 및 인증 상태 확인 완료 후 URL 라우팅 처리
+  // onAuthStateChanged에서도 handleURLRouting()이 호출되지만, 
+  // 여기서도 한 번 더 호출하여 확실하게 처리
   handleURLRouting();
   
   // 초기 로드 플래그 해제
