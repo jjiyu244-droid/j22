@@ -1777,14 +1777,6 @@ function setupSignupForm() {
   signupForm.parentNode.replaceChild(newSignupForm, signupForm);
   const freshSignupForm = $('#signupForm');
   
-  // 약관 동의 텍스트 강제 수정
-  const agreeLabel = document.querySelector('.signup-agree-label');
-  const agreeText = document.querySelector('.signup-agree-text');
-  if (agreeText) {
-    agreeText.innerHTML = '<a href="#" class="terms-link" style="color:#6366f1;text-decoration:underline;white-space:nowrap;">이용약관</a> 및 <a href="#" class="privacy-link" style="color:#6366f1;text-decoration:underline;white-space:nowrap;">개인정보처리방침</a>에 동의합니다.';
-    console.log('✅ 약관 동의 텍스트 수정 완료');
-  }
-  
   // 약관 링크 클릭 이벤트 추가
   const termsLink = document.querySelector('.terms-link');
   const privacyLink = document.querySelector('.privacy-link');
@@ -1869,7 +1861,7 @@ function setupSignupForm() {
     
     if (!agree) {
       console.warn('⚠️ 약관 동의 미체크');
-      alert('이용약관 및 개인정보처리방침에 동의해주세요.');
+      alert('약관에 동의해야 가입이 가능합니다.');
       return;
     }
     
