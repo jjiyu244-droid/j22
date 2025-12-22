@@ -2020,6 +2020,8 @@ function setupSignupForm() {
     
     // submit 이벤트는 제거 (onclick만 사용)
     // 중복 호출 방지를 위해 이벤트 리스너는 추가하지 않음
+    
+    console.log('✅ 회원가입 폼 설정 완료 (onclick만 사용)');
       e.preventDefault();
       e.stopPropagation();
       
@@ -2195,8 +2197,7 @@ function setupSignupForm() {
         console.error('❌ 회원가입 최종 오류:', error);
       }
     });
-    
-    console.log('✅ 회원가입 폼 submit 이벤트 리스너 등록 완료');
+    */
   } else {
     console.error('❌ freshSignupForm을 찾을 수 없습니다!');
   }
