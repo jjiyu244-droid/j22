@@ -781,14 +781,15 @@ async function saveInquiry(email, subject, content) {
       content: content,
       userId: currentUser ? currentUser.uid : null,
       userEmail: currentUser ? currentUser.email : null,
-      status: '대기중',
+      status: 'pending', // '대기중' 대신 'pending' 사용 (일관성)
       createdAt: serverTimestamp(),
       repliedAt: null,
       reply: null,
     });
+    console.log('✅ 문의 저장 완료:', { email, subject });
     return true;
   } catch (e) {
-    console.error('문의 저장 중 오류:', e);
+    console.error('❌ 문의 저장 중 오류:', e);
     return false;
   }
 }
@@ -2403,22 +2404,21 @@ function setupInquiryForm() {
     const success = await saveInquiry(email, subject, content);
     
     if (success) {
-      if (statusText) {
-        statusText.textContent = '문의가 성공적으로 전송되었습니다. 빠른 시일 내에 답변드리겠습니다.';
-        statusText.style.color = 'var(--success)';
-      }
+      alert('문의가 접수되었습니다. 빠른 시일 내에 답변드리겠습니다.');
       inquiryForm.reset();
       // 로그인된 사용자의 이메일 다시 채우기
       if (currentUser && currentUser.email) {
         $('#inquiryEmail').value = currentUser.email;
       }
       
-      // 3초 후 메시지 제거
+      // 대시보드로 이동
       setTimeout(() => {
-        if (statusText) {
-          statusText.textContent = '';
+        if (typeof navigateToPage === 'function') {
+          navigateToPage('dashboard');
+        } else if (typeof window.navigateToPage === 'function') {
+          window.navigateToPage('dashboard');
         }
-      }, 3000);
+      }, 500);
     } else {
       if (statusText) {
         statusText.textContent = '문의 전송 중 오류가 발생했습니다. 다시 시도해주세요.';
@@ -4114,8 +4114,11 @@ async function navigateToPage(page) {
   }
   
   // Hide all page sections (will be shown later if needed)
+  // 초기 로드 시 모든 page-section 숨기기
   document.querySelectorAll('.page-section').forEach((section) => {
     section.style.setProperty('display', 'none', 'important');
+    section.style.setProperty('visibility', 'hidden', 'important');
+    section.style.setProperty('opacity', '0', 'important');
     section.classList.remove('active');
   });
   
@@ -4144,60 +4147,98 @@ async function navigateToPage(page) {
   // Show the requested page
   // FAQ 페이지 처리
   if (page === 'faq') {
+    console.log('✅ FAQ 페이지로 이동 시작');
+    
     // 모든 다른 섹션 강제로 숨기기
     document.querySelectorAll('section.content-section').forEach((section) => {
       section.style.setProperty('display', 'none', 'important');
+      section.style.setProperty('visibility', 'hidden', 'important');
+      section.style.setProperty('opacity', '0', 'important');
     });
+    
+    // 다른 모든 page-section 숨기기
     document.querySelectorAll('.page-section').forEach((section) => {
       if (section.id !== 'faq-page') {
         section.style.setProperty('display', 'none', 'important');
+        section.style.setProperty('visibility', 'hidden', 'important');
+        section.style.setProperty('opacity', '0', 'important');
+        section.classList.remove('active');
       }
     });
     
     const faqPage = document.getElementById('faq-page');
     if (faqPage) {
+      // FAQ 페이지 강제 표시
       faqPage.style.setProperty('display', 'block', 'important');
       faqPage.style.setProperty('visibility', 'visible', 'important');
       faqPage.style.setProperty('opacity', '1', 'important');
+      faqPage.style.setProperty('position', 'relative', 'important');
+      faqPage.style.setProperty('z-index', '10', 'important');
       faqPage.classList.add('active');
       
-      // 페이지 상단으로 스크롤
+      console.log('✅ FAQ 페이지 표시 완료:', {
+        display: window.getComputedStyle(faqPage).display,
+        visibility: window.getComputedStyle(faqPage).visibility,
+        opacity: window.getComputedStyle(faqPage).opacity,
+        offsetHeight: faqPage.offsetHeight
+      });
+      
+      // 페이지 상단으로 스크롤 및 아코디언 설정
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setupFAQAccordion();
       }, 100);
     } else {
-      console.error('FAQ 페이지를 찾을 수 없습니다.');
+      console.error('❌ FAQ 페이지를 찾을 수 없습니다.');
     }
     return;
   }
   
   // 1:1 문의 페이지 처리
   if (page === 'inquiry') {
+    console.log('✅ 문의 페이지로 이동 시작');
+    
     // 모든 다른 섹션 강제로 숨기기
     document.querySelectorAll('section.content-section').forEach((section) => {
       section.style.setProperty('display', 'none', 'important');
+      section.style.setProperty('visibility', 'hidden', 'important');
+      section.style.setProperty('opacity', '0', 'important');
     });
+    
+    // 다른 모든 page-section 숨기기
     document.querySelectorAll('.page-section').forEach((section) => {
       if (section.id !== 'inquiry-page') {
         section.style.setProperty('display', 'none', 'important');
+        section.style.setProperty('visibility', 'hidden', 'important');
+        section.style.setProperty('opacity', '0', 'important');
+        section.classList.remove('active');
       }
     });
     
     const inquiryPage = document.getElementById('inquiry-page');
     if (inquiryPage) {
+      // 문의 페이지 강제 표시
       inquiryPage.style.setProperty('display', 'block', 'important');
       inquiryPage.style.setProperty('visibility', 'visible', 'important');
       inquiryPage.style.setProperty('opacity', '1', 'important');
+      inquiryPage.style.setProperty('position', 'relative', 'important');
+      inquiryPage.style.setProperty('z-index', '10', 'important');
       inquiryPage.classList.add('active');
       
-      // 페이지 상단으로 스크롤
+      console.log('✅ 문의 페이지 표시 완료:', {
+        display: window.getComputedStyle(inquiryPage).display,
+        visibility: window.getComputedStyle(inquiryPage).visibility,
+        opacity: window.getComputedStyle(inquiryPage).opacity,
+        offsetHeight: inquiryPage.offsetHeight
+      });
+      
+      // 페이지 상단으로 스크롤 및 폼 설정
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setupInquiryForm();
       }, 100);
     } else {
-      console.error('문의 페이지를 찾을 수 없습니다.');
+      console.error('❌ 문의 페이지를 찾을 수 없습니다.');
     }
     return;
   }
