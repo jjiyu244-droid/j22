@@ -1777,6 +1777,24 @@ function setupSignupForm() {
   signupForm.parentNode.replaceChild(newSignupForm, signupForm);
   const freshSignupForm = $('#signupForm');
   
+  // 약관 링크 클릭 이벤트 추가
+  const termsLink = document.querySelector('.terms-link');
+  const privacyLink = document.querySelector('.privacy-link');
+  
+  if (termsLink) {
+    termsLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('이용약관\n\n1. 서비스 이용\n- 본 서비스는 암호화폐 스테이킹 서비스를 제공합니다.\n- 사용자는 서비스 이용 시 발생하는 모든 책임을 집니다.\n\n2. 수수료\n- 스테이킹 보상에 대한 수수료가 적용될 수 있습니다.\n\n3. 면책 조항\n- 서비스 제공자는 네트워크 장애, 시장 변동 등으로 인한 손실에 대해 책임을 지지 않습니다.');
+    });
+  }
+  
+  if (privacyLink) {
+    privacyLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('개인정보처리방침\n\n1. 수집하는 정보\n- 사용자명, 비밀번호, 이메일 주소\n- 스테이킹 거래 내역\n\n2. 정보 사용 목적\n- 서비스 제공 및 계정 관리\n- 거래 내역 관리\n\n3. 정보 보호\n- 모든 개인정보는 암호화되어 저장됩니다.\n- 제3자에게 정보를 제공하지 않습니다.\n\n4. 정보 보관 기간\n- 계정 삭제 시까지 보관됩니다.');
+    });
+  }
+  
   if (goToLoginBtn) {
     goToLoginBtn.addEventListener('click', (e) => {
       e.preventDefault();
