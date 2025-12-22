@@ -4116,7 +4116,15 @@ async function navigateToPage(page) {
   // Hide all page sections (will be shown later if needed)
   document.querySelectorAll('.page-section').forEach((section) => {
     section.style.display = 'none';
+    section.classList.remove('active');
   });
+  
+  // Hide all content sections when navigating to FAQ or Inquiry pages
+  if (page === 'faq' || page === 'inquiry') {
+    document.querySelectorAll('section.content-section:not(.page-section)').forEach((section) => {
+      section.style.display = 'none';
+    });
+  }
 
   // Update nav button active states
   document.querySelectorAll('.nav-item-horizontal').forEach((btn) => {
@@ -4129,28 +4137,50 @@ async function navigateToPage(page) {
   // Show the requested page
   // FAQ 페이지 처리
   if (page === 'faq') {
+    // 모든 다른 섹션 숨기기
+    document.querySelectorAll('section.content-section:not(.page-section)').forEach((section) => {
+      section.style.display = 'none';
+    });
+    
     const faqPage = document.getElementById('faq-page');
     if (faqPage) {
       faqPage.style.display = 'block';
+      faqPage.style.visibility = 'visible';
+      faqPage.style.opacity = '1';
       faqPage.classList.add('active');
-      // FAQ 아코디언 이벤트 리스너 설정
+      
+      // 페이지 상단으로 스크롤
       setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         setupFAQAccordion();
       }, 100);
+    } else {
+      console.error('FAQ 페이지를 찾을 수 없습니다.');
     }
     return;
   }
   
   // 1:1 문의 페이지 처리
   if (page === 'inquiry') {
+    // 모든 다른 섹션 숨기기
+    document.querySelectorAll('section.content-section:not(.page-section)').forEach((section) => {
+      section.style.display = 'none';
+    });
+    
     const inquiryPage = document.getElementById('inquiry-page');
     if (inquiryPage) {
       inquiryPage.style.display = 'block';
+      inquiryPage.style.visibility = 'visible';
+      inquiryPage.style.opacity = '1';
       inquiryPage.classList.add('active');
-      // 문의 폼 설정
+      
+      // 페이지 상단으로 스크롤
       setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         setupInquiryForm();
       }, 100);
+    } else {
+      console.error('문의 페이지를 찾을 수 없습니다.');
     }
     return;
   }
@@ -5203,13 +5233,23 @@ function setupNavigation() {
     }
   }, true); // capture phase - 이벤트 전파 전에 실행
   
-  // Add click handlers to all nav items
+  // Add click handlers to all nav items (중복 방지)
   document.querySelectorAll('.nav-item-horizontal').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
+    // 기존 리스너 제거 (중복 방지)
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    newBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      const page = btn.getAttribute('data-page');
-      if (page) {
+      e.stopPropagation();
+      const page = newBtn.getAttribute('data-page');
+      console.log('네비게이션 버튼 클릭:', page);
+      if (page && typeof navigateToPage === 'function') {
         navigateToPage(page);
+      } else if (page && typeof window.navigateToPage === 'function') {
+        window.navigateToPage(page);
+      } else {
+        console.error('navigateToPage 함수를 찾을 수 없습니다.');
       }
     });
   });
