@@ -1777,21 +1777,23 @@ function setupSignupForm() {
   signupForm.parentNode.replaceChild(newSignupForm, signupForm);
   const freshSignupForm = $('#signupForm');
   
-  // 약관 링크 클릭 이벤트 추가
+  // 약관 링크 클릭 이벤트 추가 (모달 열기)
   const termsLink = document.querySelector('.terms-link');
   const privacyLink = document.querySelector('.privacy-link');
   
   if (termsLink) {
     termsLink.addEventListener('click', (e) => {
       e.preventDefault();
-      alert('이용약관\n\n1. 서비스 이용\n- 본 서비스는 암호화폐 스테이킹 서비스를 제공합니다.\n- 사용자는 서비스 이용 시 발생하는 모든 책임을 집니다.\n\n2. 수수료\n- 스테이킹 보상에 대한 수수료가 적용될 수 있습니다.\n\n3. 면책 조항\n- 서비스 제공자는 네트워크 장애, 시장 변동 등으로 인한 손실에 대해 책임을 지지 않습니다.');
+      e.stopPropagation();
+      openTermsModal();
     });
   }
   
   if (privacyLink) {
     privacyLink.addEventListener('click', (e) => {
       e.preventDefault();
-      alert('개인정보처리방침\n\n1. 수집하는 정보\n- 사용자명, 비밀번호, 이메일 주소\n- 스테이킹 거래 내역\n\n2. 정보 사용 목적\n- 서비스 제공 및 계정 관리\n- 거래 내역 관리\n\n3. 정보 보호\n- 모든 개인정보는 암호화되어 저장됩니다.\n- 제3자에게 정보를 제공하지 않습니다.\n\n4. 정보 보관 기간\n- 계정 삭제 시까지 보관됩니다.');
+      e.stopPropagation();
+      openPrivacyModal();
     });
   }
   
@@ -1847,18 +1849,21 @@ function setupSignupForm() {
     // 유효성 검사
     if (!username || !password || !passwordConfirm) {
       console.warn('⚠️ 필수 입력값 누락');
+      window.__signupInProgress = false;
       alert('사용자명, 비밀번호, 비밀번호 확인을 모두 입력해주세요.');
       return;
     }
     
     if (password !== passwordConfirm) {
       console.warn('⚠️ 비밀번호 불일치');
+      window.__signupInProgress = false;
       alert('비밀번호가 일치하지 않습니다.');
       return;
     }
     
     if (password.length < 15) {
       console.warn('⚠️ 비밀번호 길이 부족:', password.length);
+      window.__signupInProgress = false;
       alert('비밀번호는 15자 이상이어야 합니다.');
       return;
     }
@@ -1871,6 +1876,7 @@ function setupSignupForm() {
     
     if (complexityCount < 2) {
       console.warn('⚠️ 비밀번호 복잡도 부족');
+      window.__signupInProgress = false;
       alert('비밀번호는 숫자와 대소문자 중 2가지 이상을 포함해야 합니다.');
       return;
     }
@@ -2021,6 +2027,61 @@ function setupSignupForm() {
     console.error('❌ freshSignupForm을 찾을 수 없습니다!');
   }
 }
+
+// 약관 모달 열기/닫기 함수 (전역으로 노출)
+window.openTermsModal = function() {
+  const modal = document.getElementById('termsModal');
+  if (modal) {
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
+  }
+};
+
+window.closeTermsModal = function() {
+  const modal = document.getElementById('termsModal');
+  if (modal) {
+    modal.classList.remove('show');
+    document.body.style.overflow = ''; // 스크롤 복원
+  }
+};
+
+window.openPrivacyModal = function() {
+  const modal = document.getElementById('privacyModal');
+  if (modal) {
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
+  }
+};
+
+window.closePrivacyModal = function() {
+  const modal = document.getElementById('privacyModal');
+  if (modal) {
+    modal.classList.remove('show');
+    document.body.style.overflow = ''; // 스크롤 복원
+  }
+};
+
+// 약관 모달 배경 클릭 시 닫기
+document.addEventListener('DOMContentLoaded', () => {
+  const termsModal = document.getElementById('termsModal');
+  const privacyModal = document.getElementById('privacyModal');
+  
+  if (termsModal) {
+    termsModal.addEventListener('click', (e) => {
+      if (e.target.id === 'termsModal') {
+        closeTermsModal();
+      }
+    });
+  }
+  
+  if (privacyModal) {
+    privacyModal.addEventListener('click', (e) => {
+      if (e.target.id === 'privacyModal') {
+        closePrivacyModal();
+      }
+    });
+  }
+});
 
 // 1:1 문의 폼 설정
 function setupInquiryForm() {

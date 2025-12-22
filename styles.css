@@ -1772,34 +1772,42 @@ body {
   }
   
   /* 회원가입 약관 동의 섹션 모바일 최적화 */
-  .agree-row {
+  .agree-container {
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;
+    gap: 10px !important;
     flex-wrap: wrap !important;
+    padding: 12px !important;
   }
   
-  .agree-row input[type="checkbox"] {
+  .agree-container input[type="checkbox"] {
     width: 20px !important;
     height: 20px !important;
     min-width: 20px !important;
     min-height: 20px !important;
     flex-shrink: 0 !important;
     cursor: pointer !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
-  .agree-label {
+  .agree-container label {
     font-size: 13px !important;
     line-height: 1.5 !important;
     color: #333 !important;
     cursor: pointer !important;
     flex: 1 !important;
     min-width: 0 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
-  .agree-label a {
-    color: #6366f1 !important;
+  .agree-container label a {
+    color: #007bff !important;
     text-decoration: underline !important;
+    white-space: nowrap !important;
   }
   
   /* 회원가입 카드 모바일 패딩 조정 */
