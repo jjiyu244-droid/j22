@@ -4115,14 +4115,21 @@ async function navigateToPage(page) {
   
   // Hide all page sections (will be shown later if needed)
   document.querySelectorAll('.page-section').forEach((section) => {
-    section.style.display = 'none';
+    section.style.setProperty('display', 'none', 'important');
     section.classList.remove('active');
   });
   
   // Hide all content sections when navigating to FAQ or Inquiry pages
   if (page === 'faq' || page === 'inquiry') {
-    document.querySelectorAll('section.content-section:not(.page-section)').forEach((section) => {
-      section.style.display = 'none';
+    // 모든 content-section 숨기기
+    document.querySelectorAll('section.content-section').forEach((section) => {
+      section.style.setProperty('display', 'none', 'important');
+    });
+    // 다른 page-section들도 모두 숨기기
+    document.querySelectorAll('.page-section').forEach((section) => {
+      if (section.id !== `${page}-page`) {
+        section.style.setProperty('display', 'none', 'important');
+      }
     });
   }
 
@@ -4137,16 +4144,21 @@ async function navigateToPage(page) {
   // Show the requested page
   // FAQ 페이지 처리
   if (page === 'faq') {
-    // 모든 다른 섹션 숨기기
-    document.querySelectorAll('section.content-section:not(.page-section)').forEach((section) => {
-      section.style.display = 'none';
+    // 모든 다른 섹션 강제로 숨기기
+    document.querySelectorAll('section.content-section').forEach((section) => {
+      section.style.setProperty('display', 'none', 'important');
+    });
+    document.querySelectorAll('.page-section').forEach((section) => {
+      if (section.id !== 'faq-page') {
+        section.style.setProperty('display', 'none', 'important');
+      }
     });
     
     const faqPage = document.getElementById('faq-page');
     if (faqPage) {
-      faqPage.style.display = 'block';
-      faqPage.style.visibility = 'visible';
-      faqPage.style.opacity = '1';
+      faqPage.style.setProperty('display', 'block', 'important');
+      faqPage.style.setProperty('visibility', 'visible', 'important');
+      faqPage.style.setProperty('opacity', '1', 'important');
       faqPage.classList.add('active');
       
       // 페이지 상단으로 스크롤
@@ -4162,16 +4174,21 @@ async function navigateToPage(page) {
   
   // 1:1 문의 페이지 처리
   if (page === 'inquiry') {
-    // 모든 다른 섹션 숨기기
-    document.querySelectorAll('section.content-section:not(.page-section)').forEach((section) => {
-      section.style.display = 'none';
+    // 모든 다른 섹션 강제로 숨기기
+    document.querySelectorAll('section.content-section').forEach((section) => {
+      section.style.setProperty('display', 'none', 'important');
+    });
+    document.querySelectorAll('.page-section').forEach((section) => {
+      if (section.id !== 'inquiry-page') {
+        section.style.setProperty('display', 'none', 'important');
+      }
     });
     
     const inquiryPage = document.getElementById('inquiry-page');
     if (inquiryPage) {
-      inquiryPage.style.display = 'block';
-      inquiryPage.style.visibility = 'visible';
-      inquiryPage.style.opacity = '1';
+      inquiryPage.style.setProperty('display', 'block', 'important');
+      inquiryPage.style.setProperty('visibility', 'visible', 'important');
+      inquiryPage.style.setProperty('opacity', '1', 'important');
       inquiryPage.classList.add('active');
       
       // 페이지 상단으로 스크롤
