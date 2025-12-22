@@ -657,14 +657,12 @@
                 />
               </div>
 
-              <div class="form-group" style="margin-bottom:32px;">
-                <div class="agree-row">
-                  <input type="checkbox" id="signupAgree" required />
-                  <label for="signupAgree" class="agree-label">
-                    <a href="#" class="terms-link">이용약관</a> 및 
-                    <a href="#" class="privacy-link">개인정보처리방침</a>에 동의합니다.
-                  </label>
-                </div>
+              <div class="agree-container" style="display: flex !important; align-items: center !important; justify-content: flex-start !important; gap: 10px !important; margin: 20px 0 !important; padding: 15px !important; background: #f8f9fa !important; border-radius: 8px !important; width: 100% !important; box-sizing: border-box !important;">
+                <input type="checkbox" id="signupAgree" required style="width: 22px !important; height: 22px !important; min-width: 22px !important; min-height: 22px !important; cursor: pointer !important; flex-shrink: 0 !important; display: block !important; visibility: visible !important; opacity: 1 !important;" />
+                <label for="signupAgree" style="font-size: 14px !important; color: #333 !important; cursor: pointer !important; line-height: 1.4 !important; flex: 1 !important; display: block !important; visibility: visible !important; opacity: 1 !important;">
+                  <a href="#" class="terms-link" style="text-decoration: underline !important; color: #007bff !important;">이용약관</a> 및 
+                  <a href="#" class="privacy-link" style="text-decoration: underline !important; color: #007bff !important;">개인정보처리방침</a>에 동의합니다.
+                </label>
               </div>
 
               <button type="button" id="signupSubmitBtn" class="btn-primary w-full" style="padding:16px;font-size:16px;font-weight:600;" onclick="if(typeof window.handleSignup === 'function') { window.handleSignup(event); } else { console.error('handleSignup 함수를 찾을 수 없습니다'); }">

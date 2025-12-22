@@ -1818,13 +1818,29 @@ function setupSignupForm() {
     }
     
     console.log('🚀 회원가입 함수 호출됨!');
-    alert('회원가입 시도'); // 디버깅용
+    
+    // 중복 호출 방지
+    if (window.__signupInProgress) {
+      console.log('⚠️ 회원가입이 이미 진행 중입니다.');
+      return;
+    }
+    window.__signupInProgress = true;
     
     const username = $('#signupUsername')?.value?.trim();
     const password = $('#signupPassword')?.value?.trim();
     const passwordConfirm = $('#signupPasswordConfirm')?.value?.trim();
     const name = $('#signupName')?.value?.trim();
-    const agree = $('#signupAgree')?.checked;
+    
+    // 체크박스 값을 여러 방법으로 확인
+    const agreeCheckbox = document.getElementById('signupAgree');
+    const agree = agreeCheckbox ? agreeCheckbox.checked : false;
+    
+    console.log('📋 체크박스 상태 확인:', {
+      element: agreeCheckbox,
+      checked: agree,
+      display: agreeCheckbox ? window.getComputedStyle(agreeCheckbox).display : 'N/A',
+      visibility: agreeCheckbox ? window.getComputedStyle(agreeCheckbox).visibility : 'N/A'
+    });
     
     console.log('📋 입력값 확인:', { username, password: password ? '***' : '', passwordConfirm: passwordConfirm ? '***' : '', name, agree });
     
@@ -1861,7 +1877,8 @@ function setupSignupForm() {
     
     if (!agree) {
       console.warn('⚠️ 약관 동의 미체크');
-      alert('약관에 동의해야 가입이 가능합니다.');
+      window.__signupInProgress = false;
+      alert('약관에 동의하셔야 회원가입이 가능합니다.');
       return;
     }
     
@@ -1957,6 +1974,7 @@ function setupSignupForm() {
       }
       
       // 성공 메시지 (Firebase Auth는 회원가입 후 자동 로그인됨)
+      window.__signupInProgress = false;
       alert('회원가입이 완료되었습니다!');
       
       // 회원가입 페이지 닫고 대시보드로 이동
@@ -1989,6 +2007,7 @@ function setupSignupForm() {
         errorMessage = `회원가입 중 오류가 발생했습니다: ${error.message || error}`;
       }
       
+      window.__signupInProgress = false;
       alert(errorMessage);
       console.error('❌ 회원가입 최종 오류:', error);
     }
@@ -1999,22 +2018,8 @@ function setupSignupForm() {
   if (freshSignupForm) {
     console.log('✅ 회원가입 폼 submit 이벤트 리스너 등록 중...');
     
-    // 회원가입 버튼에 직접 클릭 이벤트도 추가 (백업)
-    const signupButton = $('#signupSubmitBtn') || freshSignupForm.querySelector('button[type="button"]#signupSubmitBtn');
-    if (signupButton) {
-      console.log('✅ 회원가입 버튼 찾음, 클릭 이벤트 추가');
-      signupButton.addEventListener('click', (e) => {
-        console.log('🖱️ 회원가입 버튼 직접 클릭됨 (이벤트 리스너)');
-        if (window.handleSignup) {
-          window.handleSignup(e);
-        }
-      });
-    } else {
-      console.warn('⚠️ 회원가입 버튼을 찾을 수 없습니다');
-    }
-    
-    // submit 이벤트도 유지 (혹시 모를 경우를 대비)
-    freshSignupForm.addEventListener('submit', async (e) => {
+    // submit 이벤트는 제거 (onclick만 사용)
+    // 중복 호출 방지를 위해 이벤트 리스너는 추가하지 않음
       e.preventDefault();
       e.stopPropagation();
       
@@ -4721,17 +4726,41 @@ async function navigateToPage(page) {
             el.style.setProperty('color', '#333333', 'important');
           });
           
-          // 모든 input 요소 재확인
-          const allInputs = pageElement.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], input:not([type])');
+          // 모든 input 요소 재확인 (체크박스 포함)
+          const allInputs = pageElement.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], input[type="checkbox"], input:not([type])');
           allInputs.forEach(input => {
             input.style.setProperty('display', 'block', 'important');
             input.style.setProperty('visibility', 'visible', 'important');
             input.style.setProperty('opacity', '1', 'important');
-            input.style.setProperty('background', 'white', 'important');
-            input.style.setProperty('border', '1px solid #ccc', 'important');
-            input.style.setProperty('height', '40px', 'important');
+            if (input.type !== 'checkbox') {
+              input.style.setProperty('background', 'white', 'important');
+              input.style.setProperty('border', '1px solid #ccc', 'important');
+              input.style.setProperty('height', '40px', 'important');
+            } else {
+              // 체크박스는 크기만 설정
+              input.style.setProperty('width', '22px', 'important');
+              input.style.setProperty('height', '22px', 'important');
+              input.style.setProperty('min-width', '22px', 'important');
+              input.style.setProperty('min-height', '22px', 'important');
+            }
             input.style.setProperty('color', '#333', 'important');
           });
+          
+          // 약관 동의 컨테이너 강제 표시
+          const agreeContainer = pageElement.querySelector('.agree-container');
+          if (agreeContainer) {
+            agreeContainer.style.setProperty('display', 'flex', 'important');
+            agreeContainer.style.setProperty('visibility', 'visible', 'important');
+            agreeContainer.style.setProperty('opacity', '1', 'important');
+            const agreeCheckbox = agreeContainer.querySelector('#signupAgree');
+            if (agreeCheckbox) {
+              agreeCheckbox.style.setProperty('display', 'block', 'important');
+              agreeCheckbox.style.setProperty('visibility', 'visible', 'important');
+              agreeCheckbox.style.setProperty('opacity', '1', 'important');
+              agreeCheckbox.style.setProperty('width', '22px', 'important');
+              agreeCheckbox.style.setProperty('height', '22px', 'important');
+            }
+          }
           
           // 모든 button 요소 재확인
           const allButtons = pageElement.querySelectorAll('button, .btn-primary, [type="submit"]');
