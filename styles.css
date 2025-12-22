@@ -1025,22 +1025,33 @@ body {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(18px);
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 40;
+  z-index: 99999;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .modal-backdrop.show {
-  display: flex;
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .modal {
   max-width: 420px;
   width: 100%;
   padding: 16px 16px 18px;
+  position: relative;
+  z-index: 100000;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .modal-header {

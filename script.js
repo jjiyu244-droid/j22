@@ -1779,21 +1779,40 @@ function setupSignupForm() {
   
   // 약관 링크 클릭 이벤트 추가 (모달 열기) - 전역 이벤트 위임 사용
   // 폼이 복제되어도 작동하도록 document에 이벤트 위임
-  document.addEventListener('click', (e) => {
-    if (e.target.classList.contains('terms-link')) {
+  // 중복 등록 방지를 위해 기존 리스너 제거 후 재등록
+  const existingHandler = window.__termsLinkHandler;
+  if (existingHandler) {
+    document.removeEventListener('click', existingHandler, true);
+  }
+  
+  window.__termsLinkHandler = function(e) {
+    const target = e.target;
+    if (target.classList.contains('terms-link') || target.closest('.terms-link')) {
       e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
+      console.log('✅ 이용약관 링크 클릭됨');
       if (window.openTermsModal) {
         window.openTermsModal();
+      } else {
+        console.error('❌ openTermsModal 함수를 찾을 수 없습니다');
       }
-    } else if (e.target.classList.contains('privacy-link')) {
+      return false;
+    } else if (target.classList.contains('privacy-link') || target.closest('.privacy-link')) {
       e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
+      console.log('✅ 개인정보처리방침 링크 클릭됨');
       if (window.openPrivacyModal) {
         window.openPrivacyModal();
+      } else {
+        console.error('❌ openPrivacyModal 함수를 찾을 수 없습니다');
       }
+      return false;
     }
-  }, true);
+  };
+  
+  document.addEventListener('click', window.__termsLinkHandler, true);
   
   if (goToLoginBtn) {
     goToLoginBtn.addEventListener('click', (e) => {
@@ -2030,8 +2049,16 @@ function setupSignupForm() {
 window.openTermsModal = function() {
   const modal = document.getElementById('termsModal');
   if (modal) {
+    // z-index 강제 설정
+    modal.style.setProperty('z-index', '99999', 'important');
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('visibility', 'visible', 'important');
+    modal.style.setProperty('opacity', '1', 'important');
     modal.classList.add('show');
     document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
+    console.log('✅ 이용약관 모달 열기 완료');
+  } else {
+    console.error('❌ termsModal 요소를 찾을 수 없습니다');
   }
 };
 
@@ -2039,15 +2066,27 @@ window.closeTermsModal = function() {
   const modal = document.getElementById('termsModal');
   if (modal) {
     modal.classList.remove('show');
+    modal.style.setProperty('display', 'none', 'important');
+    modal.style.setProperty('visibility', 'hidden', 'important');
+    modal.style.setProperty('opacity', '0', 'important');
     document.body.style.overflow = ''; // 스크롤 복원
+    console.log('✅ 이용약관 모달 닫기 완료');
   }
 };
 
 window.openPrivacyModal = function() {
   const modal = document.getElementById('privacyModal');
   if (modal) {
+    // z-index 강제 설정
+    modal.style.setProperty('z-index', '99999', 'important');
+    modal.style.setProperty('display', 'flex', 'important');
+    modal.style.setProperty('visibility', 'visible', 'important');
+    modal.style.setProperty('opacity', '1', 'important');
     modal.classList.add('show');
     document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
+    console.log('✅ 개인정보처리방침 모달 열기 완료');
+  } else {
+    console.error('❌ privacyModal 요소를 찾을 수 없습니다');
   }
 };
 
@@ -2055,29 +2094,47 @@ window.closePrivacyModal = function() {
   const modal = document.getElementById('privacyModal');
   if (modal) {
     modal.classList.remove('show');
+    modal.style.setProperty('display', 'none', 'important');
+    modal.style.setProperty('visibility', 'hidden', 'important');
+    modal.style.setProperty('opacity', '0', 'important');
     document.body.style.overflow = ''; // 스크롤 복원
+    console.log('✅ 개인정보처리방침 모달 닫기 완료');
   }
 };
 
-// 약관 모달 배경 클릭 시 닫기
-document.addEventListener('DOMContentLoaded', () => {
-  const termsModal = document.getElementById('termsModal');
-  const privacyModal = document.getElementById('privacyModal');
-  
-  if (termsModal) {
-    termsModal.addEventListener('click', (e) => {
-      if (e.target.id === 'termsModal') {
-        closeTermsModal();
-      }
-    });
+// 약관 모달 배경 클릭 시 닫기 (전역 이벤트 위임 사용)
+document.addEventListener('click', (e) => {
+  const target = e.target;
+  if (target.id === 'termsModal' || (target.classList.contains('modal-backdrop') && target.id === 'termsModal')) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.closeTermsModal) {
+      window.closeTermsModal();
+    }
+  } else if (target.id === 'privacyModal' || (target.classList.contains('modal-backdrop') && target.id === 'privacyModal')) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.closePrivacyModal) {
+      window.closePrivacyModal();
+    }
   }
-  
-  if (privacyModal) {
-    privacyModal.addEventListener('click', (e) => {
-      if (e.target.id === 'privacyModal') {
-        closePrivacyModal();
+}, true);
+
+// ESC 키로 모달 닫기
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const termsModal = document.getElementById('termsModal');
+    const privacyModal = document.getElementById('privacyModal');
+    
+    if (termsModal && termsModal.classList.contains('show')) {
+      if (window.closeTermsModal) {
+        window.closeTermsModal();
       }
-    });
+    } else if (privacyModal && privacyModal.classList.contains('show')) {
+      if (window.closePrivacyModal) {
+        window.closePrivacyModal();
+      }
+    }
   }
 });
 
