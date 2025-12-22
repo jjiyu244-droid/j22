@@ -1761,8 +1761,21 @@ function setupRewardFilters() {
 
 // 회원가입 폼 설정
 function setupSignupForm() {
+  console.log('🔧 setupSignupForm 호출됨');
   const signupForm = $('#signupForm');
   const goToLoginBtn = $('#goToLogin');
+  
+  if (!signupForm) {
+    console.error('❌ signupForm을 찾을 수 없습니다!');
+    return;
+  }
+  
+  console.log('✅ signupForm 찾음:', signupForm);
+  
+  // 기존 이벤트 리스너 제거 (중복 방지)
+  const newSignupForm = signupForm.cloneNode(true);
+  signupForm.parentNode.replaceChild(newSignupForm, signupForm);
+  const freshSignupForm = $('#signupForm');
   
   if (goToLoginBtn) {
     goToLoginBtn.addEventListener('click', (e) => {
@@ -1779,28 +1792,53 @@ function setupSignupForm() {
     });
   }
   
-  if (signupForm) {
-    signupForm.addEventListener('submit', async (e) => {
+  if (freshSignupForm) {
+    console.log('✅ 회원가입 폼 submit 이벤트 리스너 등록 중...');
+    
+    // 회원가입 버튼에 직접 클릭 이벤트도 추가 (백업)
+    const signupButton = freshSignupForm.querySelector('button[type="submit"]');
+    if (signupButton) {
+      console.log('✅ 회원가입 버튼 찾음, 클릭 이벤트 추가');
+      signupButton.addEventListener('click', (e) => {
+        console.log('🖱️ 회원가입 버튼 직접 클릭됨');
+        // 폼 제출 트리거
+        if (freshSignupForm) {
+          freshSignupForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        }
+      });
+    } else {
+      console.warn('⚠️ 회원가입 버튼을 찾을 수 없습니다');
+    }
+    
+    freshSignupForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      e.stopPropagation();
       
-      const username = $('#signupUsername').value.trim();
-      const password = $('#signupPassword').value.trim();
-      const passwordConfirm = $('#signupPasswordConfirm').value.trim();
-      const name = $('#signupName').value.trim();
-      const agree = $('#signupAgree').checked;
+      console.log('📝 회원가입 버튼 클릭됨!');
+      
+      const username = $('#signupUsername')?.value?.trim();
+      const password = $('#signupPassword')?.value?.trim();
+      const passwordConfirm = $('#signupPasswordConfirm')?.value?.trim();
+      const name = $('#signupName')?.value?.trim();
+      const agree = $('#signupAgree')?.checked;
+      
+      console.log('📋 입력값 확인:', { username, password: password ? '***' : '', passwordConfirm: passwordConfirm ? '***' : '', name, agree });
       
       // 유효성 검사
       if (!username || !password || !passwordConfirm) {
+        console.warn('⚠️ 필수 입력값 누락');
         alert('사용자명, 비밀번호, 비밀번호 확인을 모두 입력해주세요.');
         return;
       }
       
       if (password !== passwordConfirm) {
+        console.warn('⚠️ 비밀번호 불일치');
         alert('비밀번호가 일치하지 않습니다.');
         return;
       }
       
       if (password.length < 15) {
+        console.warn('⚠️ 비밀번호 길이 부족:', password.length);
         alert('비밀번호는 15자 이상이어야 합니다.');
         return;
       }
@@ -1812,33 +1850,44 @@ function setupSignupForm() {
       const complexityCount = [hasNumber, hasUpper, hasLower].filter(Boolean).length;
       
       if (complexityCount < 2) {
+        console.warn('⚠️ 비밀번호 복잡도 부족');
         alert('비밀번호는 숫자와 대소문자 중 2가지 이상을 포함해야 합니다.');
         return;
       }
       
       if (!agree) {
+        console.warn('⚠️ 약관 동의 미체크');
         alert('이용약관 및 개인정보처리방침에 동의해주세요.');
         return;
       }
       
+      console.log('✅ 유효성 검사 통과');
+      
       // Firebase Auth를 사용하여 회원가입
       try {
+        console.log('🔥 Firebase Auth 모듈 로드 중...');
         // Firebase Auth 모듈 동적 import
         const {
           createUserWithEmailAndPassword,
         } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
         
+        console.log('✅ Firebase Auth 모듈 로드 완료');
+        
         // auth 객체 가져오기 - window.__firebase.auth 사용 (setupLogin과 동일한 방식)
         let currentAuth = auth;
         if (!currentAuth && window.__firebase && window.__firebase.auth) {
           currentAuth = window.__firebase.auth;
+          console.log('✅ window.__firebase.auth 사용');
         }
         
         if (!currentAuth) {
-          alert('Firebase가 초기화되지 않았습니다. 페이지를 새로고침해주세요.');
-          console.error('Firebase auth를 찾을 수 없습니다. auth:', auth, 'window.__firebase:', window.__firebase);
+          const errorMsg = 'Firebase가 초기화되지 않았습니다. 페이지를 새로고침해주세요.';
+          console.error('❌ Firebase auth를 찾을 수 없습니다. auth:', auth, 'window.__firebase:', window.__firebase);
+          alert(errorMsg);
           return;
         }
+        
+        console.log('✅ Firebase auth 객체 확인 완료');
         
       // username 유효성 검사 (영문, 숫자, 언더스코어만 허용)
       const usernamePattern = /^[A-Za-z0-9_]+$/;
@@ -1868,13 +1917,16 @@ function setupSignupForm() {
       // username을 이메일 형식으로 변환 (통일된 함수 사용)
       const email = usernameToEmail(username);
       if (!email) {
+        console.error('❌ usernameToEmail 실패:', username);
         alert('사용자명은 영문, 숫자, 언더스코어(_)만 사용 가능합니다.');
         return;
       }
       
       console.log('📝 회원가입 시도:', { username, email });
+      console.log('🔥 createUserWithEmailAndPassword 호출 중...');
         
-        await createUserWithEmailAndPassword(currentAuth, email, password);
+        const userCredential = await createUserWithEmailAndPassword(currentAuth, email, password);
+        console.log('✅ Firebase Auth 회원가입 성공:', userCredential.user.uid);
       
       // Firestore users 컬렉션에 username 저장
       try {
@@ -1910,9 +1962,11 @@ function setupSignupForm() {
         signupForm.reset();
         
       } catch (error) {
-        console.error('회원가입 오류 상세:', error);
-        console.error('에러 스택:', error.stack);
-        console.error('현재 auth 상태:', { auth, windowFirebase: window.__firebase });
+        console.error('❌ 회원가입 오류 상세:', error);
+        console.error('❌ 에러 코드:', error.code);
+        console.error('❌ 에러 메시지:', error.message);
+        console.error('❌ 에러 스택:', error.stack);
+        console.error('❌ 현재 auth 상태:', { auth, windowFirebase: window.__firebase });
         
         let errorMessage = '회원가입 중 오류가 발생했습니다.';
         
@@ -1922,14 +1976,20 @@ function setupSignupForm() {
           errorMessage = '비밀번호가 너무 약합니다. 더 복잡한 비밀번호를 사용해주세요.';
         } else if (error.code === 'auth/invalid-email') {
           errorMessage = '올바른 사용자명 형식이 아닙니다.';
+        } else if (error.code === 'auth/network-request-failed') {
+          errorMessage = '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
         } else {
           errorMessage = `회원가입 중 오류가 발생했습니다: ${error.message || error}`;
         }
         
         alert(errorMessage);
-        console.error('회원가입 오류:', error);
+        console.error('❌ 회원가입 최종 오류:', error);
       }
     });
+    
+    console.log('✅ 회원가입 폼 submit 이벤트 리스너 등록 완료');
+  } else {
+    console.error('❌ freshSignupForm을 찾을 수 없습니다!');
   }
 }
 
