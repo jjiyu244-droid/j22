@@ -2138,6 +2138,221 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// FAQ 아코디언 설정
+function setupFAQAccordion() {
+  const faqQuestions = document.querySelectorAll('.faq-question');
+  faqQuestions.forEach((question) => {
+    // 중복 리스너 방지
+    question.removeEventListener('click', handleFAQClick);
+    question.addEventListener('click', handleFAQClick);
+  });
+}
+
+function handleFAQClick(e) {
+  const question = e.currentTarget;
+  const faqItem = question.closest('.faq-item');
+  const answer = faqItem.querySelector('.faq-answer');
+  const icon = question.querySelector('.faq-icon');
+  
+  // 다른 FAQ 닫기
+  document.querySelectorAll('.faq-item').forEach((item) => {
+    if (item !== faqItem) {
+      const otherAnswer = item.querySelector('.faq-answer');
+      const otherIcon = item.querySelector('.faq-icon');
+      if (otherAnswer) {
+        otherAnswer.style.maxHeight = null;
+        otherAnswer.classList.remove('active');
+      }
+      if (otherIcon) {
+        otherIcon.textContent = '+';
+      }
+    }
+  });
+  
+  // 현재 FAQ 토글
+  if (answer) {
+    if (answer.classList.contains('active')) {
+      answer.style.maxHeight = null;
+      answer.classList.remove('active');
+      if (icon) icon.textContent = '+';
+    } else {
+      answer.style.maxHeight = answer.scrollHeight + 'px';
+      answer.classList.add('active');
+      if (icon) icon.textContent = '−';
+    }
+  }
+}
+
+// 문의 상세보기 함수 (어드민용)
+window.viewInquiryDetail = async function(inquiryId) {
+  if (!db) {
+    alert('데이터베이스 연결이 없습니다.');
+    return;
+  }
+  
+  try {
+    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+    const inquiryRef = doc(db, 'inquiries', inquiryId);
+    const inquirySnap = await getDoc(inquiryRef);
+    
+    if (!inquirySnap.exists()) {
+      alert('문의를 찾을 수 없습니다.');
+      return;
+    }
+    
+    const inquiry = inquirySnap.data();
+    const dateStr = inquiry.createdAt?.toDate ? inquiry.createdAt.toDate().toLocaleString('ko-KR') : '날짜 없음';
+    const replyDateStr = inquiry.repliedAt?.toDate ? inquiry.repliedAt.toDate().toLocaleString('ko-KR') : '';
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal-backdrop show';
+    modal.style.zIndex = '99999';
+    modal.innerHTML = `
+      <div class="modal glass" style="max-width: 700px; max-height: 90vh; overflow-y: auto; z-index: 100000;">
+        <div class="modal-header">
+          <h2 class="modal-title">문의 상세보기</h2>
+          <button class="modal-close" onclick="this.closest('.modal-backdrop').remove()">✕</button>
+        </div>
+        <div class="modal-body" style="padding: 24px;">
+          <div style="margin-bottom: 20px;">
+            <strong style="color: #9ca3af; font-size: 12px;">문의일시</strong>
+            <p style="margin-top: 4px; color: #ffffff;">${dateStr}</p>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <strong style="color: #9ca3af; font-size: 12px;">이메일</strong>
+            <p style="margin-top: 4px; color: #ffffff;">${inquiry.email || inquiry.userEmail || '이메일 없음'}</p>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <strong style="color: #9ca3af; font-size: 12px;">제목</strong>
+            <p style="margin-top: 4px; color: #ffffff; font-weight: 600;">${inquiry.subject || '제목 없음'}</p>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <strong style="color: #9ca3af; font-size: 12px;">내용</strong>
+            <p style="margin-top: 4px; color: #ffffff; white-space: pre-wrap; line-height: 1.6;">${inquiry.content || '내용 없음'}</p>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <strong style="color: #9ca3af; font-size: 12px;">상태</strong>
+            <p style="margin-top: 4px;">
+              <span style="background: ${inquiry.status === '완료' ? '#22c55e' : '#f59e0b'}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                ${inquiry.status || '대기중'}
+              </span>
+            </p>
+          </div>
+          ${inquiry.reply ? `
+            <div style="margin-bottom: 20px; padding: 16px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);">
+              <strong style="color: #22c55e; font-size: 12px;">답변</strong>
+              ${replyDateStr ? `<p style="margin-top: 4px; color: #9ca3af; font-size: 11px;">답변일시: ${replyDateStr}</p>` : ''}
+              <p style="margin-top: 8px; color: #ffffff; white-space: pre-wrap; line-height: 1.6;">${inquiry.reply}</p>
+            </div>
+          ` : `
+            <div style="margin-bottom: 20px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+              <strong style="color: #9ca3af; font-size: 12px;">답변</strong>
+              <textarea id="inquiryReplyText" placeholder="답변을 입력하세요..." style="width: 100%; min-height: 120px; padding: 12px; margin-top: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #ffffff; font-family: inherit; resize: vertical;"></textarea>
+              <div style="margin-top: 12px; display: flex; gap: 8px;">
+                <button class="btn-primary" onclick="submitInquiryReply('${inquiryId}')" style="padding: 10px 20px; font-size: 14px;">답변 전송</button>
+                <button class="btn-outline" onclick="markInquiryComplete('${inquiryId}')" style="padding: 10px 20px; font-size: 14px;">완료 처리</button>
+              </div>
+            </div>
+          `}
+          <div style="margin-top: 24px; text-align: center;">
+            <button class="btn-outline" onclick="this.closest('.modal-backdrop').remove()" style="padding: 12px 32px; font-size: 14px;">닫기</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+    
+    // 배경 클릭 시 닫기
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.remove();
+        document.body.style.overflow = '';
+      }
+    });
+  } catch (error) {
+    console.error('문의 상세보기 오류:', error);
+    alert('문의를 불러오는 중 오류가 발생했습니다.');
+  }
+};
+
+// 문의 답변 전송 함수
+window.submitInquiryReply = async function(inquiryId) {
+  const replyText = document.getElementById('inquiryReplyText');
+  if (!replyText || !replyText.value.trim()) {
+    alert('답변을 입력해주세요.');
+    return;
+  }
+  
+  if (!db) {
+    alert('데이터베이스 연결이 없습니다.');
+    return;
+  }
+  
+  try {
+    const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+    const inquiryRef = doc(db, 'inquiries', inquiryId);
+    await updateDoc(inquiryRef, {
+      reply: replyText.value.trim(),
+      status: '완료',
+      repliedAt: serverTimestamp(),
+    });
+    
+    alert('답변이 전송되었습니다.');
+    // 모달 닫고 새로고침
+    document.querySelector('.modal-backdrop')?.remove();
+    document.body.style.overflow = '';
+    // 대시보드 새로고침
+    if (typeof renderAdminDashboardContent === 'function') {
+      const adminPageContent = document.getElementById('adminPageContent');
+      if (adminPageContent) {
+        const users = await loadAllUserStakes();
+        await renderAdminDashboardContent(users, adminPageContent);
+      }
+    }
+  } catch (error) {
+    console.error('답변 전송 오류:', error);
+    alert('답변 전송 중 오류가 발생했습니다.');
+  }
+};
+
+// 문의 완료 처리 함수
+window.markInquiryComplete = async function(inquiryId) {
+  if (!confirm('이 문의를 완료 처리하시겠습니까?')) {
+    return;
+  }
+  
+  if (!db) {
+    alert('데이터베이스 연결이 없습니다.');
+    return;
+  }
+  
+  try {
+    const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+    const inquiryRef = doc(db, 'inquiries', inquiryId);
+    await updateDoc(inquiryRef, {
+      status: '완료',
+      repliedAt: serverTimestamp(),
+    });
+    
+    alert('완료 처리되었습니다.');
+    // 모달 닫고 새로고침
+    document.querySelector('.modal-backdrop')?.remove();
+    document.body.style.overflow = '';
+    // 대시보드 새로고침
+    if (typeof renderAdminDashboardContent === 'function') {
+      const adminPageContent = document.getElementById('adminPageContent');
+      if (adminPageContent) {
+        const users = await loadAllUserStakes();
+        await renderAdminDashboardContent(users, adminPageContent);
+      }
+    }
+  } catch (error) {
+    console.error('완료 처리 오류:', error);
+    alert('완료 처리 중 오류가 발생했습니다.');
+  }
+};
+
 // 1:1 문의 폼 설정
 function setupInquiryForm() {
   const inquiryForm = $('#inquiryForm');
@@ -3912,17 +4127,32 @@ async function navigateToPage(page) {
   });
 
   // Show the requested page
-  // FAQ 페이지는 스크롤만 처리 (레이아웃은 CSS에서 처리)
+  // FAQ 페이지 처리
   if (page === 'faq') {
-    // FAQ 섹션으로 스크롤 (레이아웃 조작 없음)
-    setTimeout(() => {
-      const faqSection = document.getElementById('faq-section');
-      if (faqSection) {
-        const offsetTop = faqSection.offsetTop - 80;
-        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
-      }
-    }, 100);
-    return; // FAQ 페이지는 여기서 종료
+    const faqPage = document.getElementById('faq-page');
+    if (faqPage) {
+      faqPage.style.display = 'block';
+      faqPage.classList.add('active');
+      // FAQ 아코디언 이벤트 리스너 설정
+      setTimeout(() => {
+        setupFAQAccordion();
+      }, 100);
+    }
+    return;
+  }
+  
+  // 1:1 문의 페이지 처리
+  if (page === 'inquiry') {
+    const inquiryPage = document.getElementById('inquiry-page');
+    if (inquiryPage) {
+      inquiryPage.style.display = 'block';
+      inquiryPage.classList.add('active');
+      // 문의 폼 설정
+      setTimeout(() => {
+        setupInquiryForm();
+      }, 100);
+    }
+    return;
   }
   
   if (page === 'dashboard' || page === 'pools') {
@@ -5199,6 +5429,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupRewardFilters();
     setupSignupForm();
     setupInquiryForm();
+    setupFAQAccordion();
 
     // 로그인 UI 세팅 (Firebase Auth 모듈 동적 로드)
     setupLogin().catch(err => {
