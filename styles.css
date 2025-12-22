@@ -80,6 +80,8 @@ body {
   padding: 16px 40px;
   max-width: 1400px;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .logo-horizontal {
@@ -310,6 +312,7 @@ body {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .topbar {
@@ -358,12 +361,14 @@ body {
   border: none;
   outline: none;
   padding: 8px 16px;
+  min-height: 44px; /* 모바일 터치 최소 크기 */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   cursor: pointer;
   transition: all 0.16s ease-out;
+  touch-action: manipulation; /* 모바일 터치 최적화 */
 }
 
 .btn-primary {
@@ -1504,15 +1509,257 @@ body {
   margin-bottom: 12px;
 }
 
+/* 모바일 반응형 디자인 (768px 이하) */
 @media (max-width: 768px) {
+  /* 기본 레이아웃 조정 */
+  .app {
+    padding: 0;
+  }
+  
+  .navbar-container {
+    padding: 12px 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .main,
+  .main-content {
+    padding: 20px 16px;
+  }
+  
+  /* 버튼 크기 확대 (터치 최적화) */
+  .btn-primary,
+  .btn-outline {
+    min-height: 44px;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+  
+  .navbar-actions .btn-primary,
+  .navbar-actions .btn-outline {
+    min-height: 44px;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+  
+  /* 그리드 레이아웃 모바일 전환 */
+  .grid-4 {
+    grid-template-columns: 1fr !important; /* 2열 -> 1열 */
+  }
+  
+  .topbar {
+    grid-template-columns: 1fr !important;
+    padding: 16px;
+  }
+  
+  .topbar-actions {
+    width: 100%;
+    align-items: stretch;
+  }
+  
+  .topbar-actions .btn-primary {
+    width: 100%;
+  }
+  
+  /* 포트폴리오 리스트 */
+  .portfolio-list {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+  
+  .portfolio-item {
+    padding: 16px;
+  }
+  
+  /* 풀 카드 */
+  .pool-card {
+    grid-template-columns: 1fr !important;
+    padding: 16px;
+  }
+  
+  .pools-rewards-container {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  
+  /* FAQ 모바일 최적화 */
   .faq-question {
     font-size: 15px;
     padding: 20px 0;
+    min-height: 44px; /* 터치 최적화 */
   }
   
   .faq-answer p,
   .faq-answer ul {
     font-size: 14px;
+  }
+  
+  .faq-container {
+    padding: 0 16px;
+  }
+  
+  /* 카드 패딩 조정 */
+  .card {
+    padding: 20px 16px;
+  }
+  
+  .card-header {
+    margin-bottom: 12px;
+  }
+  
+  /* 폰트 크기 조정 */
+  .page-title {
+    font-size: 20px;
+  }
+  
+  .page-subtitle {
+    font-size: 13px;
+  }
+  
+  .value-large {
+    font-size: 24px;
+  }
+  
+  /* 모달 모바일 최적화 */
+  .modal {
+    width: 95%;
+    max-width: 95%;
+    margin: 20px auto;
+    padding: 20px;
+  }
+  
+  .modal-body {
+    padding: 16px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .input {
+    min-height: 44px;
+    font-size: 16px; /* iOS 줌 방지 */
+    padding: 12px 16px;
+  }
+  
+  textarea.input {
+    min-height: 120px;
+    font-size: 16px; /* iOS 줌 방지 */
+  }
+  
+  /* 테이블 모바일 처리 (가로 스크롤 또는 카드 변환) */
+  .table-wrapper,
+  table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+    width: 100%;
+  }
+  
+  table {
+    min-width: 600px; /* 최소 너비 보장 */
+  }
+  
+  /* 어드민 대시보드 모바일 최적화 */
+  .admin-container {
+    padding: 12px;
+  }
+  
+  .admin-header {
+    padding: 16px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .admin-header h1 {
+    font-size: 20px;
+  }
+  
+  /* 차트 및 통계 카드 모바일 */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+  
+  .stats-grid-sub {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px;
+  }
+  
+  /* 테이블 모바일 최적화 */
+  .table-wrapper-mobile {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+  
+  .table-wrapper-mobile table {
+    font-size: 12px;
+  }
+  
+  .table-wrapper-mobile th,
+  .table-wrapper-mobile td {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+  
+  .table-wrapper-mobile button {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    min-height: 44px !important;
+    white-space: nowrap;
+  }
+  
+  /* 활동 내역 모바일 */
+  .activity-list {
+    max-height: 300px;
+  }
+  
+  .activity-item {
+    padding: 12px;
+    font-size: 12px;
+  }
+  
+  /* 사용자 검색 모바일 */
+  #adminUserSearch {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  
+  #adminSearchBtn {
+    width: 100%;
+  }
+}
+
+/* 작은 모바일 (480px 이하) */
+@media (max-width: 480px) {
+  .navbar-container {
+    padding: 10px 16px;
+  }
+  
+  .main,
+  .main-content {
+    padding: 16px 12px;
+  }
+  
+  .card {
+    padding: 16px 12px;
+  }
+  
+  .page-title {
+    font-size: 18px;
+  }
+  
+  .value-large {
+    font-size: 20px;
+  }
+  
+  .btn-primary,
+  .btn-outline {
+    padding: 14px 24px;
+    font-size: 15px;
   }
 }
 

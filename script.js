@@ -2492,16 +2492,16 @@ async function renderAdminDashboard(users) {
         ${pendingRequests.length > 0 ? `<span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${pendingRequests.length}건 대기</span>` : ''}
       </h3>
       ${pendingRequests.length > 0 ? `
-        <div style="overflow-x: auto;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+        <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;" class="table-wrapper-mobile">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px;">
             <thead>
               <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">이메일</th>
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">코인</th>
-                <th style="padding: 12px; text-align: right; color: #9ca3af; font-weight: 600;">신청 수량</th>
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">네트워크</th>
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">신청일</th>
-                <th style="padding: 12px; text-align: center; color: #9ca3af; font-weight: 600;">작업</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">이메일</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">코인</th>
+                <th style="padding: 12px; text-align: right; color: #9ca3af; font-weight: 600; white-space: nowrap;">신청 수량</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">네트워크</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">신청일</th>
+                <th style="padding: 12px; text-align: center; color: #9ca3af; font-weight: 600; white-space: nowrap;">작업</th>
               </tr>
             </thead>
             <tbody>
@@ -2509,22 +2509,22 @@ async function renderAdminDashboard(users) {
                 const dateStr = req.createdAt?.toDate ? req.createdAt.toDate().toLocaleDateString('ko-KR') : '날짜 없음';
                 return `
                   <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding: 12px;">${req.userEmail || '이메일 없음'}</td>
-                    <td style="padding: 12px; font-weight: 600;">${req.symbol}</td>
-                    <td style="padding: 12px; text-align: right; font-weight: 600;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
-                    <td style="padding: 12px; color: #9ca3af;">${req.network}</td>
-                    <td style="padding: 12px; color: #9ca3af;">${dateStr}</td>
-                    <td style="padding: 12px; text-align: center;">
+                    <td style="padding: 12px; white-space: nowrap;">${req.userEmail || '이메일 없음'}</td>
+                    <td style="padding: 12px; font-weight: 600; white-space: nowrap;">${req.symbol}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600; white-space: nowrap;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
+                    <td style="padding: 12px; color: #9ca3af; white-space: nowrap;">${req.network}</td>
+                    <td style="padding: 12px; color: #9ca3af; white-space: nowrap;">${dateStr}</td>
+                    <td style="padding: 12px; text-align: center; white-space: nowrap;">
                       <button 
                         class="btn-primary" 
-                        style="padding: 6px 12px; font-size: 12px; margin-right: 8px;"
+                        style="padding: 8px 16px; font-size: 13px; margin-right: 8px; min-height: 44px; touch-action: manipulation;"
                         onclick="handleApproveStakingRequest('${req.id}', '${req.userId}', '${req.symbol}', ${req.amount}, '${req.userEmail || ''}')"
                       >
                         승인
                       </button>
                       <button 
                         class="btn-outline" 
-                        style="padding: 6px 12px; font-size: 12px;"
+                        style="padding: 8px 16px; font-size: 13px; min-height: 44px; touch-action: manipulation;"
                         onclick="handleRejectStakingRequest('${req.id}')"
                       >
                         거절
@@ -2546,7 +2546,7 @@ async function renderAdminDashboard(users) {
       <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">🔍 사용자 검색</h3>
     <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
       <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">📊 전체 통계</h3>
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;" class="stats-grid">
         <div>
           <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 회원수</div>
           <div style="font-size: 20px; font-weight: 700; color: #fff;">${users.length}명</div>
@@ -2564,7 +2564,7 @@ async function renderAdminDashboard(users) {
           <div style="font-size: 18px; font-weight: 600; color: #4f46e5;">${totalETH.toFixed(4)}</div>
         </div>
       </div>
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;" class="stats-grid-sub">
         <div>
           <div style="font-size: 11px; color: #9ca3af;">XRP 총합</div>
           <div style="font-size: 16px; font-weight: 600; color: #06b6d4;">${totalXRP.toFixed(2)}</div>
@@ -3105,16 +3105,16 @@ async function renderAdminDashboardContent(users, container) {
         ${pendingRequests.length > 0 ? `<span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${pendingRequests.length}건 대기</span>` : ''}
       </h3>
       ${pendingRequests.length > 0 ? `
-        <div style="overflow-x: auto;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+        <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;" class="table-wrapper-mobile">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px;">
             <thead>
               <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">이메일</th>
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">코인</th>
-                <th style="padding: 12px; text-align: right; color: #9ca3af; font-weight: 600;">신청 수량</th>
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">네트워크</th>
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600;">신청일</th>
-                <th style="padding: 12px; text-align: center; color: #9ca3af; font-weight: 600;">작업</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">이메일</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">코인</th>
+                <th style="padding: 12px; text-align: right; color: #9ca3af; font-weight: 600; white-space: nowrap;">신청 수량</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">네트워크</th>
+                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">신청일</th>
+                <th style="padding: 12px; text-align: center; color: #9ca3af; font-weight: 600; white-space: nowrap;">작업</th>
               </tr>
             </thead>
             <tbody>
@@ -3122,22 +3122,22 @@ async function renderAdminDashboardContent(users, container) {
                 const dateStr = req.createdAt?.toDate ? req.createdAt.toDate().toLocaleDateString('ko-KR') : '날짜 없음';
                 return `
                   <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding: 12px;">${req.userEmail || '이메일 없음'}</td>
-                    <td style="padding: 12px; font-weight: 600;">${req.symbol}</td>
-                    <td style="padding: 12px; text-align: right; font-weight: 600;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
-                    <td style="padding: 12px; color: #9ca3af;">${req.network}</td>
-                    <td style="padding: 12px; color: #9ca3af;">${dateStr}</td>
-                    <td style="padding: 12px; text-align: center;">
+                    <td style="padding: 12px; white-space: nowrap;">${req.userEmail || '이메일 없음'}</td>
+                    <td style="padding: 12px; font-weight: 600; white-space: nowrap;">${req.symbol}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600; white-space: nowrap;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
+                    <td style="padding: 12px; color: #9ca3af; white-space: nowrap;">${req.network}</td>
+                    <td style="padding: 12px; color: #9ca3af; white-space: nowrap;">${dateStr}</td>
+                    <td style="padding: 12px; text-align: center; white-space: nowrap;">
                       <button 
                         class="btn-primary" 
-                        style="padding: 6px 12px; font-size: 12px; margin-right: 8px;"
+                        style="padding: 8px 16px; font-size: 13px; margin-right: 8px; min-height: 44px; touch-action: manipulation;"
                         onclick="handleApproveStakingRequest('${req.id}', '${req.userId}', '${req.symbol}', ${req.amount}, '${req.userEmail || ''}')"
                       >
                         승인
                       </button>
                       <button 
                         class="btn-outline" 
-                        style="padding: 6px 12px; font-size: 12px;"
+                        style="padding: 8px 16px; font-size: 13px; min-height: 44px; touch-action: manipulation;"
                         onclick="handleRejectStakingRequest('${req.id}')"
                       >
                         거절
@@ -3157,26 +3157,26 @@ async function renderAdminDashboardContent(users, container) {
     </div>
     <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
       <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">🔍 사용자 검색</h3>
-      <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+      <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
         <input
           type="text"
           id="adminUserSearch"
           class="input"
           placeholder="아이디(username)로 사용자 검색..."
-          style="flex: 1; padding: 12px; font-size: 14px;"
+          style="flex: 1; min-width: 200px; padding: 12px; font-size: 16px; min-height: 44px;"
           pattern="[A-Za-z0-9_]+"
         />
         <button
           class="btn-primary"
           id="adminSearchBtn"
-          style="padding: 12px 24px; font-size: 14px;"
+          style="padding: 12px 24px; font-size: 14px; min-height: 44px; touch-action: manipulation;"
         >
           검색
         </button>
       </div>
       <div id="adminSearchResult" style="display: none; margin-top: 16px;"></div>
       <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; margin-top: 24px;">📊 전체 통계</h3>
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;">
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;" class="stats-grid">
         <div>
           <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 회원수</div>
           <div style="font-size: 20px; font-weight: 700; color: #fff;">${users.length}명</div>
@@ -3194,7 +3194,7 @@ async function renderAdminDashboardContent(users, container) {
           <div style="font-size: 18px; font-weight: 600; color: #4f46e5;">${totalETH.toFixed(4)}</div>
         </div>
       </div>
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;" class="stats-grid-sub">
         <div>
           <div style="font-size: 11px; color: #9ca3af;">XRP 총합</div>
           <div style="font-size: 16px; font-weight: 600; color: #06b6d4;">${totalXRP.toFixed(2)}</div>
