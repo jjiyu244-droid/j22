@@ -4128,10 +4128,17 @@ async function navigateToPage(page) {
       
       // 회원가입 페이지인 경우 특별 처리 (DOM 이동 + 내부 노출 + 표시)
       if (page === 'signup') {
-        console.log('회원가입 페이지 특별 처리 시작');
+        // 로그 최소화 - 첫 렌더링만 로그 출력
+        const isFirstRender = !pageElement.classList.contains('active');
+        
+        if (isFirstRender) {
+          console.log('회원가입 페이지 특별 처리 시작');
+        }
         
         // ===== 단계 0: 조건부 CSS Injection (Scoped CSS) =====
-        console.log('단계 0 시작: 조건부 CSS Injection');
+        if (isFirstRender) {
+          console.log('단계 0 시작: 조건부 CSS Injection');
+        }
         
         // 기존 스타일 태그가 있으면 제거
         const existingStyle = document.getElementById('signup-page-force-styles');
@@ -4300,14 +4307,20 @@ async function navigateToPage(page) {
           const elDisplay = window.getComputedStyle(el).display;
           if (elDisplay === 'none') {
             el.style.setProperty('display', '', 'important');
-            console.log('내부 요소 노출:', el.tagName, el.className || el.id);
+            if (isFirstRender) {
+              console.log('내부 요소 노출:', el.tagName, el.className || el.id);
+            }
           }
         });
         
-        console.log('단계 2 완료: 내부 콘텐츠 강제 노출 완료');
+        if (isFirstRender) {
+          console.log('단계 2 완료: 내부 콘텐츠 강제 노출 완료');
+        }
         
         // ===== 단계 2-1: 텍스트 색상 및 대비 스타일 강제 적용 =====
-        console.log('단계 2-1 시작: 텍스트 색상 및 대비 스타일 강제 적용');
+        if (isFirstRender) {
+          console.log('단계 2-1 시작: 텍스트 색상 및 대비 스타일 강제 적용');
+        }
         
         // #signup-page 자체의 텍스트 색상 설정
         pageElement.style.setProperty('color', '#333333', 'important');
@@ -4316,8 +4329,49 @@ async function navigateToPage(page) {
         const textElements = pageElement.querySelectorAll('label, h2, h3, p, span, small, .card-title, .card-subtitle, .form-group label');
         textElements.forEach(el => {
           el.style.setProperty('color', '#333333', 'important');
+          el.style.setProperty('visibility', 'visible', 'important');
+          el.style.setProperty('opacity', '1', 'important');
+          el.style.setProperty('display', 'block', 'important');
         });
-        console.log(`✅ ${textElements.length}개의 텍스트 요소에 색상 적용 완료`);
+        
+        // 약관 라벨 텍스트 강제 설정
+        const agreeLabel = pageElement.querySelector('label[for="signupAgree"]');
+        if (agreeLabel) {
+          // 텍스트가 비어있으면 강제로 설정
+          if (!agreeLabel.textContent || agreeLabel.textContent.trim() === '' || agreeLabel.textContent.includes('및 에')) {
+            agreeLabel.innerHTML = '<a href="#" class="terms-link" style="text-decoration: underline !important; color: #007bff !important;">이용약관</a> 및 <a href="#" class="privacy-link" style="text-decoration: underline !important; color: #007bff !important;">개인정보처리방침</a>에 동의합니다.';
+          }
+          agreeLabel.style.setProperty('color', '#333333', 'important');
+          agreeLabel.style.setProperty('visibility', 'visible', 'important');
+          agreeLabel.style.setProperty('opacity', '1', 'important');
+          agreeLabel.style.setProperty('display', 'block', 'important');
+          agreeLabel.style.setProperty('font-size', '14px', 'important');
+          agreeLabel.style.setProperty('line-height', '1.4', 'important');
+        }
+        
+        // 약관 링크 스타일 강제 적용
+        const termsLinks = pageElement.querySelectorAll('.terms-link, .privacy-link');
+        termsLinks.forEach(link => {
+          link.style.setProperty('color', '#007bff', 'important');
+          link.style.setProperty('text-decoration', 'underline', 'important');
+          link.style.setProperty('visibility', 'visible', 'important');
+          link.style.setProperty('opacity', '1', 'important');
+          link.style.setProperty('display', 'inline', 'important');
+        });
+        
+        // 약관 컨테이너 강제 표시
+        const agreeContainer = pageElement.querySelector('.agree-container');
+        if (agreeContainer) {
+          agreeContainer.style.setProperty('display', 'flex', 'important');
+          agreeContainer.style.setProperty('visibility', 'visible', 'important');
+          agreeContainer.style.setProperty('opacity', '1', 'important');
+          agreeContainer.style.setProperty('align-items', 'center', 'important');
+          agreeContainer.style.setProperty('gap', '10px', 'important');
+        }
+        
+        if (isFirstRender) {
+          console.log(`✅ ${textElements.length}개의 텍스트 요소에 색상 적용 완료`);
+        }
         
         // 모든 input 요소에 테두리 및 배경색 강제 설정
         const inputElements = pageElement.querySelectorAll('input[type="text"], input[type="password"], input[type="email"], input[type="number"], input:not([type])');
@@ -4328,7 +4382,9 @@ async function navigateToPage(page) {
           input.style.setProperty('padding', '10px 12px', 'important');
           input.style.setProperty('border-radius', '4px', 'important');
         });
-        console.log(`✅ ${inputElements.length}개의 input 요소에 테두리 및 배경색 적용 완료`);
+        if (isFirstRender) {
+          console.log(`✅ ${inputElements.length}개의 input 요소에 테두리 및 배경색 적용 완료`);
+        }
         
         // 모든 button 요소에 배경색 및 텍스트 색상 강제 설정
         const buttonElements = pageElement.querySelectorAll('button, .btn-primary, [type="submit"]');
@@ -4341,7 +4397,9 @@ async function navigateToPage(page) {
           button.style.setProperty('cursor', 'pointer', 'important');
           button.style.setProperty('font-weight', '600', 'important');
         });
-        console.log(`✅ ${buttonElements.length}개의 button 요소에 배경색 및 텍스트 색상 적용 완료`);
+        if (isFirstRender) {
+          console.log(`✅ ${buttonElements.length}개의 button 요소에 배경색 및 텍스트 색상 적용 완료`);
+        }
         
         // link-btn (로그인 링크 버튼) 스타일
         const linkButtons = pageElement.querySelectorAll('.link-btn, #goToLogin');
@@ -4352,7 +4410,9 @@ async function navigateToPage(page) {
           linkBtn.style.setProperty('text-decoration', 'underline', 'important');
           linkBtn.style.setProperty('cursor', 'pointer', 'important');
         });
-        console.log(`✅ ${linkButtons.length}개의 링크 버튼에 스타일 적용 완료`);
+        if (isFirstRender) {
+          console.log(`✅ ${linkButtons.length}개의 링크 버튼에 스타일 적용 완료`);
+        }
         
         // checkbox 스타일
         const checkboxes = pageElement.querySelectorAll('input[type="checkbox"]');
@@ -4361,7 +4421,9 @@ async function navigateToPage(page) {
           checkbox.style.setProperty('height', '18px', 'important');
           checkbox.style.setProperty('cursor', 'pointer', 'important');
         });
-        console.log(`✅ ${checkboxes.length}개의 checkbox에 스타일 적용 완료`);
+        if (isFirstRender) {
+          console.log(`✅ ${checkboxes.length}개의 checkbox에 스타일 적용 완료`);
+        }
         
         // .card 요소의 배경색도 명시적으로 설정 (투명하지 않도록)
         if (signupCard) {
@@ -4372,10 +4434,14 @@ async function navigateToPage(page) {
           signupCard.style.setProperty('color', '#333333', 'important');
         }
         
-        console.log('단계 2-1 완료: 텍스트 색상 및 대비 스타일 강제 적용 완료');
+        if (isFirstRender) {
+          console.log('단계 2-1 완료: 텍스트 색상 및 대비 스타일 강제 적용 완료');
+        }
         
         // ===== 단계 3: CSS 초기화 및 .active 클래스 추가 =====
-        console.log('단계 3 시작: CSS 초기화 및 .active 클래스 추가');
+        if (isFirstRender) {
+          console.log('단계 3 시작: CSS 초기화 및 .active 클래스 추가');
+        }
         
         // 다른 모든 page-section에서 active 제거
         document.querySelectorAll('.page-section').forEach(section => {
@@ -4539,7 +4605,12 @@ async function navigateToPage(page) {
         
         // ===== Timeout 처리: 모든 페이지 전환 로직이 끝난 후 재확인 =====
         setTimeout(() => {
-          console.log('Timeout 처리 시작: 회원가입 폼 스타일 재확인 및 강제 설정');
+          // 로그 최소화 - 첫 렌더링만 로그 출력
+          const shouldLog = isFirstRender;
+          
+          if (shouldLog) {
+            console.log('Timeout 처리 시작: 회원가입 폼 스타일 재확인 및 강제 설정');
+          }
           
           // #signup-page 자체 재확인
           pageElement.style.setProperty('display', 'block', 'important');
@@ -4577,7 +4648,9 @@ async function navigateToPage(page) {
             header.style.setProperty('top', '0', 'important');
             header.style.setProperty('background-color', window.getComputedStyle(header).backgroundColor || 'rgba(255, 255, 255, 0.95)', 'important');
             header.style.setProperty('backdrop-filter', 'blur(10px)', 'important');
-            console.log('Timeout: 네비게이션 바 재확인 완료 (z-index: 1000)');
+            if (shouldLog) {
+              console.log('Timeout: 네비게이션 바 재확인 완료 (z-index: 1000)');
+            }
           }
           
           // 내부 .card 요소 재확인
@@ -4631,6 +4704,9 @@ async function navigateToPage(page) {
             agreeContainer.style.setProperty('display', 'flex', 'important');
             agreeContainer.style.setProperty('visibility', 'visible', 'important');
             agreeContainer.style.setProperty('opacity', '1', 'important');
+            agreeContainer.style.setProperty('align-items', 'center', 'important');
+            agreeContainer.style.setProperty('gap', '10px', 'important');
+            
             const agreeCheckbox = agreeContainer.querySelector('#signupAgree');
             if (agreeCheckbox) {
               agreeCheckbox.style.setProperty('display', 'block', 'important');
@@ -4639,6 +4715,32 @@ async function navigateToPage(page) {
               agreeCheckbox.style.setProperty('width', '22px', 'important');
               agreeCheckbox.style.setProperty('height', '22px', 'important');
             }
+            
+            // 약관 라벨 텍스트 강제 설정
+            const agreeLabel = agreeContainer.querySelector('label[for="signupAgree"]');
+            if (agreeLabel) {
+              // 텍스트가 비어있거나 잘못된 경우 강제로 설정
+              const labelText = agreeLabel.textContent || agreeLabel.innerText || '';
+              if (!labelText || labelText.trim() === '' || labelText.includes('및 에') || !labelText.includes('이용약관')) {
+                agreeLabel.innerHTML = '<a href="#" class="terms-link" style="text-decoration: underline !important; color: #007bff !important;">이용약관</a> 및 <a href="#" class="privacy-link" style="text-decoration: underline !important; color: #007bff !important;">개인정보처리방침</a>에 동의합니다.';
+              }
+              agreeLabel.style.setProperty('color', '#333333', 'important');
+              agreeLabel.style.setProperty('visibility', 'visible', 'important');
+              agreeLabel.style.setProperty('opacity', '1', 'important');
+              agreeLabel.style.setProperty('display', 'block', 'important');
+              agreeLabel.style.setProperty('font-size', '14px', 'important');
+              agreeLabel.style.setProperty('line-height', '1.4', 'important');
+            }
+            
+            // 약관 링크 스타일 강제 적용
+            const termsLinks = agreeContainer.querySelectorAll('.terms-link, .privacy-link');
+            termsLinks.forEach(link => {
+              link.style.setProperty('color', '#007bff', 'important');
+              link.style.setProperty('text-decoration', 'underline', 'important');
+              link.style.setProperty('visibility', 'visible', 'important');
+              link.style.setProperty('opacity', '1', 'important');
+              link.style.setProperty('display', 'inline', 'important');
+            });
           }
           
           // 모든 button 요소 재확인
@@ -4663,20 +4765,22 @@ async function navigateToPage(page) {
           const finalOpacity = window.getComputedStyle(pageElement).opacity;
           const finalHeight = pageElement.offsetHeight;
           
-          console.log('Timeout 처리 완료:');
-          console.log('  - display:', finalDisplay);
-          console.log('  - visibility:', finalVisibility);
-          console.log('  - opacity:', finalOpacity);
-          console.log('  - offsetHeight:', finalHeight);
-          
-          if (signupCard) {
-            console.log('  - 카드 display:', window.getComputedStyle(signupCard).display);
-            console.log('  - 카드 offsetHeight:', signupCard.offsetHeight);
-          }
-          
-          if (signupForm) {
-            console.log('  - 폼 display:', window.getComputedStyle(signupForm).display);
-            console.log('  - 폼 offsetHeight:', signupForm.offsetHeight);
+          if (shouldLog) {
+            console.log('Timeout 처리 완료:');
+            console.log('  - display:', finalDisplay);
+            console.log('  - visibility:', finalVisibility);
+            console.log('  - opacity:', finalOpacity);
+            console.log('  - offsetHeight:', finalHeight);
+            
+            if (signupCard) {
+              console.log('  - 카드 display:', window.getComputedStyle(signupCard).display);
+              console.log('  - 카드 offsetHeight:', signupCard.offsetHeight);
+            }
+            
+            if (signupForm) {
+              console.log('  - 폼 display:', window.getComputedStyle(signupForm).display);
+              console.log('  - 폼 offsetHeight:', signupForm.offsetHeight);
+            }
           }
         }, 100);
       } else {
