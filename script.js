@@ -1777,25 +1777,23 @@ function setupSignupForm() {
   signupForm.parentNode.replaceChild(newSignupForm, signupForm);
   const freshSignupForm = $('#signupForm');
   
-  // 약관 링크 클릭 이벤트 추가 (모달 열기)
-  const termsLink = document.querySelector('.terms-link');
-  const privacyLink = document.querySelector('.privacy-link');
-  
-  if (termsLink) {
-    termsLink.addEventListener('click', (e) => {
+  // 약관 링크 클릭 이벤트 추가 (모달 열기) - 전역 이벤트 위임 사용
+  // 폼이 복제되어도 작동하도록 document에 이벤트 위임
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('terms-link')) {
       e.preventDefault();
       e.stopPropagation();
-      openTermsModal();
-    });
-  }
-  
-  if (privacyLink) {
-    privacyLink.addEventListener('click', (e) => {
+      if (window.openTermsModal) {
+        window.openTermsModal();
+      }
+    } else if (e.target.classList.contains('privacy-link')) {
       e.preventDefault();
       e.stopPropagation();
-      openPrivacyModal();
-    });
-  }
+      if (window.openPrivacyModal) {
+        window.openPrivacyModal();
+      }
+    }
+  }, true);
   
   if (goToLoginBtn) {
     goToLoginBtn.addEventListener('click', (e) => {
