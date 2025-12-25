@@ -2354,6 +2354,146 @@ window.markInquiryComplete = async function(inquiryId) {
   }
 };
 
+// Contact 모달 관련 함수들
+function setupContactModal() {
+  const contactModal = document.getElementById('contactModal');
+  const closeBtn = document.getElementById('contactModalCloseBtn');
+  const contactForm = document.getElementById('contactForm');
+  
+  if (!contactModal) return;
+  
+  // 모달 닫기 버튼
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      contactModal.classList.remove('show');
+      document.body.style.overflow = '';
+    });
+  }
+  
+  // 모달 배경 클릭 시 닫기
+  contactModal.addEventListener('click', (e) => {
+    if (e.target.id === 'contactModal') {
+      contactModal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+  });
+  
+  // 폼 제출 이벤트
+  if (contactForm) {
+    contactForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await submitContactForm();
+    });
+  }
+}
+
+// Contact 폼 제출 함수
+async function submitContactForm() {
+  const titleInput = document.getElementById('contactTitle');
+  const contentInput = document.getElementById('contactContent');
+  const fileInput = document.getElementById('contactFile');
+  const statusText = document.getElementById('contactStatusText');
+  const contactModal = document.getElementById('contactModal');
+  
+  if (!titleInput || !contentInput) {
+    console.error('Contact form inputs not found');
+    return;
+  }
+  
+  const title = titleInput.value.trim();
+  const content = contentInput.value.trim();
+  const file = fileInput?.files?.[0] || null;
+  
+  // 유효성 검사
+  if (!title || !content) {
+    if (statusText) {
+      statusText.textContent = '제목과 내용을 모두 입력해주세요.';
+      statusText.style.color = '#ef4444';
+    }
+    return;
+  }
+  
+  // 파일 크기 검증 (10MB 제한)
+  if (file && file.size > 10 * 1024 * 1024) {
+    if (statusText) {
+      statusText.textContent = '파일 크기는 10MB 이하여야 합니다.';
+      statusText.style.color = '#ef4444';
+    }
+    return;
+  }
+  
+  // 상태 메시지 표시
+  if (statusText) {
+    statusText.textContent = '문의를 전송하는 중...';
+    statusText.style.color = 'var(--text)';
+  }
+  
+  try {
+    // Firestore에 저장 (기존 saveInquiry와 유사하지만 contact 전용)
+    const { collection, addDoc, serverTimestamp } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    
+    if (!db) {
+      throw new Error('Database not initialized');
+    }
+    
+    const contactsRef = collection(db, 'contacts');
+    const contactData = {
+      title: title,
+      content: content,
+      userId: currentUser ? currentUser.uid : null,
+      userEmail: currentUser ? currentUser.email : null,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+      hasFile: !!file,
+      fileName: file ? file.name : null,
+      fileSize: file ? file.size : null,
+      // 파일 자체는 Firestore에 저장할 수 없으므로, 파일명과 크기만 저장
+      // 실제 파일은 Firebase Storage에 저장해야 함 (선택사항)
+    };
+    
+    await addDoc(contactsRef, contactData);
+    
+    console.log('✅ Contact 저장 완료:', { title });
+    
+    // 성공 메시지
+    if (statusText) {
+      statusText.textContent = '문의가 접수되었습니다. 빠른 시일 내에 답변드리겠습니다.';
+      statusText.style.color = '#10b981';
+    }
+    
+    // 폼 초기화
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+      contactForm.reset();
+    }
+    
+    // 모달 닫기 (3초 후)
+    setTimeout(() => {
+      if (contactModal) {
+        contactModal.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+      if (statusText) {
+        statusText.textContent = '';
+      }
+    }, 3000);
+    
+    return true;
+  } catch (e) {
+    console.error('❌ Contact 저장 중 오류:', e);
+    if (statusText) {
+      statusText.textContent = '문의 전송 중 오류가 발생했습니다. 다시 시도해주세요.';
+      statusText.style.color = '#ef4444';
+    }
+    return false;
+  }
+}
+
+// 전역으로 노출
+window.submitContactForm = submitContactForm;
+
 // 1:1 문의 폼 설정
 function setupInquiryForm() {
   const inquiryForm = $('#inquiryForm');
@@ -4237,8 +4377,28 @@ async function navigateToPage(page) {
     return;
   }
   
-  // 1:1 문의 페이지 처리
+  // 1:1 문의 페이지 처리 - 모달 열기
   if (page === 'inquiry') {
+    console.log('✅ 문의 모달 열기');
+    const contactModal = document.getElementById('contactModal');
+    if (contactModal) {
+      contactModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+      // 폼 초기화
+      const contactForm = document.getElementById('contactForm');
+      if (contactForm) {
+        contactForm.reset();
+      }
+      const statusText = document.getElementById('contactStatusText');
+      if (statusText) {
+        statusText.textContent = '';
+      }
+    }
+    return;
+  }
+  
+  // 기존 inquiry 페이지 처리 (페이지 직접 접근 시를 위해 유지)
+  if (page === 'inquiry-page') {
     console.log('✅ 문의 페이지로 이동 시작');
     
     // 모든 다른 섹션 강제로 숨기기
@@ -5604,6 +5764,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupSignupForm();
     setupInquiryForm();
     setupFAQAccordion();
+    setupContactModal();
 
     // 로그인 UI 세팅 (Firebase Auth 모듈 동적 로드)
     setupLogin().catch(err => {
