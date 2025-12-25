@@ -999,6 +999,16 @@ body {
   outline: none;
 }
 
+/* 어드민 페이지 다크 모드용 입력창 플레이스홀더 */
+#adminUserSearch::placeholder,
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="number"]::placeholder,
+textarea::placeholder {
+  color: #d1d5db !important; /* 밝은 회색으로 변경 (기존 #9ca3af보다 밝음) */
+  opacity: 1;
+}
+
 .input:focus {
   border-color: #6366f1;
   box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.6);
@@ -1134,10 +1144,21 @@ body {
 
 /* 페이지 섹션 */
 .page-section {
+  display: none;
   animation: fadeIn 0.3s ease-in-out;
   display: none;
   visibility: hidden;
   opacity: 0;
+}
+
+#faq-page,
+#inquiry-page {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  min-height: 600px !important;
+  width: 100% !important;
 }
 
 .page-section.active {

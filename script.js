@@ -393,7 +393,7 @@ async function initFirebase() {
           // 로딩 상태 표시
           adminPageContent.innerHTML = `
             <div class="card glass" style="padding: 40px; text-align: center;">
-              <p style="color: #9ca3af; font-size: 16px;">데이터를 불러오는 중...</p>
+              <p style="color: #ffffff; font-size: 16px;">데이터를 불러오는 중...</p>
             </div>
           `;
           
@@ -421,8 +421,8 @@ async function initFirebase() {
               adminPageContent.innerHTML = `
                 <div class="card glass" style="padding: 40px; text-align: center;">
                   <h3 style="color: #ef4444; font-size: 20px; margin-bottom: 16px;">❌ 어드민 권한이 필요합니다</h3>
-                  <p style="color: #9ca3af; font-size: 16px; margin-bottom: 12px;">현재 계정: ${user.email}</p>
-                  <p style="color: #9ca3af; font-size: 14px; margin-bottom: 24px;">허용된 계정: ${adminUsername}</p>
+                  <p style="color: #ffffff; font-size: 16px; margin-bottom: 12px;">현재 계정: ${user.email}</p>
+                  <p style="color: #ffffff; font-size: 14px; margin-bottom: 24px;">허용된 계정: ${adminUsername}</p>
                   <button class="btn-primary" id="showLoginBtnAgain" style="padding: 12px 24px; font-size: 16px; margin-top: 16px;">다시 로그인하기</button>
                 </div>
               `;
@@ -517,7 +517,7 @@ async function initFirebase() {
           adminPageContent.innerHTML = `
             <div class="card glass" style="padding: 40px; text-align: center;">
               <h3 style="color: #ffffff; font-size: 20px; margin-bottom: 16px;">로그인이 필요합니다</h3>
-              <p style="color: #9ca3af; font-size: 16px; margin-bottom: 24px;">어드민 대시보드에 접근하려면 관리자 계정으로 로그인해주세요.</p>
+              <p style="color: #ffffff; font-size: 16px; margin-bottom: 24px;">어드민 대시보드에 접근하려면 관리자 계정으로 로그인해주세요.</p>
               <button class="btn-primary" id="showLoginBtn" style="padding: 12px 24px; font-size: 16px;">로그인하기</button>
             </div>
           `;
@@ -1243,7 +1243,7 @@ async function setupLogin() {
           if (statusText) {
             statusText.innerHTML = `
               <span style="color: #ef4444;">❌ 관리자 계정만 로그인할 수 있습니다.</span><br/>
-              <span style="color: #9ca3af; font-size: 12px;">허용된 계정: ${adminUsername}</span>
+              <span style="color: #ffffff; font-size: 12px;">허용된 계정: ${adminUsername}</span>
             `;
           }
           return;
@@ -1353,7 +1353,7 @@ async function setupLogin() {
             1. Firebase 콘솔(Authentication → Users)에 위 이메일 중 하나가 정확히 존재하는지<br/>
             2. 비밀번호가 정확한지<br/>
             3. 계정이 삭제되지 않았는지<br/><br/>
-            <small style="color: #9ca3af;">💡 팁: Firebase 콘솔에서 사용자 목록을 확인하여 정확한 이메일 주소를 확인하세요.</small>`;
+            <small style="color: #ffffff;">💡 팁: Firebase 콘솔에서 사용자 목록을 확인하여 정확한 이메일 주소를 확인하세요.</small>`;
         } else {
           errorMessage = `이메일 또는 비밀번호가 올바르지 않습니다.<br/><br/>
             입력한 이메일: ${emailsList}<br/><br/>
@@ -2216,23 +2216,23 @@ window.viewInquiryDetail = async function(inquiryId) {
         </div>
         <div class="modal-body" style="padding: 24px;">
           <div style="margin-bottom: 20px;">
-            <strong style="color: #9ca3af; font-size: 12px;">문의일시</strong>
+            <strong style="color: #ffffff; font-size: 12px;">문의일시</strong>
             <p style="margin-top: 4px; color: #ffffff;">${dateStr}</p>
           </div>
           <div style="margin-bottom: 20px;">
-            <strong style="color: #9ca3af; font-size: 12px;">이메일</strong>
+            <strong style="color: #ffffff; font-size: 12px;">이메일</strong>
             <p style="margin-top: 4px; color: #ffffff;">${inquiry.email || inquiry.userEmail || '이메일 없음'}</p>
           </div>
           <div style="margin-bottom: 20px;">
-            <strong style="color: #9ca3af; font-size: 12px;">제목</strong>
+            <strong style="color: #ffffff; font-size: 12px;">제목</strong>
             <p style="margin-top: 4px; color: #ffffff; font-weight: 600;">${inquiry.subject || '제목 없음'}</p>
           </div>
           <div style="margin-bottom: 20px;">
-            <strong style="color: #9ca3af; font-size: 12px;">내용</strong>
+            <strong style="color: #ffffff; font-size: 12px;">내용</strong>
             <p style="margin-top: 4px; color: #ffffff; white-space: pre-wrap; line-height: 1.6;">${inquiry.content || '내용 없음'}</p>
           </div>
           <div style="margin-bottom: 20px;">
-            <strong style="color: #9ca3af; font-size: 12px;">상태</strong>
+            <strong style="color: #ffffff; font-size: 12px;">상태</strong>
             <p style="margin-top: 4px;">
               <span style="background: ${inquiry.status === '완료' ? '#22c55e' : '#f59e0b'}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
                 ${inquiry.status || '대기중'}
@@ -2242,12 +2242,12 @@ window.viewInquiryDetail = async function(inquiryId) {
           ${inquiry.reply ? `
             <div style="margin-bottom: 20px; padding: 16px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; border: 1px solid rgba(34, 197, 94, 0.3);">
               <strong style="color: #22c55e; font-size: 12px;">답변</strong>
-              ${replyDateStr ? `<p style="margin-top: 4px; color: #9ca3af; font-size: 11px;">답변일시: ${replyDateStr}</p>` : ''}
+              ${replyDateStr ? `<p style="margin-top: 4px; color: #ffffff; font-size: 11px;">답변일시: ${replyDateStr}</p>` : ''}
               <p style="margin-top: 8px; color: #ffffff; white-space: pre-wrap; line-height: 1.6;">${inquiry.reply}</p>
             </div>
           ` : `
             <div style="margin-bottom: 20px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-              <strong style="color: #9ca3af; font-size: 12px;">답변</strong>
+              <strong style="color: #ffffff; font-size: 12px;">답변</strong>
               <textarea id="inquiryReplyText" placeholder="답변을 입력하세요..." style="width: 100%; min-height: 120px; padding: 12px; margin-top: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #ffffff; font-family: inherit; resize: vertical;"></textarea>
               <div style="margin-top: 12px; display: flex; gap: 8px;">
                 <button class="btn-primary" onclick="submitInquiryReply('${inquiryId}')" style="padding: 10px 20px; font-size: 14px;">답변 전송</button>
@@ -2515,7 +2515,7 @@ function openStakeModal(poolId) {
         <div style="font-weight:500;font-size:12px;">${currentPool.symbol} / ${
     currentPool.network
   }</div>
-        <div style="font-size:11px;color:#9ca3af;">APY ${currentPool.apr}% · Lock-up ${
+        <div style="font-size:11px;color:#e5e7eb;">APY ${currentPool.apr}% · Lock-up ${
     currentPool.lockup
   }</div>
       </div>
@@ -2847,14 +2847,24 @@ async function loadUserRewardsForAdmin(userId) {
   }
 }
 
+/**
+ * 어드민 대시보드 렌더링 함수
+ * 
+ * 다크 모드 가독성 개선을 위한 텍스트 색상 변경 사항:
+ * - 기존 회색 텍스트 (#9ca3af, #6b7280)를 밝은 색상으로 변경
+ *   - #9ca3af → #ffffff (주요 텍스트) 또는 #e5e7eb (보조 텍스트)
+ *   - #6b7280 → #e5e7eb (보조 텍스트)
+ * - 강조 색상은 유지 (초록색 #10b981, #22c55e, 주황색 #f59e0b 등)
+ * - 입력창 플레이스홀더는 #d1d5db로 설정 (styles.css 참조)
+ */
 async function renderAdminDashboard(users) {
   const container = $('#adminContent');
   if (!container) return;
 
-  container.innerHTML = '<p style="color:#9ca3af; text-align:center; padding: 20px;">데이터를 불러오는 중...</p>';
+  container.innerHTML = '<p style="color:#e5e7eb; text-align:center; padding: 20px;">데이터를 불러오는 중...</p>';
 
   if (users.length === 0) {
-    container.innerHTML = '<p style="color:#9ca3af;">스테이킹 데이터가 없습니다.</p>';
+    container.innerHTML = '<p style="color:#e5e7eb;">스테이킹 데이터가 없습니다.</p>';
     return;
   }
 
@@ -2916,12 +2926,12 @@ async function renderAdminDashboard(users) {
           <table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px;">
             <thead>
               <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">이메일</th>
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">코인</th>
-                <th style="padding: 12px; text-align: right; color: #9ca3af; font-weight: 600; white-space: nowrap;">신청 수량</th>
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">네트워크</th>
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">신청일</th>
-                <th style="padding: 12px; text-align: center; color: #9ca3af; font-weight: 600; white-space: nowrap;">작업</th>
+                <th style="padding: 12px; text-align: left; color: #ffffff; font-weight: 600; white-space: nowrap;">이메일</th>
+                <th style="padding: 12px; text-align: left; color: #ffffff; font-weight: 600; white-space: nowrap;">코인</th>
+                <th style="padding: 12px; text-align: right; color: #ffffff; font-weight: 600; white-space: nowrap;">신청 수량</th>
+                <th style="padding: 12px; text-align: left; color: #ffffff; font-weight: 600; white-space: nowrap;">네트워크</th>
+                <th style="padding: 12px; text-align: left; color: #ffffff; font-weight: 600; white-space: nowrap;">신청일</th>
+                <th style="padding: 12px; text-align: center; color: #ffffff; font-weight: 600; white-space: nowrap;">작업</th>
               </tr>
             </thead>
             <tbody>
@@ -2932,8 +2942,8 @@ async function renderAdminDashboard(users) {
                     <td style="padding: 12px; white-space: nowrap;">${req.userEmail || '이메일 없음'}</td>
                     <td style="padding: 12px; font-weight: 600; white-space: nowrap;">${req.symbol}</td>
                     <td style="padding: 12px; text-align: right; font-weight: 600; white-space: nowrap;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
-                    <td style="padding: 12px; color: #9ca3af; white-space: nowrap;">${req.network}</td>
-                    <td style="padding: 12px; color: #9ca3af; white-space: nowrap;">${dateStr}</td>
+                    <td style="padding: 12px; color: #ffffff; white-space: nowrap;">${req.network}</td>
+                    <td style="padding: 12px; color: #ffffff; white-space: nowrap;">${dateStr}</td>
                     <td style="padding: 12px; text-align: center; white-space: nowrap;">
                       <button 
                         class="btn-primary" 
@@ -2957,7 +2967,7 @@ async function renderAdminDashboard(users) {
           </table>
         </div>
       ` : `
-        <div style="padding: 20px; text-align: center; color: #9ca3af;">
+        <div style="padding: 20px; text-align: center; color: #ffffff;">
           대기 중인 스테이킹 신청이 없습니다.
         </div>
       `}
@@ -2968,33 +2978,33 @@ async function renderAdminDashboard(users) {
       <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">📊 전체 통계</h3>
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;" class="stats-grid">
         <div>
-          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 회원수</div>
+          <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">총 회원수</div>
           <div style="font-size: 20px; font-weight: 700; color: #fff;">${users.length}명</div>
         </div>
         <div>
-          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 스테이킹 금액</div>
+          <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">총 스테이킹 금액</div>
           <div style="font-size: 20px; font-weight: 700; color: #10b981;">${formatUSD(totalUSD)}</div>
         </div>
         <div>
-          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">BTC 총합</div>
+          <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">BTC 총합</div>
           <div style="font-size: 18px; font-weight: 600; color: #f97316;">${totalBTC.toFixed(4)}</div>
         </div>
         <div>
-          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">ETH 총합</div>
+          <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">ETH 총합</div>
           <div style="font-size: 18px; font-weight: 600; color: #4f46e5;">${totalETH.toFixed(4)}</div>
         </div>
       </div>
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;" class="stats-grid-sub">
         <div>
-          <div style="font-size: 11px; color: #9ca3af;">XRP 총합</div>
+          <div style="font-size: 11px; color: #ffffff;">XRP 총합</div>
           <div style="font-size: 16px; font-weight: 600; color: #06b6d4;">${totalXRP.toFixed(2)}</div>
         </div>
         <div>
-          <div style="font-size: 11px; color: #9ca3af;">BTC USD</div>
+          <div style="font-size: 11px; color: #ffffff;">BTC USD</div>
           <div style="font-size: 16px; font-weight: 600;">${formatUSD(totalBTC * prices.BTC)}</div>
         </div>
         <div>
-          <div style="font-size: 11px; color: #9ca3af;">ETH USD</div>
+          <div style="font-size: 11px; color: #ffffff;">ETH USD</div>
           <div style="font-size: 16px; font-weight: 600;">${formatUSD(totalETH * prices.ETH)}</div>
         </div>
       </div>
@@ -3010,34 +3020,34 @@ async function renderAdminDashboard(users) {
           <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
             <thead>
               <tr style="background: rgba(255,255,255,0.05);">
-                <th style="padding: 10px; text-align: left; color: #9ca3af; font-weight: 600;">날짜</th>
-                <th style="padding: 10px; text-align: left; color: #9ca3af; font-weight: 600;">이메일</th>
-                <th style="padding: 10px; text-align: left; color: #9ca3af; font-weight: 600;">제목</th>
-                <th style="padding: 10px; text-align: center; color: #9ca3af; font-weight: 600;">상태</th>
-                <th style="padding: 10px; text-align: left; color: #9ca3af; font-weight: 600;">내용</th>
+                <th style="padding: 10px; text-align: left; color: #ffffff; font-weight: 600;">날짜</th>
+                <th style="padding: 10px; text-align: left; color: #ffffff; font-weight: 600;">이메일</th>
+                <th style="padding: 10px; text-align: left; color: #ffffff; font-weight: 600;">제목</th>
+                <th style="padding: 10px; text-align: center; color: #ffffff; font-weight: 600;">상태</th>
+                <th style="padding: 10px; text-align: left; color: #ffffff; font-weight: 600;">내용</th>
               </tr>
             </thead>
             <tbody>
-      ` : '<p style="color: #6b7280; text-align: center; padding: 20px;">문의 내역이 없습니다.</p>'}
+      ` : '<p style="color: #e5e7eb; text-align: center; padding: 20px;">문의 내역이 없습니다.</p>'}
       ${inquiries.length > 0 ? inquiries.slice(0, 10).map(inq => {
         const createdDate = inq.createdAt?.toDate ? inq.createdAt.toDate() : new Date();
         const dateStr = createdDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-        const statusColor = inq.status === '대기중' ? '#ef4444' : inq.status === '답변완료' ? '#10b981' : '#9ca3af';
+        const statusColor = inq.status === '대기중' ? '#ef4444' : inq.status === '답변완료' ? '#10b981' : '#e5e7eb';
         const contentPreview = (inq.content || '').substring(0, 50) + ((inq.content || '').length > 50 ? '...' : '');
         const escapedContent = (inq.content || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         
         return `
               <tr style="border-top: 1px solid rgba(255,255,255,0.05);">
-                <td style="padding: 10px;">${dateStr}</td>
-                <td style="padding: 10px;">${inq.email || inq.userEmail || '-'}</td>
-                <td style="padding: 10px; font-weight: 500;">${inq.subject || '-'}</td>
+                <td style="padding: 10px; color: #ffffff;">${dateStr}</td>
+                <td style="padding: 10px; color: #ffffff;">${inq.email || inq.userEmail || '-'}</td>
+                <td style="padding: 10px; font-weight: 500; color: #ffffff;">${inq.subject || '-'}</td>
                 <td style="padding: 10px; text-align: center;">
                   <span style="background: ${statusColor}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600;">
                     ${inq.status || '대기중'}
                   </span>
                 </td>
                 <td style="padding: 10px;">
-                  <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapedContent}">
+                  <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #e5e7eb;" title="${escapedContent}">
                     ${contentPreview}
                   </div>
                   ${inq.reply ? `<div style="margin-top: 4px; padding: 6px; background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; font-size: 10px; color: #10b981;">
@@ -3089,18 +3099,18 @@ async function renderAdminDashboard(users) {
             <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">
               회원 #${idx + 1} · ${u.email || '이메일 없음'}
             </div>
-            <div style="font-size: 11px; color: #9ca3af;">
+            <div style="font-size: 11px; color: #ffffff;">
               UID: ${u.uid.substring(0, 16)}...
             </div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 리워드</div>
+            <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">총 리워드</div>
             <div style="font-size: 16px; font-weight: 600; color: #10b981;">${formatUSD(userTotalRewardUSD)}</div>
           </div>
         </div>
 
         <div style="margin-bottom: 16px;">
-          <div style="font-size: 12px; font-weight: 600; color: #9ca3af; margin-bottom: 8px;">💰 투자 내역</div>
+          <div style="font-size: 12px; font-weight: 600; color: #ffffff; margin-bottom: 8px;">💰 투자 내역</div>
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
     `;
 
@@ -3119,20 +3129,20 @@ async function renderAdminDashboard(users) {
         
         html += `
           <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
-            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 6px; font-weight: 600;">${symbol}</div>
+            <div style="font-size: 11px; color: #ffffff; margin-bottom: 6px; font-weight: 600;">${symbol}</div>
             <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">
               수량: <strong>${amount.toFixed(symbol === 'XRP' ? 2 : 4)}</strong>
             </div>
-            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">
+            <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">
               USD: ${formatUSD(usdValue)}
             </div>
-            <div style="font-size: 10px; color: #6b7280; margin-bottom: 4px;">
+            <div style="font-size: 10px; color: #e5e7eb; margin-bottom: 4px;">
               시작일: ${startDateStr}
             </div>
-            <div style="font-size: 10px; color: #6b7280; margin-bottom: 8px;">
+            <div style="font-size: 10px; color: #e5e7eb; margin-bottom: 8px;">
               기간: ${period}
             </div>
-            <div style="font-size: 10px; color: #9ca3af; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
+            <div style="font-size: 10px; color: #ffffff; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
               APY: ${poolApy[symbol]}%<br/>
               예상 월: ${monthlyReward.toFixed(symbol === 'XRP' ? 2 : 6)}
             </div>
@@ -3153,7 +3163,7 @@ async function renderAdminDashboard(users) {
         </div>
 
         <div>
-          <div style="font-size: 12px; font-weight: 600; color: #9ca3af; margin-bottom: 8px;">🎁 이자 내역 (${userRewards.length}건)</div>
+          <div style="font-size: 12px; font-weight: 600; color: #ffffff; margin-bottom: 8px;">🎁 이자 내역 (${userRewards.length}건)</div>
     `;
 
     if (userRewards.length > 0) {
@@ -3162,11 +3172,11 @@ async function renderAdminDashboard(users) {
             <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
               <thead>
                 <tr style="background: rgba(255,255,255,0.05);">
-                  <th style="padding: 8px; text-align: left; color: #9ca3af; font-weight: 600;">날짜</th>
-                  <th style="padding: 8px; text-align: left; color: #9ca3af; font-weight: 600;">코인</th>
-                  <th style="padding: 8px; text-align: right; color: #9ca3af; font-weight: 600;">수량</th>
-                  <th style="padding: 8px; text-align: right; color: #9ca3af; font-weight: 600;">USD</th>
-                  <th style="padding: 8px; text-align: center; color: #9ca3af; font-weight: 600;">APY</th>
+                  <th style="padding: 8px; text-align: left; color: #ffffff; font-weight: 600;">날짜</th>
+                  <th style="padding: 8px; text-align: left; color: #ffffff; font-weight: 600;">코인</th>
+                  <th style="padding: 8px; text-align: right; color: #ffffff; font-weight: 600;">수량</th>
+                  <th style="padding: 8px; text-align: right; color: #ffffff; font-weight: 600;">USD</th>
+                  <th style="padding: 8px; text-align: center; color: #ffffff; font-weight: 600;">APY</th>
                 </tr>
               </thead>
               <tbody>
@@ -3191,7 +3201,7 @@ async function renderAdminDashboard(users) {
       if (userRewards.length > 5) {
         html += `
                 <tr>
-                  <td colspan="5" style="padding: 8px; text-align: center; color: #9ca3af; font-size: 10px;">
+                  <td colspan="5" style="padding: 8px; text-align: center; color: #ffffff; font-size: 10px;">
                     외 ${userRewards.length - 5}건 더 있음
                   </td>
                 </tr>
@@ -3205,7 +3215,7 @@ async function renderAdminDashboard(users) {
       `;
     } else {
       html += `
-          <div style="padding: 12px; text-align: center; color: #6b7280; font-size: 11px; background: rgba(255,255,255,0.02); border-radius: 6px;">
+          <div style="padding: 12px; text-align: center; color: #e5e7eb; font-size: 11px; background: rgba(255,255,255,0.02); border-radius: 6px;">
             리워드 내역이 없습니다.
           </div>
       `;
@@ -3455,10 +3465,10 @@ async function renderAdminDashboardContent(users, container) {
       <div style="padding: 80px 40px; text-align: center; background: rgba(255,255,255,0.05); border-radius: 16px; border: 2px solid rgba(255,255,255,0.1); margin: 40px 0;">
         <div style="font-size: 64px; margin-bottom: 24px; line-height: 1;">📊</div>
         <h3 style="font-size: 28px; font-weight: 700; color: #ffffff; margin-bottom: 16px; line-height: 1.4;">등록된 회원이 없습니다</h3>
-        <p style="font-size: 18px; color: #9ca3af; margin-bottom: 12px; line-height: 1.6;">
+        <p style="font-size: 18px; color: #ffffff; margin-bottom: 12px; line-height: 1.6;">
           현재 등록된 스테이킹 데이터가 없습니다.
         </p>
-        <p style="font-size: 16px; color: #6b7280; margin-top: 24px; line-height: 1.6;">
+        <p style="font-size: 16px; color: #e5e7eb; margin-top: 24px; line-height: 1.6;">
           회원들이 스테이킹을 시작하면 여기에 데이터가 표시됩니다.
         </p>
         <div style="margin-top: 32px; padding: 16px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.2);">
@@ -3529,12 +3539,12 @@ async function renderAdminDashboardContent(users, container) {
           <table style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px;">
             <thead>
               <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">이메일</th>
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">코인</th>
-                <th style="padding: 12px; text-align: right; color: #9ca3af; font-weight: 600; white-space: nowrap;">신청 수량</th>
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">네트워크</th>
-                <th style="padding: 12px; text-align: left; color: #9ca3af; font-weight: 600; white-space: nowrap;">신청일</th>
-                <th style="padding: 12px; text-align: center; color: #9ca3af; font-weight: 600; white-space: nowrap;">작업</th>
+                <th style="padding: 12px; text-align: left; color: #ffffff; font-weight: 600; white-space: nowrap;">이메일</th>
+                <th style="padding: 12px; text-align: left; color: #ffffff; font-weight: 600; white-space: nowrap;">코인</th>
+                <th style="padding: 12px; text-align: right; color: #ffffff; font-weight: 600; white-space: nowrap;">신청 수량</th>
+                <th style="padding: 12px; text-align: left; color: #ffffff; font-weight: 600; white-space: nowrap;">네트워크</th>
+                <th style="padding: 12px; text-align: left; color: #ffffff; font-weight: 600; white-space: nowrap;">신청일</th>
+                <th style="padding: 12px; text-align: center; color: #ffffff; font-weight: 600; white-space: nowrap;">작업</th>
               </tr>
             </thead>
             <tbody>
@@ -3545,8 +3555,8 @@ async function renderAdminDashboardContent(users, container) {
                     <td style="padding: 12px; white-space: nowrap;">${req.userEmail || '이메일 없음'}</td>
                     <td style="padding: 12px; font-weight: 600; white-space: nowrap;">${req.symbol}</td>
                     <td style="padding: 12px; text-align: right; font-weight: 600; white-space: nowrap;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
-                    <td style="padding: 12px; color: #9ca3af; white-space: nowrap;">${req.network}</td>
-                    <td style="padding: 12px; color: #9ca3af; white-space: nowrap;">${dateStr}</td>
+                    <td style="padding: 12px; color: #ffffff; white-space: nowrap;">${req.network}</td>
+                    <td style="padding: 12px; color: #ffffff; white-space: nowrap;">${dateStr}</td>
                     <td style="padding: 12px; text-align: center; white-space: nowrap;">
                       <button 
                         class="btn-primary" 
@@ -3570,7 +3580,7 @@ async function renderAdminDashboardContent(users, container) {
           </table>
         </div>
       ` : `
-        <div style="padding: 20px; text-align: center; color: #9ca3af;">
+        <div style="padding: 20px; text-align: center; color: #ffffff;">
           대기 중인 스테이킹 신청이 없습니다.
         </div>
       `}
@@ -3583,7 +3593,7 @@ async function renderAdminDashboardContent(users, container) {
           id="adminUserSearch"
           class="input"
           placeholder="아이디(username)로 사용자 검색..."
-          style="flex: 1; min-width: 200px; padding: 12px; font-size: 16px; min-height: 44px;"
+          style="flex: 1; min-width: 200px; padding: 12px; font-size: 16px; min-height: 44px; color: #ffffff;"
           pattern="[A-Za-z0-9_]+"
         />
         <button
@@ -3598,33 +3608,33 @@ async function renderAdminDashboardContent(users, container) {
       <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; margin-top: 24px;">📊 전체 통계</h3>
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;" class="stats-grid">
         <div>
-          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 회원수</div>
+          <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">총 회원수</div>
           <div style="font-size: 20px; font-weight: 700; color: #fff;">${users.length}명</div>
         </div>
         <div>
-          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 스테이킹 금액</div>
+          <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">총 스테이킹 금액</div>
           <div style="font-size: 20px; font-weight: 700; color: #10b981;">${formatUSD(totalUSD)}</div>
         </div>
         <div>
-          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">BTC 총합</div>
+          <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">BTC 총합</div>
           <div style="font-size: 18px; font-weight: 600; color: #f97316;">${totalBTC.toFixed(4)}</div>
         </div>
         <div>
-          <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">ETH 총합</div>
+          <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">ETH 총합</div>
           <div style="font-size: 18px; font-weight: 600; color: #4f46e5;">${totalETH.toFixed(4)}</div>
         </div>
       </div>
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;" class="stats-grid-sub">
         <div>
-          <div style="font-size: 11px; color: #9ca3af;">XRP 총합</div>
+          <div style="font-size: 11px; color: #ffffff;">XRP 총합</div>
           <div style="font-size: 16px; font-weight: 600; color: #06b6d4;">${totalXRP.toFixed(2)}</div>
         </div>
         <div>
-          <div style="font-size: 11px; color: #9ca3af;">BTC USD</div>
+          <div style="font-size: 11px; color: #ffffff;">BTC USD</div>
           <div style="font-size: 16px; font-weight: 600;">${formatUSD(totalBTC * prices.BTC)}</div>
         </div>
         <div>
-          <div style="font-size: 11px; color: #9ca3af;">ETH USD</div>
+          <div style="font-size: 11px; color: #ffffff;">ETH USD</div>
           <div style="font-size: 16px; font-weight: 600;">${formatUSD(totalETH * prices.ETH)}</div>
         </div>
       </div>
@@ -3664,18 +3674,18 @@ async function renderAdminDashboardContent(users, container) {
             <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">
               회원 #${idx + 1} · ${u.email || '이메일 없음'}
             </div>
-            <div style="font-size: 11px; color: #9ca3af;">
+            <div style="font-size: 11px; color: #ffffff;">
               UID: ${u.uid.substring(0, 16)}...
             </div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">총 리워드</div>
+            <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">총 리워드</div>
             <div style="font-size: 16px; font-weight: 600; color: #10b981;">${formatUSD(userTotalRewardUSD)}</div>
           </div>
         </div>
 
         <div style="margin-bottom: 16px;">
-          <div style="font-size: 12px; font-weight: 600; color: #9ca3af; margin-bottom: 8px;">💰 투자 내역</div>
+          <div style="font-size: 12px; font-weight: 600; color: #ffffff; margin-bottom: 8px;">💰 투자 내역</div>
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
     `;
 
@@ -3694,20 +3704,20 @@ async function renderAdminDashboardContent(users, container) {
         
         html += `
           <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
-            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 6px; font-weight: 600;">${symbol}</div>
+            <div style="font-size: 11px; color: #ffffff; margin-bottom: 6px; font-weight: 600;">${symbol}</div>
             <div style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">
               수량: <strong>${amount.toFixed(symbol === 'XRP' ? 2 : 4)}</strong>
             </div>
-            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">
+            <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">
               USD: ${formatUSD(usdValue)}
             </div>
-            <div style="font-size: 10px; color: #6b7280; margin-bottom: 4px;">
+            <div style="font-size: 10px; color: #e5e7eb; margin-bottom: 4px;">
               시작일: ${startDateStr}
             </div>
-            <div style="font-size: 10px; color: #6b7280; margin-bottom: 8px;">
+            <div style="font-size: 10px; color: #e5e7eb; margin-bottom: 8px;">
               기간: ${period}
             </div>
-            <div style="font-size: 10px; color: #9ca3af; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
+            <div style="font-size: 10px; color: #ffffff; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
               APY: ${poolApy[symbol]}%<br/>
               예상 월: ${monthlyReward.toFixed(symbol === 'XRP' ? 2 : 6)}
             </div>
@@ -3728,7 +3738,7 @@ async function renderAdminDashboardContent(users, container) {
         </div>
 
         <div>
-          <div style="font-size: 12px; font-weight: 600; color: #9ca3af; margin-bottom: 8px;">🎁 이자 내역 (${userRewards.length}건)</div>
+          <div style="font-size: 12px; font-weight: 600; color: #ffffff; margin-bottom: 8px;">🎁 이자 내역 (${userRewards.length}건)</div>
     `;
 
     if (userRewards.length > 0) {
@@ -3737,12 +3747,12 @@ async function renderAdminDashboardContent(users, container) {
             <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
               <thead>
                 <tr style="background: rgba(255,255,255,0.05);">
-                  <th style="padding: 8px; text-align: left; color: #9ca3af; font-weight: 600;">날짜</th>
-                  <th style="padding: 8px; text-align: left; color: #9ca3af; font-weight: 600;">코인</th>
-                  <th style="padding: 8px; text-align: right; color: #9ca3af; font-weight: 600;">수량</th>
-                  <th style="padding: 8px; text-align: right; color: #9ca3af; font-weight: 600;">USD</th>
-                  <th style="padding: 8px; text-align: center; color: #9ca3af; font-weight: 600;">APY</th>
-                  <th style="padding: 8px; text-align: center; color: #9ca3af; font-weight: 600;">관리</th>
+                  <th style="padding: 8px; text-align: left; color: #ffffff; font-weight: 600;">날짜</th>
+                  <th style="padding: 8px; text-align: left; color: #ffffff; font-weight: 600;">코인</th>
+                  <th style="padding: 8px; text-align: right; color: #ffffff; font-weight: 600;">수량</th>
+                  <th style="padding: 8px; text-align: right; color: #ffffff; font-weight: 600;">USD</th>
+                  <th style="padding: 8px; text-align: center; color: #ffffff; font-weight: 600;">APY</th>
+                  <th style="padding: 8px; text-align: center; color: #ffffff; font-weight: 600;">관리</th>
                 </tr>
               </thead>
               <tbody>
@@ -3777,7 +3787,7 @@ async function renderAdminDashboardContent(users, container) {
       if (userRewards.length > 5) {
         html += `
                 <tr>
-                  <td colspan="6" style="padding: 8px; text-align: center; color: #9ca3af; font-size: 10px;">
+                  <td colspan="6" style="padding: 8px; text-align: center; color: #e5e7eb; font-size: 10px;">
                     외 ${userRewards.length - 5}건 더 있음
                   </td>
                 </tr>
@@ -3791,7 +3801,7 @@ async function renderAdminDashboardContent(users, container) {
       `;
     } else {
       html += `
-          <div style="padding: 12px; text-align: center; color: #6b7280; font-size: 11px; background: rgba(255,255,255,0.02); border-radius: 6px;">
+          <div style="padding: 12px; text-align: center; color: #e5e7eb; font-size: 11px; background: rgba(255,255,255,0.02); border-radius: 6px;">
             리워드 내역이 없습니다.
           </div>
       `;
@@ -3904,7 +3914,7 @@ async function setupAdminUserSearch(users, prices) {
         </h4>
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px;">
           <div>
-            <label style="display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; font-weight: 600;">BTC 수량</label>
+            <label style="display: block; font-size: 12px; color: #ffffff; margin-bottom: 8px; font-weight: 600;">BTC 수량</label>
             <input
               type="number"
               id="editUserBTC"
@@ -3916,7 +3926,7 @@ async function setupAdminUserSearch(users, prices) {
             />
           </div>
           <div>
-            <label style="display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; font-weight: 600;">ETH 수량</label>
+            <label style="display: block; font-size: 12px; color: #ffffff; margin-bottom: 8px; font-weight: 600;">ETH 수량</label>
             <input
               type="number"
               id="editUserETH"
@@ -3928,7 +3938,7 @@ async function setupAdminUserSearch(users, prices) {
             />
           </div>
           <div>
-            <label style="display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; font-weight: 600;">XRP 수량</label>
+            <label style="display: block; font-size: 12px; color: #ffffff; margin-bottom: 8px; font-weight: 600;">XRP 수량</label>
             <input
               type="number"
               id="editUserXRP"
@@ -3957,7 +3967,7 @@ async function setupAdminUserSearch(users, prices) {
             취소
           </button>
         </div>
-        <p id="userEditStatusText" style="text-align: center; margin-top: 12px; color: #9ca3af; font-size: 14px;"></p>
+        <p id="userEditStatusText" style="text-align: center; margin-top: 12px; color: #ffffff; font-size: 14px;"></p>
       </div>
     `;
     searchResult.style.display = 'block';
@@ -3976,7 +3986,7 @@ async function setupAdminUserSearch(users, prices) {
         
         if (statusText) {
           statusText.textContent = '저장 중...';
-          statusText.style.color = '#9ca3af';
+          statusText.style.color = '#e5e7eb';
         }
         
         const success = await updateUserStakes(userId, {
@@ -4174,19 +4184,52 @@ async function navigateToPage(page) {
       faqPage.style.setProperty('opacity', '1', 'important');
       faqPage.style.setProperty('position', 'relative', 'important');
       faqPage.style.setProperty('z-index', '10', 'important');
+      faqPage.style.setProperty('height', 'auto', 'important');
+      faqPage.style.setProperty('min-height', '600px', 'important');
+      faqPage.style.setProperty('width', '100%', 'important');
       faqPage.classList.add('active');
+      
+      // 내부 요소들도 강제로 표시
+      const faqWrapper = faqPage.querySelector('.faq-wrapper');
+      const faqContainer = faqPage.querySelector('.faq-container');
+      const faqItems = faqPage.querySelectorAll('.faq-item');
+      
+      if (faqWrapper) {
+        faqWrapper.style.setProperty('display', 'block', 'important');
+        faqWrapper.style.setProperty('visibility', 'visible', 'important');
+        faqWrapper.style.setProperty('opacity', '1', 'important');
+      }
+      
+      if (faqContainer) {
+        faqContainer.style.setProperty('display', 'block', 'important');
+        faqContainer.style.setProperty('visibility', 'visible', 'important');
+        faqContainer.style.setProperty('opacity', '1', 'important');
+      }
+      
+      faqItems.forEach(item => {
+        item.style.setProperty('display', 'block', 'important');
+        item.style.setProperty('visibility', 'visible', 'important');
+        item.style.setProperty('opacity', '1', 'important');
+      });
+      
+      // Force reflow
+      void faqPage.offsetWidth;
+      void faqPage.offsetHeight;
       
       console.log('✅ FAQ 페이지 표시 완료:', {
         display: window.getComputedStyle(faqPage).display,
         visibility: window.getComputedStyle(faqPage).visibility,
         opacity: window.getComputedStyle(faqPage).opacity,
-        offsetHeight: faqPage.offsetHeight
+        offsetHeight: faqPage.offsetHeight,
+        innerHTML: faqPage.innerHTML.substring(0, 100)
       });
       
       // 페이지 상단으로 스크롤 및 아코디언 설정
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setupFAQAccordion();
+        // 다시 한번 높이 확인
+        console.log('✅ FAQ 페이지 최종 높이:', faqPage.offsetHeight);
       }, 100);
     } else {
       console.error('❌ FAQ 페이지를 찾을 수 없습니다.');
@@ -4223,19 +4266,52 @@ async function navigateToPage(page) {
       inquiryPage.style.setProperty('opacity', '1', 'important');
       inquiryPage.style.setProperty('position', 'relative', 'important');
       inquiryPage.style.setProperty('z-index', '10', 'important');
+      inquiryPage.style.setProperty('height', 'auto', 'important');
+      inquiryPage.style.setProperty('min-height', '600px', 'important');
+      inquiryPage.style.setProperty('width', '100%', 'important');
       inquiryPage.classList.add('active');
+      
+      // 내부 요소들도 강제로 표시
+      const inquiryCard = inquiryPage.querySelector('.card');
+      const inquiryForm = inquiryPage.querySelector('#inquiryForm');
+      const inquiryInputs = inquiryPage.querySelectorAll('input, textarea, button');
+      
+      if (inquiryCard) {
+        inquiryCard.style.setProperty('display', 'block', 'important');
+        inquiryCard.style.setProperty('visibility', 'visible', 'important');
+        inquiryCard.style.setProperty('opacity', '1', 'important');
+      }
+      
+      if (inquiryForm) {
+        inquiryForm.style.setProperty('display', 'block', 'important');
+        inquiryForm.style.setProperty('visibility', 'visible', 'important');
+        inquiryForm.style.setProperty('opacity', '1', 'important');
+      }
+      
+      inquiryInputs.forEach(input => {
+        input.style.setProperty('display', 'block', 'important');
+        input.style.setProperty('visibility', 'visible', 'important');
+        input.style.setProperty('opacity', '1', 'important');
+      });
+      
+      // Force reflow
+      void inquiryPage.offsetWidth;
+      void inquiryPage.offsetHeight;
       
       console.log('✅ 문의 페이지 표시 완료:', {
         display: window.getComputedStyle(inquiryPage).display,
         visibility: window.getComputedStyle(inquiryPage).visibility,
         opacity: window.getComputedStyle(inquiryPage).opacity,
-        offsetHeight: inquiryPage.offsetHeight
+        offsetHeight: inquiryPage.offsetHeight,
+        innerHTML: inquiryPage.innerHTML.substring(0, 100)
       });
       
       // 페이지 상단으로 스크롤 및 폼 설정
       setTimeout(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setupInquiryForm();
+        // 다시 한번 높이 확인
+        console.log('✅ 문의 페이지 최종 높이:', inquiryPage.offsetHeight);
       }, 100);
     } else {
       console.error('❌ 문의 페이지를 찾을 수 없습니다.');
