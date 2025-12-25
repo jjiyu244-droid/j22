@@ -788,7 +788,7 @@ async function deleteReward(rewardId) {
   }
 }
 
-// 1:1 문의 저장
+// 스테이킹 문의 저장
 async function saveInquiry(email, subject, content) {
   try {
     const { collection, addDoc, serverTimestamp } = await import(
@@ -2583,7 +2583,7 @@ async function submitContactForm() {
 // 전역으로 노출
 window.submitContactForm = submitContactForm;
 
-// 1:1 문의 폼 설정
+// 스테이킹 문의 폼 설정
 function setupInquiryForm() {
   const inquiryForm = $('#inquiryForm');
   const statusText = $('#inquiryStatusText');
@@ -3241,7 +3241,7 @@ async function renderAdminDashboard(users) {
     
     <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h3 style="font-size: 16px; font-weight: 600; margin: 0;">📬 1:1 문의 내역 (${inquiries.length}건)</h3>
+        <h3 style="font-size: 16px; font-weight: 600; margin: 0;">📬 스테이킹 문의 내역 (${inquiries.length}건)</h3>
         ${pendingInquiries.length > 0 ? `<span style="background: #ef4444; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">대기중 ${pendingInquiries.length}건</span>` : ''}
       </div>
       ${inquiries.length > 0 ? `
@@ -4756,7 +4756,7 @@ async function navigateToPage(page) {
     return;
   }
   
-  // 1:1 문의 페이지 처리 - 모달 열기
+  // 스테이킹 문의 페이지 처리 - 모달 열기
   if (page === 'inquiry') {
     console.log('✅ 문의 모달 열기');
     const contactModal = document.getElementById('contactModal');
