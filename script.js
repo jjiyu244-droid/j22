@@ -2705,7 +2705,7 @@ function setupSimulator() {
   });
 }
 
-// 스테이킹 신청 저장 (유저가 신청만 가능)
+// 스테이킹 신청 저장 (유저가 신청만 가능) - requestStaking과 동일한 의미
 async function createStakingRequest(poolId, amount) {
   if (!currentUser || !currentUser.uid) {
     throw new Error('로그인이 필요합니다.');
@@ -2816,7 +2816,7 @@ function setupStakeModal() {
       
       await createStakingRequest(currentPool.id, amount);
       
-      helper.textContent = `✅ 스테이킹 신청이 완료되었습니다. 관리자 승인 후 반영됩니다.`;
+      helper.textContent = `✅ 스테이킹 신청이 정상적으로 접수되었습니다. 관리자 확인 후 승인될 예정입니다.`;
       helper.style.color = '#10b981';
 
     // prepend virtual activity
@@ -2835,13 +2835,13 @@ function setupStakeModal() {
       $('#stakeConfirmBtn').textContent = '신청 완료';
     setTimeout(() => {
       closeStakeModal();
-        $('#stakeConfirmBtn').textContent = '스테이킹 신청';
+        $('#stakeConfirmBtn').textContent = '신청 완료';
         $('#stakeConfirmBtn').disabled = false;
       }, 1500);
     } catch (error) {
       helper.textContent = `❌ 신청 실패: ${error.message}`;
       helper.classList.add('text-danger');
-      $('#stakeConfirmBtn').textContent = '스테이킹 신청';
+      $('#stakeConfirmBtn').textContent = '신청 완료';
       $('#stakeConfirmBtn').disabled = false;
     }
   });
