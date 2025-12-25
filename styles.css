@@ -873,8 +873,8 @@ body {
 .pool-action {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  align-items: flex-end;
+  justify-content: center;
+  align-items: center;
 }
 
 .link-muted {

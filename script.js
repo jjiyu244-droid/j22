@@ -1645,7 +1645,6 @@ function renderPools(filter = 'all') {
         </div>
         <div class="pool-action">
           <button class="btn-primary" data-stake-id="${pool.id}">스테이킹</button>
-          <span class="link-muted">상세 보기</span>
         </div>
       `;
       container.appendChild(el);
