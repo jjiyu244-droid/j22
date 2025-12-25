@@ -2473,6 +2473,19 @@ function setupContactModal() {
       await submitContactForm();
     });
   }
+  
+  // 문의 유형 선택 드롭다운 이벤트
+  const categorySelect = document.getElementById('contactCategory');
+  const titleInput = document.getElementById('contactTitle');
+  
+  if (categorySelect && titleInput) {
+    categorySelect.addEventListener('change', (e) => {
+      const selectedValue = e.target.value;
+      if (selectedValue) {
+        titleInput.value = selectedValue;
+      }
+    });
+  }
 }
 
 // Contact 폼 제출 함수
@@ -4767,6 +4780,11 @@ async function navigateToPage(page) {
       const contactForm = document.getElementById('contactForm');
       if (contactForm) {
         contactForm.reset();
+      }
+      // 드롭다운 초기화
+      const categorySelect = document.getElementById('contactCategory');
+      if (categorySelect) {
+        categorySelect.value = '';
       }
       const statusText = document.getElementById('contactStatusText');
       if (statusText) {

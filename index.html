@@ -914,6 +914,41 @@
         <div class="modal-body">
           <form id="contactForm">
             <div class="form-group" style="margin-bottom: 20px;">
+              <label for="contactCategory" style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">문의 유형 선택</label>
+              <select
+                id="contactCategory"
+                class="input"
+                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: var(--text); font-size: 14px; cursor: pointer;"
+              >
+                <option value="">문의 유형을 선택하세요</option>
+                <optgroup label="1) 스테이킹 이자 관련">
+                  <option value="스테이킹 이자는 어떻게 계산되나요?">스테이킹 이자는 어떻게 계산되나요?</option>
+                  <option value="스테이킹 보상은 언제 지급되나요?">스테이킹 보상은 언제 지급되나요?</option>
+                  <option value="APR(연이율)은 변동되나요?">APR(연이율)은 변동되나요?</option>
+                </optgroup>
+                <optgroup label="2) 출금/언스테이킹 관련">
+                  <option value="언스테이킹 기간은 얼마나 걸리나요?">언스테이킹 기간은 얼마나 걸리나요?</option>
+                  <option value="언스테이킹이 진행되지 않습니다.">언스테이킹이 진행되지 않습니다.</option>
+                  <option value="스테이킹 해제 후 코인이 지갑에 들어오지 않아요.">스테이킹 해제 후 코인이 지갑에 들어오지 않아요.</option>
+                </optgroup>
+                <optgroup label="3) 기술적 이슈">
+                  <option value="스테이킹 버튼이 작동하지 않습니다.">스테이킹 버튼이 작동하지 않습니다.</option>
+                  <option value="거래가 Pending 상태로 멈춰있어요.">거래가 Pending 상태로 멈춰있어요.</option>
+                  <option value="스테이킹 수량이 정상적으로 표시되지 않습니다.">스테이킹 수량이 정상적으로 표시되지 않습니다.</option>
+                </optgroup>
+                <optgroup label="4) 계정/보안 관련">
+                  <option value="계정 정보 변경 관련 문의">계정 정보 변경 관련 문의</option>
+                  <option value="이메일 인증이 되지 않습니다.">이메일 인증이 되지 않습니다.</option>
+                  <option value="2FA(구글OTP) 문제 문의">2FA(구글OTP) 문제 문의</option>
+                </optgroup>
+                <optgroup label="5) 기타">
+                  <option value="스테이킹 관련 기타 문의">스테이킹 관련 기타 문의</option>
+                  <option value="파트너십 / 협업 관련 문의">파트너십 / 협업 관련 문의</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
               <label for="contactTitle" style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">제목 *</label>
               <input
                 type="text"
