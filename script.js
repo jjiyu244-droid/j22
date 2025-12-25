@@ -443,6 +443,26 @@ async function initFirebase() {
             
             // 어드민 대시보드 렌더링
             console.log('🔄 [어드민 대시보드] 데이터 로드 시작');
+            // URL 경로에 따라 다른 페이지 렌더링
+            const path = window.location.pathname;
+            
+            // contact-detail/:id 경로 처리
+            const contactDetailMatch = path.match(/\/admin\/contact-detail\/([^\/]+)/);
+            if (contactDetailMatch && typeof renderContactDetail === 'function') {
+              const contactId = contactDetailMatch[1];
+              await renderContactDetail(contactId, adminPageContent);
+              console.log('✅ [어드민] Contact 상세보기 렌더링 완료');
+              return;
+            }
+            
+            // contact-list 경로 처리
+            if ((path === '/admin/contact-list' || path === '/admin/contact-list/') && typeof renderContactList === 'function') {
+              await renderContactList(adminPageContent);
+              console.log('✅ [어드민] Contact 목록 렌더링 완료');
+              return;
+            }
+            
+            // 기본 대시보드 렌더링
             const users = await loadAllUserStakes();
             console.log('✅ [어드민 대시보드] 데이터 로드 완료:', users.length, '명');
             
@@ -835,6 +855,74 @@ async function loadAllInquiries() {
     return [];
   }
 }
+
+// 어드민용: 모든 Contact 문의 내역 불러오기
+async function loadAllContacts() {
+  if (!db) return [];
+  
+  try {
+    const { collection, query, getDocs, orderBy } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const contactsRef = collection(db, 'contacts');
+    
+    let q = query(contactsRef, orderBy('createdAt', 'desc'));
+    
+    try {
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    } catch (indexError) {
+      // 인덱스가 없으면 orderBy 없이 조회 후 클라이언트에서 정렬
+      console.warn('Firestore 인덱스 없음, 클라이언트 정렬 사용');
+      const querySnapshot = await getDocs(contactsRef);
+      const contacts = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      
+      // 클라이언트에서 날짜순 정렬
+      contacts.sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+        return dateB.getTime() - dateA.getTime(); // 최신순
+      });
+      
+      return contacts;
+    }
+  } catch (e) {
+    console.error('Contact 문의 내역 로드 실패:', e);
+    return [];
+  }
+}
+
+// Contact 답변 등록
+async function saveContactAnswer(contactId, answer) {
+  if (!db) return false;
+  
+  try {
+    const { doc, updateDoc, serverTimestamp } = await import(
+      'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js'
+    );
+    const contactRef = doc(db, 'contacts', contactId);
+    
+    await updateDoc(contactRef, {
+      answer: answer,
+      answeredAt: serverTimestamp(),
+    });
+    
+    return true;
+  } catch (e) {
+    console.error('Contact 답변 저장 실패:', e);
+    return false;
+  }
+}
+
+// 전역으로 노출
+window.loadAllContacts = loadAllContacts;
+window.saveContactAnswer = saveContactAnswer;
 
 // 어드민용: 모든 스테이킹 신청 불러오기
 async function loadStakingRequests() {
@@ -2440,17 +2528,17 @@ async function submitContactForm() {
     
     const contactsRef = collection(db, 'contacts');
     const contactData = {
+      userId: currentUser ? currentUser.uid : null,
       title: title,
       content: content,
-      userId: currentUser ? currentUser.uid : null,
-      userEmail: currentUser ? currentUser.email : null,
-      status: 'pending',
+      answer: null,
       createdAt: serverTimestamp(),
+      answeredAt: null,
+      // 추가 필드 (하위 호환성 유지)
+      userEmail: currentUser ? currentUser.email : null,
       hasFile: !!file,
       fileName: file ? file.name : null,
       fileSize: file ? file.size : null,
-      // 파일 자체는 Firestore에 저장할 수 없으므로, 파일명과 크기만 저장
-      // 실제 파일은 Firebase Storage에 저장해야 함 (선택사항)
     };
     
     await addDoc(contactsRef, contactData);
@@ -2458,8 +2546,9 @@ async function submitContactForm() {
     console.log('✅ Contact 저장 완료:', { title });
     
     // 성공 메시지
+    alert('문의가 등록되었습니다');
     if (statusText) {
-      statusText.textContent = '문의가 접수되었습니다. 빠른 시일 내에 답변드리겠습니다.';
+      statusText.textContent = '문의가 등록되었습니다.';
       statusText.style.color = '#10b981';
     }
     
@@ -3595,6 +3684,296 @@ async function renderAdminPage() {
     `;
   }
 }
+
+// Contact 목록 렌더링
+async function renderContactList(container) {
+  if (!container) return;
+  
+  container.innerHTML = '<p style="color:#ffffff; text-align:center; padding: 40px;">데이터를 불러오는 중...</p>';
+  
+  try {
+    const contacts = await loadAllContacts();
+    
+    // 검색 기능
+    let searchQuery = '';
+    let filteredContacts = contacts;
+    
+    container.innerHTML = `
+      <div style="margin-bottom: 24px;">
+        <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 20px;">문의 목록</h2>
+        <div style="margin-bottom: 20px;">
+          <input 
+            type="text" 
+            id="contactSearchInput" 
+            placeholder="userId, 제목, 날짜로 검색..." 
+            style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #ffffff; font-size: 14px;"
+          />
+        </div>
+        <div id="contactListContainer"></div>
+      </div>
+    `;
+    
+    const renderList = () => {
+      const listContainer = document.getElementById('contactListContainer');
+      if (!listContainer) return;
+      
+      if (filteredContacts.length === 0) {
+        listContainer.innerHTML = '<p style="color: #ffffff; text-align: center; padding: 40px;">문의 내역이 없습니다.</p>';
+        return;
+      }
+      
+      listContainer.innerHTML = `
+        <div style="background: rgba(255,255,255,0.05); border-radius: 12px; overflow: hidden;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: rgba(255,255,255,0.1); border-bottom: 2px solid rgba(255,255,255,0.2);">
+                <th style="padding: 16px; text-align: left; color: #ffffff; font-weight: 600;">ID</th>
+                <th style="padding: 16px; text-align: left; color: #ffffff; font-weight: 600;">userId</th>
+                <th style="padding: 16px; text-align: left; color: #ffffff; font-weight: 600;">제목</th>
+                <th style="padding: 16px; text-align: left; color: #ffffff; font-weight: 600;">작성일</th>
+                <th style="padding: 16px; text-align: left; color: #ffffff; font-weight: 600;">답변여부</th>
+                <th style="padding: 16px; text-align: center; color: #ffffff; font-weight: 600;">작업</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredContacts.map(contact => {
+                const createdAt = contact.createdAt?.toDate ? contact.createdAt.toDate() : new Date(contact.createdAt || 0);
+                const dateStr = createdAt.toLocaleString('ko-KR');
+                const hasAnswer = contact.answer && contact.answer.trim() !== '';
+                return `
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer;" onclick="window.openContactDetail('${contact.id}')">
+                    <td style="padding: 16px; color: #ffffff;">${contact.id.substring(0, 8)}...</td>
+                    <td style="padding: 16px; color: #ffffff;">${contact.userId || '-'}</td>
+                    <td style="padding: 16px; color: #ffffff;">${contact.title || '-'}</td>
+                    <td style="padding: 16px; color: #ffffff;">${dateStr}</td>
+                    <td style="padding: 16px; color: ${hasAnswer ? '#10b981' : '#f59e0b'};">
+                      ${hasAnswer ? '✓ 답변완료' : '대기중'}
+                    </td>
+                    <td style="padding: 16px; text-align: center;">
+                      <button 
+                        class="btn-outline" 
+                        onclick="event.stopPropagation(); window.openContactDetail('${contact.id}');"
+                        style="padding: 8px 16px; font-size: 13px;"
+                      >
+                        상세보기
+                      </button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    };
+    
+    renderList();
+    
+    // 검색 이벤트 리스너
+    const searchInput = document.getElementById('contactSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase();
+        filteredContacts = contacts.filter(contact => {
+          const userId = (contact.userId || '').toLowerCase();
+          const title = (contact.title || '').toLowerCase();
+          const createdAt = contact.createdAt?.toDate ? contact.createdAt.toDate() : new Date(contact.createdAt || 0);
+          const dateStr = createdAt.toLocaleDateString('ko-KR').toLowerCase();
+          
+          return userId.includes(searchQuery) || 
+                 title.includes(searchQuery) || 
+                 dateStr.includes(searchQuery);
+        });
+        renderList();
+      });
+    }
+  } catch (error) {
+    console.error('Contact 목록 로드 실패:', error);
+    container.innerHTML = `
+      <div style="padding: 40px; text-align: center; background: rgba(239, 68, 68, 0.1); border-radius: 12px;">
+        <p style="color: #ef4444;">문의 목록을 불러오는 중 오류가 발생했습니다.</p>
+      </div>
+    `;
+  }
+}
+
+// Contact 상세보기 렌더링
+async function renderContactDetail(contactId, container) {
+  if (!container || !contactId) return;
+  
+  container.innerHTML = '<p style="color:#ffffff; text-align:center; padding: 40px;">데이터를 불러오는 중...</p>';
+  
+  try {
+    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+    const contactRef = doc(db, 'contacts', contactId);
+    const contactSnap = await getDoc(contactRef);
+    
+    if (!contactSnap.exists()) {
+      container.innerHTML = '<p style="color: #ef4444; text-align: center; padding: 40px;">문의를 찾을 수 없습니다.</p>';
+      return;
+    }
+    
+    const contact = { id: contactSnap.id, ...contactSnap.data() };
+    const createdAt = contact.createdAt?.toDate ? contact.createdAt.toDate() : new Date(contact.createdAt || 0);
+    const answeredAt = contact.answeredAt?.toDate ? contact.answeredAt.toDate() : null;
+    
+    container.innerHTML = `
+      <div style="max-width: 800px; margin: 0 auto;">
+        <div style="margin-bottom: 24px;">
+          <button 
+            class="btn-outline" 
+            onclick="window.renderContactList(document.getElementById('adminPageContent'))"
+            style="margin-bottom: 20px; padding: 10px 20px;"
+          >
+            ← 목록으로
+          </button>
+        </div>
+        
+        <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 32px; margin-bottom: 24px;">
+          <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 24px;">문의 상세보기</h2>
+          
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; color: #ffffff; font-weight: 600; margin-bottom: 8px;">제목</label>
+            <div style="color: #ffffff; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+              ${contact.title || '-'}
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; color: #ffffff; font-weight: 600; margin-bottom: 8px;">내용</label>
+            <div style="color: #ffffff; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; white-space: pre-wrap; min-height: 100px;">
+              ${contact.content || '-'}
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; color: #ffffff; font-weight: 600; margin-bottom: 8px;">작성일</label>
+            <div style="color: #ffffff; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+              ${createdAt.toLocaleString('ko-KR')}
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; color: #ffffff; font-weight: 600; margin-bottom: 8px;">userId</label>
+            <div style="color: #ffffff; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+              ${contact.userId || '-'}
+            </div>
+          </div>
+        </div>
+        
+        <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 32px;">
+          <h3 style="color: #ffffff; font-size: 20px; margin-bottom: 20px;">답변</h3>
+          
+          ${contact.answer ? `
+            <div style="margin-bottom: 20px;">
+              <label style="display: block; color: #ffffff; font-weight: 600; margin-bottom: 8px;">기존 답변</label>
+              <div style="color: #ffffff; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; white-space: pre-wrap;">
+                ${contact.answer}
+              </div>
+              ${answeredAt ? `<div style="color: #9ca3af; font-size: 14px; margin-top: 8px;">답변일: ${answeredAt.toLocaleString('ko-KR')}</div>` : ''}
+            </div>
+          ` : ''}
+          
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; color: #ffffff; font-weight: 600; margin-bottom: 8px;">답변 입력</label>
+            <textarea 
+              id="contactAnswerInput" 
+              placeholder="답변을 입력하세요..."
+              style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #ffffff; font-size: 14px; min-height: 150px; resize: vertical; font-family: inherit;"
+            >${contact.answer || ''}</textarea>
+          </div>
+          
+          <button 
+            class="btn-primary" 
+            onclick="window.saveContactAnswerHandler('${contact.id}')"
+            style="padding: 12px 24px; font-size: 16px; font-weight: 600;"
+          >
+            답변 등록
+          </button>
+          
+          <p id="contactAnswerStatus" style="margin-top: 16px; color: #ffffff; font-size: 14px;"></p>
+        </div>
+      </div>
+    `;
+  } catch (error) {
+    console.error('Contact 상세보기 로드 실패:', error);
+    container.innerHTML = `
+      <div style="padding: 40px; text-align: center; background: rgba(239, 68, 68, 0.1); border-radius: 12px;">
+        <p style="color: #ef4444;">문의를 불러오는 중 오류가 발생했습니다.</p>
+      </div>
+    `;
+  }
+}
+
+// Contact 답변 저장 핸들러
+window.saveContactAnswerHandler = async function(contactId) {
+  const answerInput = document.getElementById('contactAnswerInput');
+  const statusText = document.getElementById('contactAnswerStatus');
+  
+  if (!answerInput) return;
+  
+  const answer = answerInput.value.trim();
+  
+  if (!answer) {
+    if (statusText) {
+      statusText.textContent = '답변을 입력해주세요.';
+      statusText.style.color = '#ef4444';
+    }
+    return;
+  }
+  
+  if (statusText) {
+    statusText.textContent = '답변을 저장하는 중...';
+    statusText.style.color = '#ffffff';
+  }
+  
+  try {
+    const success = await saveContactAnswer(contactId, answer);
+    
+    if (success) {
+      if (statusText) {
+        statusText.textContent = '답변이 등록되었습니다.';
+        statusText.style.color = '#10b981';
+      }
+      
+      // 사용자에게 알림 (여기서는 간단히 alert, 추후 푸시 알림으로 변경 가능)
+      alert('답변이 등록되었습니다.');
+      
+      // 답변일 업데이트 표시를 위해 페이지 새로고침
+      setTimeout(() => {
+        const container = document.getElementById('adminPageContent');
+        if (container) {
+          renderContactDetail(contactId, container);
+        }
+      }, 500);
+    } else {
+      if (statusText) {
+        statusText.textContent = '답변 저장 중 오류가 발생했습니다.';
+        statusText.style.color = '#ef4444';
+      }
+    }
+  } catch (error) {
+    console.error('답변 저장 오류:', error);
+    if (statusText) {
+      statusText.textContent = '답변 저장 중 오류가 발생했습니다.';
+      statusText.style.color = '#ef4444';
+    }
+  }
+};
+
+// Contact 상세보기 열기 (전역 함수)
+window.openContactDetail = function(contactId) {
+  const container = document.getElementById('adminPageContent');
+  if (container) {
+    renderContactDetail(contactId, container);
+    // URL 업데이트 (브라우저 히스토리 추가)
+    window.history.pushState({ page: 'contact-detail', id: contactId }, '', `/admin/contact-detail/${contactId}`);
+  }
+};
+
+// 전역으로 노출
+window.renderContactList = renderContactList;
+window.renderContactDetail = renderContactDetail;
 
 // 어드민 대시보드 콘텐츠 렌더링 (모달과 페이지 공통 사용)
 async function renderAdminDashboardContent(users, container) {

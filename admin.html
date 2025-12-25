@@ -161,7 +161,11 @@
         <!-- Admin Header -->
         <div class="admin-header">
           <h1>🔐 어드민 대시보드</h1>
-          <a href="/" class="back-btn">← 홈으로</a>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <button class="back-btn" onclick="window.navigateAdminPage('dashboard')" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 8px; cursor: pointer; color: white; text-decoration: none;">대시보드</button>
+            <button class="back-btn" onclick="window.navigateAdminPage('contact-list')" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 8px; cursor: pointer; color: white; text-decoration: none;">문의 목록</button>
+            <a href="/" class="back-btn">← 홈으로</a>
+          </div>
         </div>
 
         <!-- Admin Dashboard Content -->
@@ -345,9 +349,13 @@
           console.log('✅ [admin.html] initFirebase 완료');
         }
         
-        // script.js의 onAuthStateChanged가 대시보드를 렌더링하므로
-        // 여기서는 별도로 렌더링하지 않음
-        // 단, 어드민 페이지 전용 UI 업데이트가 필요하면 여기서 처리
+        // URL 경로에 따른 라우팅 처리
+        handleAdminRouting();
+        
+        // 브라우저 뒤로/앞으로 버튼 처리
+        window.addEventListener('popstate', () => {
+          handleAdminRouting();
+        });
         
         // 🔥 로딩 상태 타임아웃 설정 (5초 후 강제 해제)
         let loadingTimeout = setTimeout(() => {
@@ -413,6 +421,51 @@
       }
 
 
+      // 어드민 페이지 라우팅 처리 함수
+      function handleAdminRouting() {
+        const path = window.location.pathname;
+        const container = document.getElementById('adminPageContent');
+        
+        if (!container) return;
+        
+        // contact-detail/:id 경로 처리
+        const contactDetailMatch = path.match(/\/admin\/contact-detail\/([^\/]+)/);
+        if (contactDetailMatch) {
+          const contactId = contactDetailMatch[1];
+          if (typeof renderContactDetail === 'function') {
+            renderContactDetail(contactId, container);
+          }
+          return;
+        }
+        
+        // contact-list 경로 처리
+        if (path === '/admin/contact-list' || path === '/admin/contact-list/') {
+          if (typeof renderContactList === 'function') {
+            renderContactList(container);
+          }
+          return;
+        }
+        
+        // 기본 대시보드 (기존 로직 - script.js의 onAuthStateChanged에서 처리됨)
+        // 여기서는 아무것도 하지 않음
+      }
+      
+      // 어드민 페이지 네비게이션 함수
+      window.navigateAdminPage = function(page) {
+        if (page === 'dashboard') {
+          window.history.pushState({ page: 'dashboard' }, '', '/admin');
+          if (typeof renderAdminPage === 'function') {
+            renderAdminPage();
+          }
+        } else if (page === 'contact-list') {
+          window.history.pushState({ page: 'contact-list' }, '', '/admin/contact-list');
+          const container = document.getElementById('adminPageContent');
+          if (container && typeof renderContactList === 'function') {
+            renderContactList(container);
+          }
+        }
+      };
+      
       // 페이지 로드 시 초기화
       document.addEventListener('DOMContentLoaded', async () => {
         // 로그인 UI 설정 (admin.html에서도 사용)
