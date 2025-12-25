@@ -2917,7 +2917,7 @@ async function renderAdminDashboard(users) {
   let html = `
     <!-- 스테이킹 신청 목록 섹션 -->
     <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(59, 130, 246, 0.3);">
-      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: #ffffff;">
         📝 스테이킹 신청 목록
         ${pendingRequests.length > 0 ? `<span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${pendingRequests.length}건 대기</span>` : ''}
       </h3>
@@ -2939,9 +2939,9 @@ async function renderAdminDashboard(users) {
                 const dateStr = req.createdAt?.toDate ? req.createdAt.toDate().toLocaleDateString('ko-KR') : '날짜 없음';
                 return `
                   <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding: 12px; white-space: nowrap;">${req.userEmail || '이메일 없음'}</td>
-                    <td style="padding: 12px; font-weight: 600; white-space: nowrap;">${req.symbol}</td>
-                    <td style="padding: 12px; text-align: right; font-weight: 600; white-space: nowrap;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
+                    <td style="padding: 12px; white-space: nowrap; color: #ffffff;">${req.userEmail || '이메일 없음'}</td>
+                    <td style="padding: 12px; font-weight: 600; white-space: nowrap; color: #ffffff;">${req.symbol}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600; white-space: nowrap; color: #ffffff;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
                     <td style="padding: 12px; color: #ffffff; white-space: nowrap;">${req.network}</td>
                     <td style="padding: 12px; color: #ffffff; white-space: nowrap;">${dateStr}</td>
                     <td style="padding: 12px; text-align: center; white-space: nowrap;">
@@ -2973,9 +2973,9 @@ async function renderAdminDashboard(users) {
       `}
     </div>
     <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">🔍 사용자 검색</h3>
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #ffffff;">🔍 사용자 검색</h3>
     <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">📊 전체 통계</h3>
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #ffffff;">📊 전체 통계</h3>
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;" class="stats-grid">
         <div>
           <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">총 회원수</div>
@@ -3028,7 +3028,7 @@ async function renderAdminDashboard(users) {
               </tr>
             </thead>
             <tbody>
-      ` : '<p style="color: #e5e7eb; text-align: center; padding: 20px;">문의 내역이 없습니다.</p>'}
+      ` : '<p style="color: #ffffff; text-align: center; padding: 20px;">문의 내역이 없습니다.</p>'}
       ${inquiries.length > 0 ? inquiries.slice(0, 10).map(inq => {
         const createdDate = inq.createdAt?.toDate ? inq.createdAt.toDate() : new Date();
         const dateStr = createdDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
@@ -3047,7 +3047,7 @@ async function renderAdminDashboard(users) {
                   </span>
                 </td>
                 <td style="padding: 10px;">
-                  <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #e5e7eb;" title="${escapedContent}">
+                  <div style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #ffffff;" title="${escapedContent}">
                     ${contentPreview}
                   </div>
                   ${inq.reply ? `<div style="margin-top: 4px; padding: 6px; background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; font-size: 10px; color: #10b981;">
@@ -3064,7 +3064,7 @@ async function renderAdminDashboard(users) {
       ` : ''}
     </div>
     
-    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">👥 회원별 상세 정보 (${users.length}명)</h3>
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #ffffff;">👥 회원별 상세 정보 (${users.length}명)</h3>
   `;
 
   // 각 사용자별로 리워드 데이터도 가져와서 표시
@@ -3096,7 +3096,7 @@ async function renderAdminDashboard(users) {
       <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
           <div>
-            <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #ffffff;">
               회원 #${idx + 1} · ${u.email || '이메일 없음'}
             </div>
             <div style="font-size: 11px; color: #ffffff;">
@@ -3136,10 +3136,10 @@ async function renderAdminDashboard(users) {
             <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">
               USD: ${formatUSD(usdValue)}
             </div>
-            <div style="font-size: 10px; color: #e5e7eb; margin-bottom: 4px;">
+            <div style="font-size: 10px; color: #ffffff; margin-bottom: 4px;">
               시작일: ${startDateStr}
             </div>
-            <div style="font-size: 10px; color: #e5e7eb; margin-bottom: 8px;">
+            <div style="font-size: 10px; color: #ffffff; margin-bottom: 8px;">
               기간: ${period}
             </div>
             <div style="font-size: 10px; color: #ffffff; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
@@ -3215,7 +3215,7 @@ async function renderAdminDashboard(users) {
       `;
     } else {
       html += `
-          <div style="padding: 12px; text-align: center; color: #e5e7eb; font-size: 11px; background: rgba(255,255,255,0.02); border-radius: 6px;">
+          <div style="padding: 12px; text-align: center; color: #ffffff; font-size: 11px; background: rgba(255,255,255,0.02); border-radius: 6px;">
             리워드 내역이 없습니다.
           </div>
       `;
@@ -3468,7 +3468,7 @@ async function renderAdminDashboardContent(users, container) {
         <p style="font-size: 18px; color: #ffffff; margin-bottom: 12px; line-height: 1.6;">
           현재 등록된 스테이킹 데이터가 없습니다.
         </p>
-        <p style="font-size: 16px; color: #e5e7eb; margin-top: 24px; line-height: 1.6;">
+        <p style="font-size: 16px; color: #ffffff; margin-top: 24px; line-height: 1.6;">
           회원들이 스테이킹을 시작하면 여기에 데이터가 표시됩니다.
         </p>
         <div style="margin-top: 32px; padding: 16px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.2);">
@@ -3530,7 +3530,7 @@ async function renderAdminDashboardContent(users, container) {
   let html = `
     <!-- 스테이킹 신청 목록 섹션 -->
     <div style="background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(59, 130, 246, 0.3);">
-      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: #ffffff;">
         📝 스테이킹 신청 목록
         ${pendingRequests.length > 0 ? `<span style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">${pendingRequests.length}건 대기</span>` : ''}
       </h3>
@@ -3552,9 +3552,9 @@ async function renderAdminDashboardContent(users, container) {
                 const dateStr = req.createdAt?.toDate ? req.createdAt.toDate().toLocaleDateString('ko-KR') : '날짜 없음';
                 return `
                   <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding: 12px; white-space: nowrap;">${req.userEmail || '이메일 없음'}</td>
-                    <td style="padding: 12px; font-weight: 600; white-space: nowrap;">${req.symbol}</td>
-                    <td style="padding: 12px; text-align: right; font-weight: 600; white-space: nowrap;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
+                    <td style="padding: 12px; white-space: nowrap; color: #ffffff;">${req.userEmail || '이메일 없음'}</td>
+                    <td style="padding: 12px; font-weight: 600; white-space: nowrap; color: #ffffff;">${req.symbol}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600; white-space: nowrap; color: #ffffff;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
                     <td style="padding: 12px; color: #ffffff; white-space: nowrap;">${req.network}</td>
                     <td style="padding: 12px; color: #ffffff; white-space: nowrap;">${dateStr}</td>
                     <td style="padding: 12px; text-align: center; white-space: nowrap;">
@@ -3586,7 +3586,7 @@ async function renderAdminDashboardContent(users, container) {
       `}
     </div>
     <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">🔍 사용자 검색</h3>
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #ffffff;">🔍 사용자 검색</h3>
       <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
         <input
           type="text"
@@ -3605,7 +3605,7 @@ async function renderAdminDashboardContent(users, container) {
         </button>
       </div>
       <div id="adminSearchResult" style="display: none; margin-top: 16px;"></div>
-      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; margin-top: 24px;">📊 전체 통계</h3>
+      <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; margin-top: 24px; color: #ffffff;">📊 전체 통계</h3>
       <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;" class="stats-grid">
         <div>
           <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">총 회원수</div>
@@ -3631,15 +3631,15 @@ async function renderAdminDashboardContent(users, container) {
         </div>
         <div>
           <div style="font-size: 11px; color: #ffffff;">BTC USD</div>
-          <div style="font-size: 16px; font-weight: 600;">${formatUSD(totalBTC * prices.BTC)}</div>
+          <div style="font-size: 16px; font-weight: 600; color: #ffffff;">${formatUSD(totalBTC * prices.BTC)}</div>
         </div>
         <div>
           <div style="font-size: 11px; color: #ffffff;">ETH USD</div>
-          <div style="font-size: 16px; font-weight: 600;">${formatUSD(totalETH * prices.ETH)}</div>
+          <div style="font-size: 16px; font-weight: 600; color: #ffffff;">${formatUSD(totalETH * prices.ETH)}</div>
         </div>
       </div>
     </div>
-    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">👥 회원별 상세 정보 (${users.length}명)</h3>
+    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #ffffff;">👥 회원별 상세 정보 (${users.length}명)</h3>
   `;
 
   // 각 사용자별로 리워드 데이터도 가져와서 표시
@@ -3671,7 +3671,7 @@ async function renderAdminDashboardContent(users, container) {
       <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
           <div>
-            <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">
+            <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #ffffff;">
               회원 #${idx + 1} · ${u.email || '이메일 없음'}
             </div>
             <div style="font-size: 11px; color: #ffffff;">
@@ -3711,10 +3711,10 @@ async function renderAdminDashboardContent(users, container) {
             <div style="font-size: 11px; color: #ffffff; margin-bottom: 4px;">
               USD: ${formatUSD(usdValue)}
             </div>
-            <div style="font-size: 10px; color: #e5e7eb; margin-bottom: 4px;">
+            <div style="font-size: 10px; color: #ffffff; margin-bottom: 4px;">
               시작일: ${startDateStr}
             </div>
-            <div style="font-size: 10px; color: #e5e7eb; margin-bottom: 8px;">
+            <div style="font-size: 10px; color: #ffffff; margin-bottom: 8px;">
               기간: ${period}
             </div>
             <div style="font-size: 10px; color: #ffffff; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
@@ -3766,11 +3766,11 @@ async function renderAdminDashboardContent(users, container) {
         
         html += `
                 <tr style="border-top: 1px solid rgba(255,255,255,0.05);">
-                  <td style="padding: 8px;">${dateStr}</td>
-                  <td style="padding: 8px;">${reward.symbol}</td>
-                  <td style="padding: 8px; text-align: right;">+${reward.amount.toFixed(reward.symbol === 'XRP' ? 2 : 4)}</td>
+                  <td style="padding: 8px; color: #ffffff;">${dateStr}</td>
+                  <td style="padding: 8px; color: #ffffff;">${reward.symbol}</td>
+                  <td style="padding: 8px; text-align: right; color: #ffffff;">+${reward.amount.toFixed(reward.symbol === 'XRP' ? 2 : 4)}</td>
                   <td style="padding: 8px; text-align: right; color: #10b981;">${formatUSD(rewardUSD)}</td>
-                  <td style="padding: 8px; text-align: center;">${reward.apy?.toFixed(1) || 0}%</td>
+                  <td style="padding: 8px; text-align: center; color: #ffffff;">${reward.apy?.toFixed(1) || 0}%</td>
                   <td style="padding: 8px; text-align: center;">
                     <button 
                       class="btn-outline" 
@@ -3787,7 +3787,7 @@ async function renderAdminDashboardContent(users, container) {
       if (userRewards.length > 5) {
         html += `
                 <tr>
-                  <td colspan="6" style="padding: 8px; text-align: center; color: #e5e7eb; font-size: 10px;">
+                  <td colspan="6" style="padding: 8px; text-align: center; color: #ffffff; font-size: 10px;">
                     외 ${userRewards.length - 5}건 더 있음
                   </td>
                 </tr>
@@ -3801,7 +3801,7 @@ async function renderAdminDashboardContent(users, container) {
       `;
     } else {
       html += `
-          <div style="padding: 12px; text-align: center; color: #e5e7eb; font-size: 11px; background: rgba(255,255,255,0.02); border-radius: 6px;">
+          <div style="padding: 12px; text-align: center; color: #ffffff; font-size: 11px; background: rgba(255,255,255,0.02); border-radius: 6px;">
             리워드 내역이 없습니다.
           </div>
       `;

@@ -1895,5 +1895,61 @@ textarea::placeholder {
   }
 }
 
+/* 관리자 대시보드 텍스트 강제 흰색 오버라이드 */
+.admin-container,
+.admin-container *,
+.admin-content,
+.admin-content *,
+#adminPageContent,
+#adminPageContent * {
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
 
+/* 섹션 제목 및 라벨 강제 흰색 */
+.admin-container h1,
+.admin-container h2,
+.admin-container h3,
+.admin-container h4,
+.admin-container h5,
+.admin-container h6,
+.admin-container .section-title,
+.admin-container .label,
+.admin-container .stat-label,
+.admin-container th,
+.admin-container .table-header {
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* 텍스트 요소 강제 흰색 */
+.admin-container p,
+.admin-container span,
+.admin-container div,
+.admin-container td,
+.admin-container .text,
+.admin-container .text-muted {
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* opacity 관련 클래스 리셋 */
+.admin-container [class*="opacity"],
+.admin-container [class*="text-gray"],
+.admin-container [class*="text-muted"] {
+  opacity: 1 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* 버튼 및 링크는 제외 (기존 스타일 유지) */
+.admin-container button,
+.admin-container .btn-primary,
+.admin-container .btn-outline,
+.admin-container a.back-btn {
+  opacity: 1 !important;
+}
 
