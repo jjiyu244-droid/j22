@@ -2224,10 +2224,13 @@ textarea::placeholder {
   }
   
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
-  /* 변경 전: padding: 40px 24px, min-height: auto → 너무 길 수 있음 */
-  /* 변경 후: padding: 32px 24px, max-height: 90vh → 한 화면 안에 들어오도록 제한 */
+  /* 변경 전: padding: 32px 24px → 위쪽 공백이 너무 많음 */
+  /* 변경 후: padding-top: 24px, padding-bottom: 32px → 위쪽 공백만 줄여서 콘텐츠를 살짝 위로 올림 */
   .hero-section-container {
-    padding: 32px 24px !important;
+    padding-top: 24px !important;
+    padding-bottom: 32px !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
     min-height: auto !important;
     max-height: 90vh !important;
   }
