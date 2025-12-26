@@ -2074,19 +2074,6 @@ textarea::placeholder {
   overflow: hidden;
 }
 
-/* 인물 이미지 래퍼 - 우측 정렬 */
-.person-image-wrapper {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 100%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  padding-right: 40px;
-  z-index: 10;
-}
-
 /* 인물 이미지 - 스티커 느낌 최종 해결 */
 .hero-image {
   position: relative;
@@ -2097,11 +2084,16 @@ textarea::placeholder {
   mix-blend-mode: luminosity;
 }
 
+/* 인물 이미지 컨테이너 - 싸인 이미지 기준점 */
+.person-image {
+  position: relative;
+}
+
 /* 싸인 이미지 배치 및 합성 */
 .signature-image {
   position: absolute;
-  right: 0;
-  bottom: 50px;
+  right: 10%;
+  bottom: 15%;
   width: 150px;
   height: auto;
   z-index: 20;
