@@ -2077,11 +2077,13 @@ textarea::placeholder {
 }
 
 /* 히어로 콘텐츠 래퍼 - flex로 왼쪽 텍스트와 오른쪽 이미지 균형 배치 */
+/* 변경 전: gap: 40px, align-items: flex-start → 전체 높이가 너무 커짐 */
+/* 변경 후: gap: 30px으로 줄이고, 상단 정렬 유지하여 컴팩트하게 */
 .hero-content-wrapper {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  gap: 40px;
+  gap: 30px;
   max-width: 100%;
   margin: 0 auto;
 }
@@ -2115,9 +2117,12 @@ textarea::placeholder {
 }
 
 /* 인물 이미지 컨테이너 - 싸인 이미지 기준점 */
+/* 변경 전: height: 720px → 섹션 높이가 너무 커져 아래쪽 큰 빈 공백 발생 */
+/* 변경 후: height: 550px, max-height 제한 → 화면의 80~90%만 차지하도록 컴팩트하게 */
 .person-image {
   position: relative;
-  height: 720px;
+  height: 550px;
+  max-height: 550px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -2197,7 +2202,11 @@ textarea::placeholder {
   
   .person-image {
     height: auto;
-    max-height: 500px;
+    max-height: 400px;
+  }
+  
+  .hero-image {
+    max-height: 400px !important;
   }
   
   .hero-logo {
@@ -2211,6 +2220,11 @@ textarea::placeholder {
   .hero-logo img {
     transform: none !important;
     width: 200px !important;
+  }
+  
+  /* 모바일에서 히어로 섹션 패딩 더 줄이기 */
+  .hero-section-container {
+    padding: 32px 24px !important;
   }
 }
 
@@ -2227,6 +2241,16 @@ textarea::placeholder {
   .hero-image-area {
     flex: 0 1 55%;
     padding-right: 10px;
+  }
+  
+  /* 태블릿에서도 높이 제한 */
+  .person-image {
+    height: 500px;
+    max-height: 500px;
+  }
+  
+  .hero-image {
+    max-height: 500px !important;
   }
 }
 

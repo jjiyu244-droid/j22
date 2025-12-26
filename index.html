@@ -96,7 +96,9 @@
         <!-- 로그인 전 환영 히어로 -->
         <!-- 변경 전: absolute positioning으로 왼쪽에 치우쳐 오른쪽에 큰 빈 공간 발생 -->
         <!-- 변경 후: flex 레이아웃으로 중앙 정렬, 왼쪽 텍스트와 오른쪽 이미지 영역 균형 배치 -->
-        <section class="card glass pre-login-welcome hero-section-container" style="position:relative;padding:80px 48px;margin:0;min-height:600px;overflow:hidden;border-radius:0;border:none !important;box-shadow:none !important;margin-top:0 !important;background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;">
+        <!-- 변경 전: min-height:600px, padding:80px 48px → 아래쪽 큰 빈 공백 발생 -->
+        <!-- 변경 후: min-height 제거(자동 높이), padding:48px 48px → 화면의 80~90%만 차지하도록 컴팩트하게 -->
+        <section class="card glass pre-login-welcome hero-section-container" style="position:relative;padding:48px 48px;margin:0;overflow:hidden;border-radius:0;border:none !important;box-shadow:none !important;margin-top:0 !important;background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;">
           <div class="hero-content-wrapper">
             <!-- 왼쪽: 텍스트 영역 -->
             <div class="hero-text-area">
@@ -121,7 +123,9 @@
             <!-- 오른쪽: 이미지 영역 (모델 + 로고 + 싸인) -->
             <div class="hero-image-area">
               <div class="person-image">
-                <img src="./profile.png" alt="코어위브 스테이킹" class="hero-image" style="height:120%;width:auto;object-fit:contain;filter:none;transform:scale(0.88);image-rendering:high-quality;outline:none;border:none;" />
+                <!-- 변경 전: height:120% → person-image(720px)의 120% = 864px로 너무 큼 -->
+                <!-- 변경 후: height:100%, max-height:550px → person-image(550px)에 맞춰 컴팩트하게 -->
+                <img src="./profile.png" alt="코어위브 스테이킹" class="hero-image" style="height:100%;max-height:550px;width:auto;object-fit:contain;filter:none;transform:scale(0.88);image-rendering:high-quality;outline:none;border:none;" />
                 <!-- 싸인 이미지 -->
                 <!-- 싸인 이미지: 449.png, 모델의 오른쪽 허리~가슴 높이에 배치 -->
                 <img src="./449.png" alt="싸인" class="signature-image" />
