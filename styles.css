@@ -2047,22 +2047,22 @@ textarea::placeholder {
   transition: all 0.3s ease;
 }
 
-/* 4531.png 이미지 - 스티커 느낌 제거 */
+/* 4531.png 이미지 - 스티커 느낌 완전 제거 (고도화된 합성 효과) */
 .staking-image img {
   width: 380px;
   max-width: 100%;
   height: auto;
   border-radius: 12px;
   object-fit: contain;
-  /* 하단 30% 영역 페이드 아웃: black 60%부터 transparent 100% */
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
-  /* 외곽 엣지 부드럽게 처리 */
-  filter: blur(0.5px);
-  /* 불필요한 검은색 그림자 완전 제거 */
-  box-shadow: none !important;
-  /* 배경과 자연스럽게 블렌딩 */
+  /* 1. 경계선 부드러운 투명화 - 모든 외곽 테두리를 배경과 자연스럽게 섞이게 */
+  -webkit-mask-image: radial-gradient(ellipse at center, black 50%, transparent 100%);
+  mask-image: radial-gradient(ellipse at center, black 50%, transparent 100%);
+  /* 2. 배경색 투영 - 인물의 색감을 남색 배경 톤에 맞춤 */
   mix-blend-mode: luminosity;
+  /* 3. 내부 그림자 효과 - 이미지 안쪽으로 은은한 남색 빛이 스며드는 효과 */
+  filter: brightness(0.9) contrast(1.1) saturate(0.8) drop-shadow(0 0 10px rgba(0, 0, 50, 0.5));
+  /* 불필요한 외부 그림자 제거 */
+  box-shadow: none !important;
   opacity: 0.95;
   transition: all 0.3s ease;
 }
