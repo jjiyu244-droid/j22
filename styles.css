@@ -2089,7 +2089,7 @@ textarea::placeholder {
   position: relative;
 }
 
-/* 싸인 이미지(4531.png) 배치 및 합성 */
+/* 싸인 이미지(449.png) 배치 및 합성 */
 /* 변경 전: bottom: 15%, right: 10% - 섹션 아래로 잘리고 모델과 겹침 */
 /* 변경 후: 모델의 오른쪽 허리~가슴 높이에 배치, 충분한 여백 확보 */
 .signature-image {
