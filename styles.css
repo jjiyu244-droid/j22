@@ -2067,11 +2067,41 @@ textarea::placeholder {
   transition: all 0.3s ease;
 }
 
-/* 히어로 섹션 컨테이너 - 화면 이탈 방지 */
+/* 히어로 섹션 컨테이너 - 화면 이탈 방지 및 중앙 정렬 */
+/* 변경 전: max-width만 있고 내부 콘텐츠가 absolute로 왼쪽 치우침 */
+/* 변경 후: flex 레이아웃으로 중앙 정렬, 양쪽 균형 배치 */
 .hero-section-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   overflow: hidden;
+}
+
+/* 히어로 콘텐츠 래퍼 - flex로 왼쪽 텍스트와 오른쪽 이미지 균형 배치 */
+.hero-content-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* 왼쪽: 텍스트 영역 */
+.hero-text-area {
+  flex: 0 1 50%;
+  max-width: 580px;
+  min-width: 0;
+}
+
+/* 오른쪽: 이미지 영역 (모델 + 로고 + 싸인) */
+.hero-image-area {
+  flex: 0 1 50%;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 0;
+  padding-right: 20px;
 }
 
 /* 인물 이미지 - 스티커 느낌 최종 해결 */
@@ -2087,6 +2117,23 @@ textarea::placeholder {
 /* 인물 이미지 컨테이너 - 싸인 이미지 기준점 */
 .person-image {
   position: relative;
+  height: 720px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 10;
+  margin-top: 12px;
+}
+
+/* CoreWeave 로고 컨테이너 */
+/* 변경 전: absolute positioning으로 고정 위치 */
+/* 변경 후: flex 레이아웃 내에서 자연스럽게 배치 */
+.hero-logo {
+  position: absolute;
+  top: 240px;
+  right: 0;
+  z-index: 999;
+  transform: translateX(50%);
 }
 
 /* 싸인 이미지(449.png) 배치 및 합성 */
@@ -2126,6 +2173,60 @@ textarea::placeholder {
     right: 10px;
     width: 110px;
     opacity: 0.9;
+  }
+  
+  /* 히어로 섹션 모바일 레이아웃 - 세로 배치 */
+  .hero-content-wrapper {
+    flex-direction: column;
+    gap: 32px;
+    align-items: center;
+  }
+  
+  .hero-text-area {
+    flex: 1 1 100%;
+    max-width: 100%;
+    text-align: center;
+  }
+  
+  .hero-image-area {
+    flex: 1 1 100%;
+    width: 100%;
+    justify-content: center;
+    padding-right: 0;
+  }
+  
+  .person-image {
+    height: auto;
+    max-height: 500px;
+  }
+  
+  .hero-logo {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 20px auto;
+    text-align: center;
+  }
+  
+  .hero-logo img {
+    transform: none !important;
+    width: 200px !important;
+  }
+}
+
+/* 태블릿 레이아웃 */
+@media (max-width: 1080px) and (min-width: 769px) {
+  .hero-content-wrapper {
+    gap: 30px;
+  }
+  
+  .hero-text-area {
+    flex: 0 1 45%;
+  }
+  
+  .hero-image-area {
+    flex: 0 1 55%;
+    padding-right: 10px;
   }
 }
 
