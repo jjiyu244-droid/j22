@@ -1198,6 +1198,12 @@ textarea::placeholder {
   }
 }
 
+/* 리워드 테이블 섹션 최적화 */
+.rewards-table-section {
+  max-width: 850px;
+  margin: 0 auto;
+}
+
 /* 리워드 테이블 */
 .rewards-table {
   overflow-x: auto;
@@ -1210,7 +1216,7 @@ textarea::placeholder {
 }
 
 .rewards-table th {
-  padding: 16px;
+  padding: 12px;
   font-weight: 600;
   color: var(--text-soft);
   text-align: left;
@@ -1219,13 +1225,17 @@ textarea::placeholder {
 }
 
 .rewards-table td {
-  padding: 16px;
+  padding: 12px;
   border-bottom: 1px solid var(--border-subtle);
   font-size: 14px;
 }
 
 .rewards-table tbody tr:hover {
   background: var(--accent-soft);
+}
+
+.rewards-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .reward-status {
@@ -1296,6 +1306,10 @@ textarea::placeholder {
 }
 
 .footer-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
   border-radius: var(--radius-md);
   padding: 12px 13px;
 }
@@ -2020,8 +2034,7 @@ textarea::placeholder {
 
 /* 이미지 블렌딩 및 외곽선 처리 */
 .feature-card img,
-.staking-image img,
-.hero-image {
+.staking-image img {
   mix-blend-mode: multiply;
   -webkit-mask-image: radial-gradient(circle, black 70%, transparent 100%);
   mask-image: radial-gradient(circle, black 70%, transparent 100%);
@@ -2029,6 +2042,16 @@ textarea::placeholder {
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   transition: all 0.3s ease;
+}
+
+/* 인물 이미지 하단 그라데이션 마스크 및 블렌딩 */
+.hero-image {
+  mix-blend-mode: luminosity;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 75%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 75%, transparent 100%);
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* 다크 배경의 이미지는 screen 모드 사용 */
