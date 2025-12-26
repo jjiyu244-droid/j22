@@ -56,6 +56,7 @@ const pools = [
     name: '비트코인 스테이킹 (BTC)',
     symbol: 'BTC',
     apr: 3.2,
+    monthlyRate: 5.8, // 월 이율 (%)
     tvl: 120_000_000,
     risk: '중간',
     type: 'stable',
@@ -68,6 +69,7 @@ const pools = [
     name: '이더리움 스테이킹 (ETH)',
     symbol: 'ETH',
     apr: 6.8,
+    monthlyRate: 6.2, // 월 이율 (%)
     tvl: 95_000_000,
     risk: '중간',
     type: 'volatile',
@@ -80,6 +82,7 @@ const pools = [
     name: '리플 스테이킹 (XRP)',
     symbol: 'XRP',
     apr: 5.4,
+    monthlyRate: 6.7, // 월 이율 (%)
     tvl: 48_000_000,
     risk: '낮음',
     type: 'stable',
@@ -92,6 +95,7 @@ const pools = [
     name: '솔라나 스테이킹 (SOL)',
     symbol: 'SOL',
     apr: 7.2,
+    monthlyRate: 7.2, // 월 이율 (%) - 해당 이율 적용
     tvl: 75_000_000,
     risk: '중간',
     type: 'volatile',
@@ -2749,23 +2753,36 @@ function openStakeModal(poolId) {
   currentPool = pools.find((p) => p.id === poolId);
   if (!currentPool) return;
 
-  $('#modalTitle').textContent = `${currentPool.name} · 스테이킹`;
-  $('#modalPoolInfo').innerHTML = `
-    <div style="display:flex;justify-content:space-between;gap:10px;">
-      <div>
-        <div style="font-weight:500;font-size:12px;">${currentPool.symbol} / ${
-    currentPool.network
-  }</div>
-        <div style="font-size:11px;color:#e5e7eb;">APY ${currentPool.apr}% · Lock-up ${
-    currentPool.lockup
-  }</div>
-      </div>
-    </div>
-  `;
+  // 코인 선택 드롭다운 생성
+  const poolSelect = $('#poolSelect');
+  if (poolSelect) {
+    poolSelect.innerHTML = pools.map(pool => 
+      `<option value="${pool.id}" ${pool.id === poolId ? 'selected' : ''}>${pool.symbol} / ${pool.network}</option>`
+    ).join('');
+  }
+
+  // 모달 정보 업데이트
+  updateModalPoolInfo(currentPool);
+
   $('#stakeAmount').value = '';
   $('#stakeHelper').textContent = '';
 
   $('#stakeModal').classList.add('show');
+}
+
+// 모달 풀 정보 업데이트 함수
+function updateModalPoolInfo(pool) {
+  if (!pool) return;
+  
+  $('#modalTitle').textContent = `${pool.name} · 스테이킹`;
+  $('#modalPoolInfo').innerHTML = `
+    <div style="display:flex;justify-content:space-between;gap:10px;">
+      <div>
+        <div style="font-weight:500;font-size:12px;">${pool.symbol} / ${pool.network}</div>
+        <div style="font-size:11px;color:#e5e7eb;">월 이율 ${pool.monthlyRate}% · Lock-up ${pool.lockup}</div>
+      </div>
+    </div>
+  `;
 }
 
 function closeStakeModal() {
@@ -2782,6 +2799,22 @@ function setupStakeModal() {
     }
   });
 
+  // 코인 선택 드롭다운 변경 이벤트
+  const poolSelect = $('#poolSelect');
+  if (poolSelect) {
+    poolSelect.addEventListener('change', (e) => {
+      const selectedPoolId = e.target.value;
+      const selectedPool = pools.find(p => p.id === selectedPoolId);
+      if (selectedPool) {
+        currentPool = selectedPool;
+        updateModalPoolInfo(selectedPool);
+        // 수량 입력 필드 초기화
+        $('#stakeAmount').value = '';
+        $('#stakeHelper').textContent = '';
+      }
+    });
+  }
+
   $('#modalCloseBtn').addEventListener('click', closeStakeModal);
   $('#stakeModal').addEventListener('click', (e) => {
     if (e.target.id === 'stakeModal') {
@@ -2792,7 +2825,24 @@ function setupStakeModal() {
   $('#stakeConfirmBtn').addEventListener('click', async () => {
     const amount = parseFloat($('#stakeAmount').value || '0');
     const helper = $('#stakeHelper');
-    if (!currentPool) return;
+    
+    // 선택된 풀 확인 (드롭다운에서 선택된 풀 사용)
+    const poolSelectForSubmit = $('#poolSelect');
+    const selectedPoolId = poolSelectForSubmit ? poolSelectForSubmit.value : (currentPool ? currentPool.id : null);
+    if (!selectedPoolId) {
+      helper.textContent = '코인을 선택해주세요.';
+      helper.classList.add('text-danger');
+      return;
+    }
+    
+    const selectedPool = pools.find(p => p.id === selectedPoolId);
+    if (!selectedPool) {
+      helper.textContent = '선택한 풀을 찾을 수 없습니다.';
+      helper.classList.add('text-danger');
+      return;
+    }
+    
+    currentPool = selectedPool;
 
     if (!amount || amount <= 0) {
       helper.textContent = '0보다 큰 수량을 입력해주세요.';
