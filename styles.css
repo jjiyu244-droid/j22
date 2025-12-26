@@ -2096,8 +2096,8 @@ textarea::placeholder {
   position: absolute;
   /* 오른쪽으로 30px 더 이동 (right: 10% → right: -30px) */
   right: -30px;
-  /* 50px 더 아래로 이동: 모델의 허리~가슴 높이 (bottom: 225px → bottom: 175px) */
-  bottom: 175px;
+  /* 20px 위로 올림: 모델의 허리~가슴 높이 (bottom: 175px → bottom: 195px) */
+  bottom: 195px;
   width: 150px;
   height: auto;
   /* 모델 위에 표시되도록 z-index 높임 */
