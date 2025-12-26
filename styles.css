@@ -2034,24 +2034,31 @@ textarea::placeholder {
 }
 
 /* 이미지 블렌딩 및 외곽선 처리 */
+/* 카드 이미지들 - 스티커 느낌 제거 */
 .feature-card img,
 .staking-image img {
   mix-blend-mode: multiply;
-  -webkit-mask-image: radial-gradient(circle, black 70%, transparent 100%);
-  mask-image: radial-gradient(circle, black 70%, transparent 100%);
-  box-shadow: rgba(0, 0, 0, 0.05) 0px 20px 40px !important;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  /* 외곽 엣지 부드럽게 처리 */
+  -webkit-mask-image: radial-gradient(circle, black 85%, rgba(0,0,0,0.7) 95%, transparent 100%);
+  mask-image: radial-gradient(circle, black 85%, rgba(0,0,0,0.7) 95%, transparent 100%);
+  /* 불필요한 검은색 그림자 제거 */
+  box-shadow: none !important;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   transition: all 0.3s ease;
 }
 
-/* 인물 이미지 하단 그라데이션 마스크 및 블렌딩 최적화 */
+/* 인물 이미지 하단 그라데이션 마스크 및 블렌딩 최적화 - 스티커 느낌 완전 제거 */
 .hero-image {
   mix-blend-mode: luminosity;
   opacity: 0.95;
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 70%, rgba(0,0,0,0.8) 80%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 0%, black 70%, rgba(0,0,0,0.8) 80%, transparent 100%);
-  box-shadow: 0 20px 60px rgba(0, 82, 204, 0.15) !important;
+  /* 하단 30% 영역 페이드 아웃: black 60%부터 transparent 100% */
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 60%, transparent 100%);
+  /* 외곽 엣지 부드럽게 처리 - inset 효과로 경계선 흐리게 */
+  filter: blur(0.5px);
+  /* 불필요한 검은색 그림자 완전 제거 */
+  box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   transition: all 0.3s ease;
