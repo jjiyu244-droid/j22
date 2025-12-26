@@ -2069,19 +2069,20 @@ textarea::placeholder {
 
 /* 히어로 섹션 컨테이너 - 화면 이탈 방지 및 중앙 정렬 */
 /* 변경 전: max-width만 있고 내부 콘텐츠가 absolute로 왼쪽 치우침 */
-/* 변경 후: flex 레이아웃으로 중앙 정렬, 양쪽 균형 배치 */
+/* 변경 후: flex 레이아웃으로 중앙 정렬, 양쪽 균형 배치, max-height로 화면을 넘지 않게 제한 */
 .hero-section-container {
   max-width: 1400px;
   margin: 0 auto;
   overflow: hidden;
+  /* 화면을 넘지 않게 제한 (인라인 스타일에서도 max-height:90vh 적용됨) */
 }
 
 /* 히어로 콘텐츠 래퍼 - flex로 왼쪽 텍스트와 오른쪽 이미지 균형 배치 */
-/* 변경 전: gap: 30px, align-items: flex-start → 모델 이미지가 작아짐 */
-/* 변경 후: gap: 40px, align-items: flex-start 유지, justify-start로 상단 정렬하여 아래 여백만 남게 */
+/* 변경 전: justify-content: center → 콘텐츠가 중앙에 배치되어 위아래 공백이 큼 */
+/* 변경 후: justify-content: start → 콘텐츠가 상단부터 시작하여 위쪽 공백 제거, 아래 여백만 남게 */
 .hero-content-wrapper {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   gap: 40px;
   max-width: 100%;
@@ -2223,9 +2224,17 @@ textarea::placeholder {
   }
   
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
+  /* 변경 전: padding: 40px 24px, min-height: auto → 너무 길 수 있음 */
+  /* 변경 후: padding: 32px 24px, max-height: 90vh → 한 화면 안에 들어오도록 제한 */
   .hero-section-container {
-    padding: 40px 24px !important;
+    padding: 32px 24px !important;
     min-height: auto !important;
+    max-height: 90vh !important;
+  }
+  
+  /* 모바일에서 콘텐츠 상단 정렬 */
+  .hero-content-wrapper {
+    justify-content: flex-start !important;
   }
 }
 
@@ -2233,6 +2242,7 @@ textarea::placeholder {
 @media (max-width: 1080px) and (min-width: 769px) {
   .hero-content-wrapper {
     gap: 30px;
+    justify-content: flex-start;
   }
   
   .hero-text-area {
