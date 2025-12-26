@@ -875,6 +875,12 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 100%;
+}
+
+.pool-action .btn-primary {
+  width: 100%;
+  text-align: center;
 }
 
 .link-muted {
@@ -2010,6 +2016,43 @@ textarea::placeholder {
   opacity: 1 !important;
   color: #FFFFFF !important;
   -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* 이미지 블렌딩 및 외곽선 처리 */
+.feature-card img,
+.staking-image img,
+.hero-image {
+  mix-blend-mode: multiply;
+  -webkit-mask-image: radial-gradient(circle, black 70%, transparent 100%);
+  mask-image: radial-gradient(circle, black 70%, transparent 100%);
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 20px 40px !important;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+/* 다크 배경의 이미지는 screen 모드 사용 */
+.staking-explanation-card img {
+  mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(circle, black 70%, transparent 100%);
+  mask-image: radial-gradient(circle, black 70%, transparent 100%);
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 20px 40px !important;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+/* 로고 이미지는 블렌딩 제외 */
+.logo-image,
+img[alt*="Logo"],
+img[alt*="CoreWeave"],
+.pool-logo,
+.token-icon img {
+  mix-blend-mode: normal !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
 }
 
 /* 버튼 및 링크는 제외 (기존 스타일 유지) */
