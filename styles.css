@@ -2069,21 +2069,26 @@ textarea::placeholder {
 
 /* 히어로 섹션 컨테이너 - 화면 이탈 방지 및 중앙 정렬 */
 /* 변경 전: max-width만 있고 내부 콘텐츠가 absolute로 왼쪽 치우침 */
-/* 변경 후: flex 레이아웃으로 중앙 정렬, 양쪽 균형 배치, max-height로 화면을 넘지 않게 제한 */
+/* 변경 후: flex 레이아웃으로 중앙 정렬, 양쪽 균형 배치, max-height:85vh로 화면 높이의 85~90%만 차지하도록 제한 */
 .hero-section-container {
   max-width: 1400px;
   margin: 0 auto;
   overflow: hidden;
-  /* 화면을 넘지 않게 제한 (인라인 스타일에서도 max-height:90vh 적용됨) */
+  /* 화면을 넘지 않게 제한 (인라인 스타일에서도 max-height:85vh 적용됨) */
+  display: flex;
+  align-items: center;
+  /* items-center: 수직 중앙 정렬 - 텍스트와 모델이 세로 방향으로 정확히 섹션 중앙에 오게 */
 }
 
 /* 히어로 콘텐츠 래퍼 - flex로 왼쪽 텍스트와 오른쪽 이미지 균형 배치 */
-/* 변경 전: justify-content: center → 콘텐츠가 중앙에 배치되어 위아래 공백이 큼 */
-/* 변경 후: justify-content: start → 콘텐츠가 상단부터 시작하여 위쪽 공백 제거, 아래 여백만 남게 */
+/* 변경 전: justify-content: flex-start, align-items: flex-start → 콘텐츠가 상단에 붙어서 위아래 여백이 남음 */
+/* 변경 후: justify-content: center, align-items: center → 텍스트와 모델이 위아래 좌우 모두 정확히 중앙에 배치 */
 .hero-content-wrapper {
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
+  justify-content: center;
+  /* justify-center: 좌우 중앙 정렬 유지 */
+  align-items: center;
+  /* items-center: 수직 중앙 정렬 - 텍스트와 모델이 세로 방향으로 정확히 섹션 중앙에 오게 */
   gap: 40px;
   max-width: 100%;
   margin: 0 auto;
@@ -2224,20 +2229,26 @@ textarea::placeholder {
   }
   
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
-  /* 변경 전: padding: 32px 24px → 위쪽 공백이 너무 많음 */
-  /* 변경 후: padding-top: 24px, padding-bottom: 32px → 위쪽 공백만 줄여서 콘텐츠를 살짝 위로 올림 */
+  /* 변경 전: padding-top: 24px, padding-bottom: 32px, max-height: 90vh → 전체 세로 높이가 조금 길어서 위아래 여백이 남음 */
+  /* 변경 후: padding-top: 32px(pt-8), padding-bottom: 48px(pb-12), max-height: 85vh → 섹션이 화면 높이의 85~90%만 차지하도록 컴팩트하게 */
   .hero-section-container {
-    padding-top: 24px !important;
-    padding-bottom: 32px !important;
+    padding-top: 32px !important;
+    padding-bottom: 48px !important;
     padding-left: 24px !important;
     padding-right: 24px !important;
-    min-height: auto !important;
-    max-height: 90vh !important;
+    height: auto !important;
+    max-height: 85vh !important;
+    display: flex !important;
+    align-items: center !important;
+    /* items-center: 수직 중앙 정렬 - 모바일에서도 텍스트와 모델이 세로 방향으로 정확히 섹션 중앙에 오게 */
   }
   
-  /* 모바일에서 콘텐츠 상단 정렬 */
+  /* 모바일에서 콘텐츠 중앙 정렬 */
   .hero-content-wrapper {
-    justify-content: flex-start !important;
+    justify-content: center !important;
+    /* justify-center: 좌우 중앙 정렬 */
+    align-items: center !important;
+    /* items-center: 수직 중앙 정렬 */
   }
 }
 
@@ -2245,7 +2256,10 @@ textarea::placeholder {
 @media (max-width: 1080px) and (min-width: 769px) {
   .hero-content-wrapper {
     gap: 30px;
-    justify-content: flex-start;
+    justify-content: center;
+    /* justify-center: 좌우 중앙 정렬 */
+    align-items: center;
+    /* items-center: 수직 중앙 정렬 - 태블릿에서도 텍스트와 모델이 세로 방향으로 정확히 섹션 중앙에 오게 */
   }
   
   .hero-text-area {
