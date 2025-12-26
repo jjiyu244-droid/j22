@@ -2117,11 +2117,11 @@ textarea::placeholder {
 }
 
 /* 인물 이미지 컨테이너 - 싸인 이미지 기준점 */
-/* 변경 전: height: 550px, max-height 제한 → 모델 이미지가 너무 작아짐 */
-/* 변경 후: height: 720px (원래 크기 복구) → 모델 이미지 크고 선명하게 표시 */
+/* 변경 전: height: 720px → 모델 이미지가 너무 작음 */
+/* 변경 후: height: 850px (h-[850px]) → 모델이 화면 오른쪽 절반을 꽉 차게 크게 표시 */
 .person-image {
   position: relative;
-  height: 720px;
+  height: 850px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -2129,27 +2129,21 @@ textarea::placeholder {
   margin-top: 12px;
 }
 
-/* CoreWeave 로고 컨테이너 */
-/* 변경 전: absolute positioning으로 고정 위치 */
-/* 변경 후: flex 레이아웃 내에서 자연스럽게 배치 */
-.hero-logo {
-  position: absolute;
-  top: 240px;
-  right: 0;
-  z-index: 999;
-  transform: translateX(50%);
-}
+/* CoreWeave 로고 컨테이너 - 제거됨 */
+/* 변경 전: CoreWeave 로고가 히어로 섹션에 표시됨 */
+/* 변경 후: 로고 완전히 제거하여 모델 이미지에 집중 */
+/* .hero-logo 스타일 제거됨 */
 
 /* 싸인 이미지(449.png) 배치 및 합성 */
-/* 변경 전: right: -30px, bottom: 195px → 우측 하단에서 벗어나 이상하게 배치됨 */
-/* 변경 후: right: 16px, bottom: 16px → 모델 오른쪽 아래 코너 근처로 자연스럽게 배치 */
+/* 변경 전: right: 16px, bottom: 16px → 모델 크기에 맞지 않음 */
+/* 변경 후: right: 12px, bottom: 20px → 모델이 커진 만큼 오른쪽 아래 코너에 자연스럽게 배치 (w-48 ~ w-64 = 192px ~ 256px) */
 .signature-image {
   position: absolute;
   /* 모델 오른쪽 아래 코너 근처로 이동 */
-  right: 16px;
-  bottom: 16px;
-  /* 크기도 적당하게 유지 (w-40 ~ w-64 = 160px ~ 256px) */
-  width: 200px;
+  right: 12px;
+  bottom: 20px;
+  /* 크기도 적당하게 유지 (w-48 ~ w-64 = 192px ~ 256px) */
+  width: 240px;
   height: auto;
   /* 모델 위에 표시되도록 z-index 높임 */
   z-index: 25;
@@ -2162,10 +2156,20 @@ textarea::placeholder {
 /* 반응형: 태블릿에서 싸인 위치 조정 */
 @media (max-width: 1080px) {
   .signature-image {
-    /* 태블릿: 오른쪽 아래 코너 근처 유지, 크기 약간 축소 */
-    right: 12px;
-    bottom: 12px;
-    width: 160px;
+    /* 태블릿: 오른쪽 아래 코너 근처 유지, 크기 적당히 */
+    right: 10px;
+    bottom: 16px;
+    width: 200px;
+  }
+  
+  /* 태블릿에서 모델 이미지 크기 조정 */
+  .person-image {
+    height: 700px;
+  }
+  
+  .hero-image {
+    height: 700px !important;
+    max-height: none !important;
   }
 }
 
@@ -2205,21 +2209,17 @@ textarea::placeholder {
   }
   
   .hero-image {
-    max-height: none !important;
-    height: 100% !important;
+    max-height: 500px !important;
+    height: auto !important;
+    width: 100% !important;
+    object-fit: contain !important;
   }
   
-  .hero-logo {
-    position: relative;
-    top: auto;
-    right: auto;
-    margin: 20px auto;
-    text-align: center;
-  }
-  
-  .hero-logo img {
-    transform: none !important;
-    width: 200px !important;
+  /* 모바일에서 싸인 위치 조정 */
+  .signature-image {
+    right: 8px;
+    bottom: 12px;
+    width: 180px;
   }
   
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
@@ -2246,12 +2246,12 @@ textarea::placeholder {
   
   /* 태블릿에서도 높이 적당히 유지 */
   .person-image {
-    height: 600px;
+    height: 700px;
   }
   
   .hero-image {
     max-height: none !important;
-    height: 120% !important;
+    height: 700px !important;
   }
 }
 

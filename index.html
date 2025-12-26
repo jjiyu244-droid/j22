@@ -120,20 +120,18 @@
               </div>
             </div>
             
-            <!-- 오른쪽: 이미지 영역 (모델 + 로고 + 싸인) -->
+            <!-- 오른쪽: 이미지 영역 (모델 + 싸인) -->
+            <!-- 변경 전: 모델 + 로고 + 싸인 → 로고가 불필요하게 남아있음 -->
+            <!-- 변경 후: 모델 + 싸인만 유지, 로고 완전히 제거 -->
             <div class="hero-image-area">
               <div class="person-image">
-                <!-- 변경 전: height:100%, max-height:550px → 모델 이미지가 너무 작아짐 -->
-                <!-- 변경 후: height:120% (원래 크기 복구) → 모델 이미지 크고 선명하게 표시 -->
-                <img src="./profile.png" alt="코어위브 스테이킹" class="hero-image" style="height:120%;width:auto;object-fit:contain;filter:none;transform:scale(0.88);image-rendering:high-quality;outline:none;border:none;" />
+                <!-- 변경 전: height:120%, transform:scale(0.88) → 모델 이미지가 너무 작음 -->
+                <!-- 변경 후: height:850px (h-[850px]), max-height 제거 → 모델이 화면 오른쪽 절반을 꽉 차게 크게 표시 -->
+                <img src="./profile.png" alt="코어위브 스테이킹" class="hero-image" style="height:850px;max-height:none;width:auto;object-fit:contain;filter:none;image-rendering:high-quality;outline:none;border:none;" />
                 <!-- 싸인 이미지 -->
-                <!-- 변경 전: 모델의 오른쪽 허리~가슴 높이에 배치 → 우측 하단에서 벗어나 이상하게 배치됨 -->
-                <!-- 변경 후: 모델 오른쪽 아래 코너 근처로 이동 (right: 16px, bottom: 16px) → 자연스러운 위치 -->
+                <!-- 변경 전: right: 16px, bottom: 16px → 모델 크기에 맞지 않음 -->
+                <!-- 변경 후: right: 12px, bottom: 20px → 모델이 커진 만큼 오른쪽 아래 코너에 자연스럽게 배치 -->
                 <img src="./449.png" alt="싸인" class="signature-image" />
-              </div>
-              <!-- CoreWeave Logo -->
-              <div class="hero-logo">
-                <img src="./sim.png" alt="CoreWeave" class="logo-image" style="width:330px;height:auto;filter:none;box-shadow:none;transform:translateX(-235px) translateY(-200px) scale(1.1);" />
               </div>
             </div>
           </div>
