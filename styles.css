@@ -1353,6 +1353,51 @@ textarea::placeholder {
   transform: translateZ(0);
 }
 
+/* 스테이킹 설명 섹션 스타일 */
+.staking-info-wrapper {
+  display: flex;
+  flex-direction: row !important;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+}
+
+.staking-text {
+  width: 55%;
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.staking-text h2,
+.staking-text h3 {
+  color: #fff;
+}
+
+.staking-text p,
+.staking-text li,
+.staking-text ol,
+.staking-text ul {
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.staking-image {
+  width: 45%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.staking-image img {
+  width: 380px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
 /* Responsive */
 @media (max-width: 1080px) {
   .app {
@@ -1416,17 +1461,17 @@ textarea::placeholder {
     padding: 40px 24px !important;
   }
 
-  .staking-explanation-grid {
-    grid-template-columns: 1fr !important;
-    gap: 40px !important;
+  .staking-info-wrapper {
+    flex-direction: column !important;
   }
 
-  .staking-explanation-grid > div:first-child {
-    order: 1;
+  .staking-text,
+  .staking-image {
+    width: 100% !important;
   }
 
-  .staking-explanation-grid > div:last-child {
-    order: 2;
+  .staking-image img {
+    width: 70% !important;
   }
 
   .pools-rewards-container {
