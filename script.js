@@ -4812,6 +4812,11 @@ async function navigateToPage(page) {
         // 다시 한번 높이 확인
         console.log('✅ FAQ 페이지 최종 높이:', faqPage.offsetHeight);
       }, 100);
+      
+      // URL 업데이트
+      if (window.history && window.history.pushState) {
+        window.history.pushState({}, '', '/faq');
+      }
     } else {
       console.error('❌ FAQ 페이지를 찾을 수 없습니다.');
     }
@@ -5973,7 +5978,33 @@ function setupNavigation() {
     }
   }, true); // capture phase - 이벤트 전파 전에 실행
   
-  // Add click handlers to all nav items (중복 방지)
+  // Add click handlers to all nav items (이벤트 위임 방식으로 더 확실하게)
+  // document 레벨에서 이벤트 위임 사용
+  document.addEventListener('click', (e) => {
+    const navBtn = e.target.closest('.nav-item-horizontal');
+    if (navBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const page = navBtn.getAttribute('data-page');
+      console.log('네비게이션 버튼 클릭 (이벤트 위임):', page);
+      
+      if (page) {
+        const navFunc = typeof navigateToPage === 'function' 
+          ? navigateToPage 
+          : typeof window.navigateToPage === 'function' 
+            ? window.navigateToPage 
+            : null;
+        
+        if (navFunc) {
+          navFunc(page);
+        } else {
+          console.error('navigateToPage 함수를 찾을 수 없습니다.');
+        }
+      }
+    }
+  }, true); // capture phase에서 실행
+  
+  // 기존 방식도 유지 (이중 보험)
   document.querySelectorAll('.nav-item-horizontal').forEach((btn) => {
     // 기존 리스너 제거 (중복 방지)
     const newBtn = btn.cloneNode(true);
@@ -5983,7 +6014,7 @@ function setupNavigation() {
       e.preventDefault();
       e.stopPropagation();
       const page = newBtn.getAttribute('data-page');
-      console.log('네비게이션 버튼 클릭:', page);
+      console.log('네비게이션 버튼 클릭 (직접 리스너):', page);
       if (page && typeof navigateToPage === 'function') {
         navigateToPage(page);
       } else if (page && typeof window.navigateToPage === 'function') {
