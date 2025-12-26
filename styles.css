@@ -2067,23 +2067,46 @@ textarea::placeholder {
   transition: all 0.3s ease;
 }
 
+/* 히어로 섹션 컨테이너 - 화면 이탈 방지 */
+.hero-section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* 인물 이미지 래퍼 - 우측 정렬 */
+.person-image-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding-right: 40px;
+  z-index: 10;
+}
+
 /* 인물 이미지 - 스티커 느낌 최종 해결 */
 .hero-image {
+  position: relative;
   /* 인물 하단이 배경 남색 속으로 스르륵 녹아들게 */
   -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+  /* 남색 배경과 톤 일치 */
+  mix-blend-mode: luminosity;
 }
 
 /* 싸인 이미지 배치 및 합성 */
 .signature-image {
   position: absolute;
-  right: 10%;
-  bottom: 15%;
+  right: 0;
+  bottom: 50px;
   width: 150px;
   height: auto;
   z-index: 20;
-  /* 배경이 흰색이면 multiply, 검은색이면 screen 적용 */
-  mix-blend-mode: multiply;
+  /* 남색 배경과 톤 일치 */
+  mix-blend-mode: luminosity;
   opacity: 0.8;
   transition: all 0.3s ease;
 }
