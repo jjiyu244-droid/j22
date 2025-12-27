@@ -96,9 +96,9 @@
         <!-- 로그인 전 환영 히어로 -->
         <!-- 변경 전: absolute positioning으로 왼쪽에 치우쳐 오른쪽에 큰 빈 공간 발생 -->
         <!-- 변경 후: flex 레이아웃으로 중앙 정렬, 왼쪽 텍스트와 오른쪽 이미지 영역 균형 배치 -->
-        <!-- 변경 전: padding-top:0px(pt-0), padding-bottom:32px(pb-8), max-height:70vh, overflow:visible, items-start → 모델과 싸인 이미지가 아래로 떨어져서 겹쳐 보임 -->
-        <!-- 변경 후: padding-top:0px(pt-0), padding-bottom:32px(pb-8), min-height:560px, max-height:70vh, overflow:visible, items-start → 모델과 싸인을 하나의 그룹처럼 오른쪽 영역에 정확하게 정렬, 이미지가 잘리지 않도록 min-height 추가 -->
-        <section class="card glass pre-login-welcome hero-section-container" style="position:relative;padding-top:0px;padding-bottom:32px;padding-left:48px;padding-right:48px;margin:0;height:auto;min-height:560px;max-height:70vh;overflow:visible;border-radius:0;border:none !important;box-shadow:none !important;margin-top:0 !important;background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;">
+        <!-- 변경 전: padding-top:0px(pt-0), align-items:flex-start → 텍스트와 모델 이미지 높이가 달라서 이미지가 아래로 눌림 -->
+        <!-- 변경 후: padding-top:40px, align-items:center → 텍스트와 모델 이미지가 정확히 수평 중앙 정렬, 모델이 아래로 밀리지 않음, 원본 이미지 컬러 표시 -->
+        <section class="card glass pre-login-welcome hero-section-container" style="position:relative;padding-top:40px;padding-bottom:32px;padding-left:48px;padding-right:48px;margin:0;height:auto;min-height:560px;max-height:70vh;overflow:visible;border-radius:0;border:none !important;box-shadow:none !important;margin-top:0 !important;background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;">
           <div class="hero-content-wrapper">
             <!-- 왼쪽: 텍스트 영역 -->
             <div class="hero-text-area">
