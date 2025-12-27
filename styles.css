@@ -2103,29 +2103,47 @@ textarea::placeholder {
 }
 
 /* 왼쪽: 텍스트 영역 */
-/* 변경 전: flex: 0 1 50%, max-width: 580px → 텍스트와 모델 이미지 정렬이 안 맞음 */
-/* 변경 후: flex: 1, max-width: 560px → 텍스트 영역이 유연하게 확장되면서 최대 너비 제한 */
+/* 변경 전: max-width: 560px → 텍스트가 너무 퍼짐 */
+/* 변경 후: max-width: 650px → 텍스트 박스 전체의 max-width를 650px로 설정하여 너무 퍼지지 않게 하고, 우측 모델 이미지와 적절한 거리 유지 */
 .hero-text-area {
   flex: 1;
   /* flex: 1 - 텍스트 영역이 유연하게 확장 */
-  max-width: 560px;
-  /* max-width: 560px - 최대 너비 제한 */
+  max-width: 650px;
+  /* max-width: 650px - 텍스트 박스 전체의 max-width를 650px로 설정하여 너무 퍼지지 않게 하고, 우측 모델 이미지와 적절한 거리 유지 */
   min-width: 0;
 }
 
-/* 메인 카피 스타일 */
-.hero-main-copy {
-  font-size: 42px;
-  font-weight: 700;
+/* 메인 카피 1행 스타일 */
+.hero-main-copy-line1 {
+  font-size: 48px;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+
+/* 메인 카피 2행 스타일 */
+.hero-main-copy-line2 {
+  font-size: 48px;
+  font-weight: 800;
   color: #1e293b;
   line-height: 1.3;
   margin-bottom: 20px;
 }
 
-/* 서브 카피 스타일 */
-.hero-sub-copy {
-  font-size: 18px;
-  color: #64748b;
+/* 서브 카피 1행 스타일 */
+.hero-sub-copy-line1 {
+  font-size: 20px;
+  color: #555;
+  line-height: 1.5;
+  margin-top: 20px;
+  margin-bottom: 8px;
+}
+
+/* 서브 카피 2행 스타일 */
+.hero-sub-copy-line2 {
+  font-size: 20px;
+  color: #555;
   line-height: 1.5;
   margin-bottom: 40px;
 }
@@ -2265,14 +2283,16 @@ textarea::placeholder {
   }
   
   /* 모바일에서 메인 카피 스타일 조정 */
-  .hero-main-copy {
+  .hero-main-copy-line1,
+  .hero-main-copy-line2 {
     font-size: 32px !important;
     /* font-size: 32px !important - 모바일에서 적당한 크기로 조정 */
     line-height: 1.3;
   }
   
   /* 모바일에서 서브 카피 스타일 조정 */
-  .hero-sub-copy {
+  .hero-sub-copy-line1,
+  .hero-sub-copy-line2 {
     font-size: 16px !important;
     /* font-size: 16px !important - 모바일에서 적당한 크기로 조정 */
     line-height: 1.5;
