@@ -2087,9 +2087,10 @@ textarea::placeholder {
   box-sizing: border-box;
   /* box-sizing: border-box - padding 포함하여 전체 너비 계산 */
   overflow: hidden;
-  /* overflow: hidden - 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 */
+  /* overflow: hidden - 데스크톱에서 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 */
+  max-height: 70vh;
+  /* max-height: 70vh - 데스크톱에서 섹션이 화면 높이의 70% 이하로 강제 제한 */
   /* min-h-[560px]: 이미지가 잘리지 않도록 최소 높이 520~580px 범위에서 560px 설정 (인라인 스타일에서도 min-height:560px 적용됨) */
-  /* max-h-[70vh]: 섹션이 화면 높이의 70% 이하로 강제 제한하여 현재보다 추가로 10~20% 더 짧게 (인라인 스타일에서도 max-height:70vh 적용됨) */
   display: flex;
   padding: 48px;
   /* padding: 48px - 전체 패딩 설정 */
