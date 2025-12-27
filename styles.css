@@ -2298,36 +2298,40 @@ textarea::placeholder {
 /* .hero-logo 스타일 제거됨 */
 
 /* 싸인 이미지 */
-/* 변경 전: right: 3%, bottom: 15%, width: 160px, z-index: 5 → 모델의 우측 하단에 완벽하게 안착되지 않음 */
-/* 변경 후: right: 2%, bottom: 5%, width: 180px, z-index: 5 → 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 완벽하게 안착 */
+/* 변경 전: right: 2%, bottom: 5%, opacity: 1 → 모델의 오른쪽 하단 영역에 자연스럽게 배치되지 않음 */
+/* 변경 후: right: 5%, bottom: 10%, opacity: 0.85, mix-blend-mode: multiply → 모델의 오른쪽 하단 영역(이미지 기준 우측 하단 모서리 쪽)으로 이동, 모델의 팔이나 몸 영역과 살짝 겹치게 배치하여 자연스러움 추가 */
 .signature-image {
   position: absolute;
-  /* position: absolute - 모델 이미지의 우측 하단에 완벽하게 안착 */
-  right: 2%;
-  /* right: 2% - 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 배치 */
-  bottom: 5%;
-  /* bottom: 5% - 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 배치 */
+  /* position: absolute - 부모 컨테이너(relative)를 기준으로 absolute 좌표 설정 */
+  right: 5%;
+  /* right: 5% - 모델의 오른쪽 하단 영역(이미지 기준 우측 하단 모서리 쪽)으로 이동 */
+  bottom: 10%;
+  /* bottom: 10% - 모델의 오른쪽 하단 영역으로 이동, 모델의 팔이나 몸 영역과 살짝 겹치게 배치 */
   width: 180px;
-  /* width: 180px - 크기는 적절히 조절 */
-  opacity: 1;
-  /* opacity: 1 - 완전 불투명 */
+  /* width: 180px - 너무 크거나 작지 않게 맞춤 */
+  opacity: 0.85;
+  /* opacity: 0.85 - 약간 은은하게 보이도록 */
+  mix-blend-mode: multiply;
+  /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
   z-index: 5;
-  /* z-index: 5 - 모델 이미지 위에 표시 (모델보다 뒤에 있는 느낌을 주려면 낮게, 모델 위로 올라오게 하려면 높게) */
+  /* z-index: 5 - 모델 이미지 위에 표시 */
   transition: all 0.3s ease;
 }
 
 /* 반응형: 태블릿에서 싸인 위치 조정 */
 @media (max-width: 1080px) {
   .signature-image {
-    /* 태블릿: 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 완벽하게 안착 */
-    right: 2%;
-    /* right: 2% - 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 배치 */
-    bottom: 5%;
-    /* bottom: 5% - 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 배치 */
+    /* 태블릿: 모델의 오른쪽 하단 영역(이미지 기준 우측 하단 모서리 쪽)으로 이동 */
+    right: 5%;
+    /* right: 5% - 모델의 오른쪽 하단 영역으로 이동 */
+    bottom: 10%;
+    /* bottom: 10% - 모델의 오른쪽 하단 영역으로 이동, 모델의 팔이나 몸 영역과 살짝 겹치게 배치 */
     width: 180px;
-    /* width: 180px - 크기는 적절히 조절 */
-    opacity: 1;
-    /* opacity: 1 - 완전 불투명 */
+    /* width: 180px - 너무 크거나 작지 않게 맞춤 */
+    opacity: 0.85;
+    /* opacity: 0.85 - 약간 은은하게 보이도록 */
+    mix-blend-mode: multiply;
+    /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
   }
   
   /* 태블릿에서 모델 이미지 크기 조정 */
@@ -2352,15 +2356,17 @@ textarea::placeholder {
 /* 반응형: 모바일에서 싸인 위치 조정 */
 @media (max-width: 768px) {
   .signature-image {
-    /* 모바일: 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 완벽하게 안착 */
-    right: 2%;
-    /* right: 2% - 모바일에서 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 배치 */
-    bottom: 5%;
-    /* bottom: 5% - 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 배치 */
+    /* 모바일: 모델의 오른쪽 하단 영역(이미지 기준 우측 하단 모서리 쪽)으로 이동 */
+    right: 5%;
+    /* right: 5% - 모바일에서 모델의 오른쪽 하단 영역으로 이동 */
+    bottom: 10%;
+    /* bottom: 10% - 모델의 오른쪽 하단 영역으로 이동, 모델의 팔이나 몸 영역과 살짝 겹치게 배치 */
     width: 160px;
     /* width: 160px - 모바일에서 적당한 크기로 조정 */
-    opacity: 1;
-    /* opacity: 1 - 완전 불투명 */
+    opacity: 0.85;
+    /* opacity: 0.85 - 약간 은은하게 보이도록 */
+    mix-blend-mode: multiply;
+    /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
   }
   
   /* 히어로 섹션 모바일 레이아웃 - 세로 배치 */
