@@ -2114,8 +2114,8 @@ textarea::placeholder {
 }
 
 /* 오른쪽 모델 이미지 컨테이너 */
-/* 변경 전: justify-content: center, align-items: flex-end → 모델 이미지가 아래로 내려감 */
-/* 변경 후: justify-content: flex-end, align-items: flex-start, padding-right: 0, margin-top: 0 → 위 정렬로 고정, 오른쪽 정렬 */
+/* 변경 전: margin-top: 0 → 모델 이미지가 텍스트와 같은 높이에 위치 */
+/* 변경 후: margin-top: -80px → 모델 이미지와 싸인 이미지만 위로 80px 이동, 텍스트 위치는 변경하지 않음 */
 .hero-image-area {
   flex: 1;
   /* flex: 1 - 오른쪽 영역이 유연하게 확장 */
@@ -2128,8 +2128,8 @@ textarea::placeholder {
   /* position: relative - 싸인 이미지의 absolute positioning 기준점 */
   padding-right: 0;
   /* padding-right: 0 - 오른쪽 패딩 제거 */
-  margin-top: 0;
-  /* margin-top: 0 - 상단 마진 제거 */
+  margin-top: -80px;
+  /* margin-top: -80px - 모델 이미지와 싸인 이미지만 위로 80px 이동, 텍스트 위치는 변경하지 않음 */
   min-width: 0;
 }
 
@@ -2256,8 +2256,8 @@ textarea::placeholder {
     /* align-items: flex-start - 위 정렬로 고정 */
     padding-right: 0;
     /* padding-right: 0 - 오른쪽 패딩 제거 */
-    margin-top: 0;
-    /* margin-top: 0 - 상단 마진 제거 */
+    margin-top: -40px;
+    /* margin-top: -40px - 모바일에서 모델 이미지와 싸인 이미지만 위로 40px 이동, 텍스트 위치는 변경하지 않음 */
   }
   
   .person-image {
@@ -2337,8 +2337,8 @@ textarea::placeholder {
     /* align-items: flex-start - 위 정렬로 고정 */
     padding-right: 0;
     /* padding-right: 0 - 오른쪽 패딩 제거 */
-    margin-top: 0;
-    /* margin-top: 0 - 상단 마진 제거 */
+    margin-top: -60px;
+    /* margin-top: -60px - 태블릿에서 모델 이미지와 싸인 이미지만 위로 60px 이동, 텍스트 위치는 변경하지 않음 */
   }
   
   /* 태블릿에서도 높이 적당히 유지 */
