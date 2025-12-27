@@ -2069,12 +2069,12 @@ textarea::placeholder {
 
 /* 히어로 섹션 컨테이너 - 화면 이탈 방지 및 중앙 정렬 */
 /* 변경 전: max-width만 있고 내부 콘텐츠가 absolute로 왼쪽 치우침 */
-/* 변경 후: flex 레이아웃으로 중앙 정렬, 양쪽 균형 배치, max-height:85vh로 화면 높이의 80~85%만 차지하도록 제한 */
+/* 변경 후: flex 레이아웃으로 중앙 정렬, 양쪽 균형 배치, max-height:80vh로 화면 높이의 80% 이하로 강제 제한하여 현재보다 20~30% 더 짧게 */
 .hero-section-container {
   max-width: 1400px;
   margin: 0 auto;
   overflow: hidden;
-  /* max-h-[85vh]: 섹션이 화면 높이의 80~85%만 차지하도록 제한 (인라인 스타일에서도 max-height:85vh 적용됨) */
+  /* max-h-[80vh]: 섹션이 화면 높이의 80% 이하로 강제 제한하여 현재보다 20~30% 더 짧게 (인라인 스타일에서도 max-height:80vh 적용됨) */
   display: flex;
   align-items: center;
   /* items-center: 수직 중앙 정렬 - 텍스트와 모델이 세로 방향으로 정확히 섹션 중앙에 오게 */
@@ -2229,18 +2229,18 @@ textarea::placeholder {
   }
   
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
-  /* 변경 전: padding-top: 32px(pt-8), padding-bottom: 48px(pb-12) → 전체 세로 높이가 조금 길어서 위아래 여백이 남음 */
-  /* 변경 후: padding-top: 24px(pt-6), padding-bottom: 32px(pb-8), max-height: 85vh → 위쪽 공백 최소화, 섹션 높이가 화면의 80~85% 정도만 차지하도록 강제로 줄임 */
+  /* 변경 전: padding-top: 24px(pt-6), padding-bottom: 32px(pb-8), max-height: 85vh → 전체 세로 높이가 조금 길어서 더 컴팩트하게 필요 */
+  /* 변경 후: padding-top: 8px(pt-2), padding-bottom: 16px(pb-4), max-height: 80vh → 상하 패딩 최소화(py-2~py-4), 섹션 높이가 화면의 80% 이하로 강제 제한하여 현재보다 20~30% 더 짧게 */
   .hero-section-container {
-    padding-top: 24px !important;
-    /* pt-6: 상단 패딩 24px - 위쪽 공백 최소화 */
-    padding-bottom: 32px !important;
-    /* pb-8: 하단 패딩 32px - 전체 높이 컴팩트하게 */
+    padding-top: 8px !important;
+    /* pt-2: 상단 패딩 8px - 위쪽 공백 최소화 (py-2~py-4 범위) */
+    padding-bottom: 16px !important;
+    /* pb-4: 하단 패딩 16px - 전체 높이 컴팩트하게 (pb-4~pb-6 범위) */
     padding-left: 24px !important;
     padding-right: 24px !important;
     height: auto !important;
-    max-height: 85vh !important;
-    /* max-h-[85vh]: 섹션이 화면 높이의 80~85%만 차지하도록 제한 */
+    max-height: 80vh !important;
+    /* max-h-[80vh]: 섹션이 화면 높이의 80% 이하로 강제 제한하여 현재보다 20~30% 더 짧게 */
     display: flex !important;
     align-items: center !important;
     /* items-center: 수직 중앙 정렬 - 모바일에서도 텍스트와 모델이 세로 방향으로 정확히 섹션 중앙에 오게 */
