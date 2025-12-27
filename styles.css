@@ -2298,40 +2298,50 @@ textarea::placeholder {
 /* .hero-logo 스타일 제거됨 */
 
 /* 싸인 이미지 */
-/* 변경 전: right: 2%, bottom: 5%, opacity: 1 → 모델의 오른쪽 하단 영역에 자연스럽게 배치되지 않음 */
-/* 변경 후: right: 5%, bottom: 10%, opacity: 0.85, mix-blend-mode: multiply → 모델의 오른쪽 하단 영역(이미지 기준 우측 하단 모서리 쪽)으로 이동, 모델의 팔이나 몸 영역과 살짝 겹치게 배치하여 자연스러움 추가 */
+/* 변경 전: right: 5%, bottom: 10%, width: 180px → 너무 중앙으로 올라와 모델 이미지를 과하게 가림 */
+/* 변경 후: right: 5%, bottom: 5%, width: 160px, transform: translate(0, 0), margin: 0, z-index: 10 → 우측 하단 끝으로 명확하게 이동, 오른쪽 아래 구석에 작게 배치, 모델 위로 확실히 보이게 */
 .signature-image {
   position: absolute;
-  /* position: absolute - 부모 컨테이너(relative)를 기준으로 absolute 좌표 설정 */
+  /* position: absolute - 전체 섹션의 우측 하단이 되게 기준 설정 */
   right: 5%;
-  /* right: 5% - 모델의 오른쪽 하단 영역(이미지 기준 우측 하단 모서리 쪽)으로 이동 */
-  bottom: 10%;
-  /* bottom: 10% - 모델의 오른쪽 하단 영역으로 이동, 모델의 팔이나 몸 영역과 살짝 겹치게 배치 */
-  width: 180px;
-  /* width: 180px - 너무 크거나 작지 않게 맞춤 */
+  /* right: 5% - 부모 컨테이너의 오른쪽 끝을 기준으로 정렬 고정 */
+  bottom: 5%;
+  /* bottom: 5% - 오른쪽 아래 구석에 작게 배치 */
+  width: 160px;
+  /* width: 160px - 오른쪽 아래 구석에 작게 배치 */
+  transform: translate(0, 0);
+  /* transform: translate(0, 0) - 기존에 설정된 중앙 정렬 값이 남아있지 않게 초기화 */
+  margin: 0;
+  /* margin: 0 - 기존에 설정된 중앙 정렬 값이 남아있지 않게 초기화 */
   opacity: 0.85;
   /* opacity: 0.85 - 약간 은은하게 보이도록 */
   mix-blend-mode: multiply;
   /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
-  z-index: 5;
-  /* z-index: 5 - 모델 이미지 위에 표시 */
+  z-index: 10;
+  /* z-index: 10 - 모델 위로 올라와야 한다면 확실히 보이게 */
   transition: all 0.3s ease;
 }
 
 /* 반응형: 태블릿에서 싸인 위치 조정 */
 @media (max-width: 1080px) {
   .signature-image {
-    /* 태블릿: 모델의 오른쪽 하단 영역(이미지 기준 우측 하단 모서리 쪽)으로 이동 */
+    /* 태블릿: 우측 하단 끝으로 명확하게 이동 */
     right: 5%;
-    /* right: 5% - 모델의 오른쪽 하단 영역으로 이동 */
-    bottom: 10%;
-    /* bottom: 10% - 모델의 오른쪽 하단 영역으로 이동, 모델의 팔이나 몸 영역과 살짝 겹치게 배치 */
-    width: 180px;
-    /* width: 180px - 너무 크거나 작지 않게 맞춤 */
+    /* right: 5% - 부모 컨테이너의 오른쪽 끝을 기준으로 정렬 고정 */
+    bottom: 5%;
+    /* bottom: 5% - 오른쪽 아래 구석에 작게 배치 */
+    width: 160px;
+    /* width: 160px - 오른쪽 아래 구석에 작게 배치 */
+    transform: translate(0, 0);
+    /* transform: translate(0, 0) - 기존에 설정된 중앙 정렬 값이 남아있지 않게 초기화 */
+    margin: 0;
+    /* margin: 0 - 기존에 설정된 중앙 정렬 값이 남아있지 않게 초기화 */
     opacity: 0.85;
     /* opacity: 0.85 - 약간 은은하게 보이도록 */
     mix-blend-mode: multiply;
     /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
+    z-index: 10;
+    /* z-index: 10 - 모델 위로 올라와야 한다면 확실히 보이게 */
   }
   
   /* 태블릿에서 모델 이미지 크기 조정 */
@@ -2356,17 +2366,23 @@ textarea::placeholder {
 /* 반응형: 모바일에서 싸인 위치 조정 */
 @media (max-width: 768px) {
   .signature-image {
-    /* 모바일: 모델의 오른쪽 하단 영역(이미지 기준 우측 하단 모서리 쪽)으로 이동 */
+    /* 모바일: 우측 하단 끝으로 명확하게 이동 */
     right: 5%;
-    /* right: 5% - 모바일에서 모델의 오른쪽 하단 영역으로 이동 */
-    bottom: 10%;
-    /* bottom: 10% - 모델의 오른쪽 하단 영역으로 이동, 모델의 팔이나 몸 영역과 살짝 겹치게 배치 */
-    width: 160px;
-    /* width: 160px - 모바일에서 적당한 크기로 조정 */
+    /* right: 5% - 부모 컨테이너의 오른쪽 끝을 기준으로 정렬 고정 */
+    bottom: 5%;
+    /* bottom: 5% - 오른쪽 아래 구석에 작게 배치 */
+    width: 140px;
+    /* width: 140px - 모바일에서 오른쪽 아래 구석에 작게 배치 */
+    transform: translate(0, 0);
+    /* transform: translate(0, 0) - 기존에 설정된 중앙 정렬 값이 남아있지 않게 초기화 */
+    margin: 0;
+    /* margin: 0 - 기존에 설정된 중앙 정렬 값이 남아있지 않게 초기화 */
     opacity: 0.85;
     /* opacity: 0.85 - 약간 은은하게 보이도록 */
     mix-blend-mode: multiply;
     /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
+    z-index: 10;
+    /* z-index: 10 - 모델 위로 올라와야 한다면 확실히 보이게 */
   }
   
   /* 히어로 섹션 모바일 레이아웃 - 세로 배치 */
