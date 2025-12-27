@@ -2311,9 +2311,11 @@ textarea::placeholder {
   object-position: top;
   /* object-position: top - 머리 윗부분이 잘리지 않도록 top 유지 */
   position: relative;
-  /* position: relative - 오른쪽 이동을 위한 기준점 */
-  right: -5%;
-  /* right: -5% - 좌측 텍스트와 너무 겹치면 모델 이미지를 오른쪽으로 살짝 이동하여 여백 확보 */
+  /* position: relative - 위치 조정을 위한 기준점 */
+  right: 0;
+  /* right: 0 - 오른쪽 이동 제거하여 왼쪽으로 이동 */
+  margin-left: -40px;
+  /* margin-left: -40px - 모델 이미지를 왼쪽으로 40px 이동 */
   /* 불필요한 효과 제거 */
   mix-blend-mode: normal !important;
   /* mix-blend-mode: normal !important - 블렌딩 제거하여 자연스러운 원본 이미지 컬러 */
@@ -2410,8 +2412,10 @@ textarea::placeholder {
     max-height: none !important;
     object-position: top !important;
     /* object-position: top !important - 머리 윗부분이 잘리지 않도록 top 유지 */
-    right: -5% !important;
-    /* right: -5% !important - 좌측 텍스트와 너무 겹치면 모델 이미지를 오른쪽으로 살짝 이동 */
+    right: 0 !important;
+    /* right: 0 !important - 오른쪽 이동 제거하여 왼쪽으로 이동 */
+    margin-left: -30px !important;
+    /* margin-left: -30px !important - 태블릿에서 모델 이미지를 왼쪽으로 30px 이동 */
   }
 }
 
@@ -2550,6 +2554,8 @@ textarea::placeholder {
     /* object-position: top !important - 모바일에서 머리 윗부분이 잘리지 않도록 top 유지 */
     right: 0 !important;
     /* right: 0 !important - 모바일에서는 오른쪽 이동 제거 */
+    margin-left: -20px !important;
+    /* margin-left: -20px !important - 모바일에서 모델 이미지를 왼쪽으로 20px 이동 */
     /* 불필요한 필터 제거 */
     mix-blend-mode: normal !important;
     /* mix-blend-mode: normal !important - 블렌딩 제거하여 자연스러운 원본 이미지 컬러 */
