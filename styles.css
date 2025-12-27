@@ -2300,13 +2300,13 @@ textarea::placeholder {
 /* .hero-logo 스타일 제거됨 */
 
 /* 싸인 이미지 */
-/* 변경 전: right: -70px, bottom: -50px → 더 오른쪽으로만 이동 필요하되 히어로 섹션 밖으로 벗어나지 않게 */
-/* 변경 후: right: -80px, bottom: -50px → 더 오른쪽으로만 이동하되 히어로 섹션 밖으로 벗어나지 않도록 (bottom은 유지) */
+/* 변경 전: right: -80px, bottom: -50px → 더 오른쪽으로만 이동 필요하되 히어로 섹션 밖으로 벗어나지 않게 */
+/* 변경 후: right: -90px, bottom: -50px → 더 오른쪽으로만 이동하되 히어로 섹션 밖으로 벗어나지 않도록 (bottom은 유지) */
 .signature-image {
   position: absolute;
   /* position: absolute - 부모 컨테이너를 기준으로 absolute 좌표 설정 */
-  right: -80px;
-  /* right: -80px - 더 오른쪽으로 이동 (마이너스 값을 더 크게) */
+  right: -90px;
+  /* right: -90px - 더 오른쪽으로 이동 (마이너스 값을 더 크게) */
   bottom: -50px;
   /* bottom: -50px - 아래 위치는 유지 (변경 없음) */
   width: 160px;
@@ -2330,8 +2330,8 @@ textarea::placeholder {
 @media (max-width: 1080px) {
   .signature-image {
     /* 태블릿: 더 오른쪽으로만 이동하되 히어로 섹션 밖으로 벗어나지 않게 */
-    right: -70px;
-    /* right: -70px - 더 오른쪽으로 이동 (태블릿에서는 데스크톱보다 작은 값) */
+    right: -80px;
+    /* right: -80px - 더 오른쪽으로 이동 (태블릿에서는 데스크톱보다 작은 값) */
     bottom: -45px;
     /* bottom: -45px - 아래 위치는 유지 (변경 없음) */
     width: 160px;
@@ -2375,8 +2375,8 @@ textarea::placeholder {
 @media (max-width: 768px) {
   .signature-image {
     /* 모바일: 더 오른쪽으로만 이동하되 히어로 섹션 밖으로 벗어나지 않게 */
-    right: -60px;
-    /* right: -60px - 모바일에서 더 오른쪽으로 이동 (태블릿보다 작은 값) */
+    right: -70px;
+    /* right: -70px - 모바일에서 더 오른쪽으로 이동 (태블릿보다 작은 값) */
     bottom: -40px;
     /* bottom: -40px - 아래 위치는 유지 (변경 없음) */
     width: 140px;
