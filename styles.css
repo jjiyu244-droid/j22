@@ -2068,8 +2068,8 @@ textarea::placeholder {
 }
 
 /* 히어로 섹션 전체 컨테이너 */
-/* 변경 전: align-items: center !important → 텍스트는 상단 정렬, 모델 이미지는 중앙 정렬로 충돌 */
-/* 변경 후: align-items: flex-start !important, padding: 48px, padding-top: 60px !important → 전체를 위쪽 기준으로 정렬, 텍스트가 너무 위로 붙지 않도록 */
+/* 변경 전: padding-top: 60px !important → 섹션이 아래쪽으로 밀려 있음 */
+/* 변경 후: padding-top: 40px !important → 화면 상단에 더 가깝게 붙도록 상단 여백 줄임 */
 .hero-section-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -2080,8 +2080,8 @@ textarea::placeholder {
   display: flex;
   padding: 48px;
   /* padding: 48px - 전체 패딩 설정 */
-  padding-top: 60px !important;
-  /* padding-top: 60px !important - 텍스트가 너무 위로 붙지 않도록 상단 패딩 추가 */
+  padding-top: 40px !important;
+  /* padding-top: 40px !important - 화면 상단에 더 가깝게 붙도록 상단 여백 줄임 */
   align-items: flex-start !important;
   /* align-items: flex-start !important - 핵심: 전체를 위쪽 기준으로 정렬 */
 }
