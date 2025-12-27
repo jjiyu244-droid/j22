@@ -1516,9 +1516,21 @@ textarea::placeholder {
   }
 
   /* 모바일에서 동그라미 크기 조정 */
-  .pre-login-welcome {
-    padding: 60px 24px !important;
-    min-height: auto !important;
+  /* 모바일에서 pre-login-welcome (히어로 섹션) 최소 높이 강제 설정 */
+  /* 변경 전: min-height: auto !important → 모바일에서 높이가 0이 되어 히어로 섹션이 비어 보임 */
+  /* 변경 후: min-height: 70vh !important → 모바일에서 최소 높이를 화면의 70%로 강제 설정 */
+  .pre-login-welcome,
+  .pre-login-welcome.hero-section-container {
+    padding: 24px 16px !important;
+    /* padding: 24px 16px !important - 모바일에서 적절한 패딩 */
+    min-height: 70vh !important;
+    /* min-height: 70vh !important - 모바일에서 최소 높이를 화면의 70%로 강제 설정 (iPhone SE 375px 기준 약 525px) */
+    height: auto !important;
+    /* height: auto !important - 콘텐츠에 맞춰 자동으로 높이 조정 */
+    display: flex !important;
+    /* display: flex !important - flex 구조 보장 */
+    overflow: visible !important;
+    /* overflow: visible !important - 콘텐츠가 보이도록 */
   }
 
   .pre-login-welcome > div:first-child {
@@ -2610,7 +2622,11 @@ textarea::placeholder {
   /* 모바일에서 히어로 섹션 강제 패치 - 모든 문제 해결 */
   /* 변경 전: min-height: auto → 모바일에서 높이가 0이 되어 히어로 섹션이 완전히 비어 보임 */
   /* 변경 후: min-height: 70vh → 모바일에서 최소 높이를 화면의 70%로 강제 설정하여 히어로 섹션이 정상적으로 보이도록 */
-  .hero-section-container {
+  /* 더 구체적인 선택자 사용하여 .pre-login-welcome의 min-height: auto를 덮어씀 */
+  .hero-section-container,
+  .pre-login-welcome.hero-section-container,
+  section.hero-section-container,
+  section.pre-login-welcome.hero-section-container {
     height: auto !important;
     /* height: auto !important - 콘텐츠에 맞춰 자동으로 높이 조정 */
     min-height: 70vh !important;
@@ -2670,6 +2686,57 @@ textarea::placeholder {
     /* width: 100% !important - 모바일에서 전체 너비 사용 */
     min-height: 300px !important;
     /* min-height: 300px !important - 텍스트 영역이 보이도록 최소 높이 설정 */
+    padding: 0 16px !important;
+    /* padding: 0 16px !important - 모바일에서 좌우 패딩 추가 */
+  }
+  
+  /* 모바일에서 메인 타이틀 텍스트 강제 가시성 보장 */
+  .hero-main-copy-line1,
+  .hero-main-copy-line2 {
+    white-space: normal !important;
+    /* white-space: normal !important - 모바일에서 인라인 스타일의 white-space: nowrap을 덮어써서 텍스트가 보이도록 */
+    display: block !important;
+    /* display: block !important - display: none 문제 해결 */
+    opacity: 1 !important;
+    /* opacity: 1 !important - opacity: 0 문제 해결 */
+    visibility: visible !important;
+    /* visibility: visible !important - visibility: hidden 문제 해결 */
+    width: 100% !important;
+    /* width: 100% !important - 모바일에서 전체 너비 사용 */
+    text-align: center !important;
+    /* text-align: center !important - 모바일에서 텍스트 중앙 정렬 */
+  }
+  
+  /* 모바일에서 서브 텍스트 강제 가시성 보장 */
+  .hero-sub-copy-line1,
+  .hero-sub-copy-line2,
+  .hero-sub-copy-line3 {
+    display: block !important;
+    /* display: block !important - display: none 문제 해결 */
+    opacity: 1 !important;
+    /* opacity: 1 !important - opacity: 0 문제 해결 */
+    visibility: visible !important;
+    /* visibility: visible !important - visibility: hidden 문제 해결 */
+    width: 100% !important;
+    /* width: 100% !important - 모바일에서 전체 너비 사용 */
+    text-align: center !important;
+    /* text-align: center !important - 모바일에서 텍스트 중앙 정렬 */
+  }
+  
+  /* 모바일에서 버튼 컨테이너 강제 가시성 보장 */
+  .hero-button-container {
+    display: flex !important;
+    /* display: flex !important - display: none 문제 해결 */
+    opacity: 1 !important;
+    /* opacity: 1 !important - opacity: 0 문제 해결 */
+    visibility: visible !important;
+    /* visibility: visible !important - visibility: hidden 문제 해결 */
+    width: 100% !important;
+    /* width: 100% !important - 모바일에서 전체 너비 사용 */
+    justify-content: center !important;
+    /* justify-content: center !important - 모바일에서 중앙 정렬 */
+    margin-left: 0 !important;
+    /* margin-left: 0 !important - 모바일에서 좌측 마진 제거 */
   }
   
   /* 모바일에서 이미지 영역 강제 가시성 보장 */
