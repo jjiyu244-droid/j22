@@ -2117,45 +2117,28 @@ textarea::placeholder {
   /* text-align: left - 모든 텍스트는 좌측 정렬 */
 }
 
-/* 메인 카피 1행 스타일 */
-/* 변경 전: margin-bottom: 12px → 각 줄 사이의 간격이 너무 벌어짐 */
-/* 변경 후: margin-bottom: 0px → 각 줄 사이의 간격을 콤팩트하게 붙임 */
-.hero-main-copy-line1 {
+/* 메인 카피 스타일 (1~2번 줄 통합) */
+/* 변경 전: 두 개의 <p> 태그로 분리 → 줄바꿈이 어긋남 */
+/* 변경 후: 하나의 <p> 태그에 <br /> 태그 사용 → 정확히 지정한 위치에서 줄바꿈 강제 */
+.hero-main-copy {
   font-size: 56px;
   /* font-size: 56px - 메인 타이틀 크기 확대, 웅장하게 */
   font-weight: 800;
+  /* font-weight: 800 - 아주 크고 굵게 강조 */
   color: #1e293b;
   line-height: 1.2;
   /* line-height: 1.2 - 큰 글씨는 행간을 좁게 (1.1~1.2) */
   letter-spacing: -0.02em;
   /* letter-spacing: -0.02em - 글자 간격 조정 */
   margin-bottom: 0px;
-  /* margin-bottom: 0px - 각 줄 사이의 간격을 콤팩트하게 붙임 */
-  text-align: left;
-  /* text-align: left - 좌측 정렬 */
-}
-
-/* 메인 카피 2행 스타일 */
-/* 변경 전: margin-bottom: 20px → 각 줄 사이의 간격이 너무 벌어짐 */
-/* 변경 후: margin-bottom: 0px → 각 줄 사이의 간격을 콤팩트하게 붙임 */
-.hero-main-copy-line2 {
-  font-size: 56px;
-  /* font-size: 56px - 메인 타이틀 크기 확대, 웅장하게 */
-  font-weight: 800;
-  color: #1e293b;
-  line-height: 1.2;
-  /* line-height: 1.2 - 큰 글씨는 행간을 좁게 (1.1~1.2) */
-  letter-spacing: -0.02em;
-  /* letter-spacing: -0.02em - 글자 간격 조정 */
-  margin-bottom: 0px;
-  /* margin-bottom: 0px - 각 줄 사이의 간격을 콤팩트하게 붙임 */
+  /* margin-bottom: 0px - 하단 문구와의 간격 조정 */
   text-align: left;
   /* text-align: left - 좌측 정렬 */
 }
 
 /* 서브 카피 1행 스타일 (3번 줄: 코어위브와 함께 더 안전한 내일을 설계하세요.) */
-/* 변경 전: font-size: 18px, color: rgba(0, 0, 0, 0.7), margin-top: 24px → 메인 타이틀과 대비가 부족함 */
-/* 변경 후: font-size: 24px, font-weight: 600, color: #0052CC, margin-top: 15px → 타이틀 바로 아래에 배치, 강조색 적용 */
+/* 변경 전: margin-top: 15px → 타이틀과의 간격이 너무 벌어짐 */
+/* 변경 후: margin-top: 12px → 타이틀과 자연스럽게 이어지도록 간격을 좁혀서 배치 */
 .hero-sub-copy-line1 {
   font-size: 24px;
   /* font-size: 24px - 타이틀 바로 아래에 배치, 메인 타이틀보다는 작게 */
@@ -2165,8 +2148,8 @@ textarea::placeholder {
   /* color: #0052CC - 강조색 적용 */
   line-height: 1.4;
   /* line-height: 1.4 - 적당한 행간 */
-  margin-top: 15px;
-  /* margin-top: 15px - 타이틀 바로 아래에 배치 */
+  margin-top: 12px;
+  /* margin-top: 12px - 타이틀과 자연스럽게 이어지도록 간격을 좁혀서 배치 */
   margin-bottom: 0px;
   /* margin-bottom: 0px - 각 줄 사이의 간격을 콤팩트하게 붙임 */
   text-align: left;
@@ -2174,19 +2157,19 @@ textarea::placeholder {
 }
 
 /* 서브 카피 2행 스타일 (4번 줄: 업계 최고 수준의 보안 알고리즘과 투명한 실시간 모니터링 시스템을 통해) */
-/* 변경 전: font-size: 18px, color: rgba(0, 0, 0, 0.7), margin-top: 24px → 메인 타이틀과 대비가 부족함 */
-/* 변경 후: font-size: 16px, color: #666, margin-top: 10px → 서브 텍스트 크기 축소, 색상 부드럽게 조정 */
+/* 변경 전: margin-top: 10px → 간격이 너무 벌어짐 */
+/* 변경 후: margin-top: 8px → 타이틀과 자연스럽게 이어지도록 간격을 좁혀서 배치 */
 .hero-sub-copy-line2 {
   font-size: 16px;
-  /* font-size: 16px - 서브 텍스트 크기 축소 */
+  /* font-size: 16px - 서브 텍스트 크기 축소, 상대적으로 작게 설정하여 시각적 계층 구조 생성 */
   font-weight: 400;
   /* font-weight: 400 - 작은 글씨는 가늘게 */
   color: #666;
   /* color: #666 - 색상 부드럽게 조정 */
   line-height: 1.5;
   /* line-height: 1.5 - 작은 글씨는 행간을 넓게 (1.5~1.6) */
-  margin-top: 10px;
-  /* margin-top: 10px - 각 줄 사이의 간격을 콤팩트하게 붙임 */
+  margin-top: 8px;
+  /* margin-top: 8px - 타이틀과 자연스럽게 이어지도록 간격을 좁혀서 배치 */
   margin-bottom: 0px;
   /* margin-bottom: 0px - 각 줄 사이의 간격을 콤팩트하게 붙임 */
   text-align: left;
@@ -2353,8 +2336,7 @@ textarea::placeholder {
   }
   
   /* 모바일에서 메인 카피 스타일 조정 */
-  .hero-main-copy-line1,
-  .hero-main-copy-line2 {
+  .hero-main-copy {
     font-size: 32px !important;
     /* font-size: 32px !important - 모바일에서 적당한 크기로 조정 */
     line-height: 1.2 !important;
