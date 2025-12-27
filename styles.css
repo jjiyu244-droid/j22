@@ -2113,6 +2113,23 @@ textarea::placeholder {
   min-width: 0;
 }
 
+/* 메인 카피 스타일 */
+.hero-main-copy {
+  font-size: 42px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.3;
+  margin-bottom: 20px;
+}
+
+/* 서브 카피 스타일 */
+.hero-sub-copy {
+  font-size: 18px;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 40px;
+}
+
 /* 오른쪽 모델 이미지 컨테이너 */
 /* 변경 전: margin-top: 0 → 모델 이미지가 텍스트와 같은 높이에 위치 */
 /* 변경 후: margin-top: -80px → 모델 이미지와 싸인 이미지만 위로 80px 이동, 텍스트 위치는 변경하지 않음 */
@@ -2135,7 +2152,7 @@ textarea::placeholder {
 
 /* 모델 이미지 */
 /* 변경 전: height: 650px → 모델 이미지가 너무 작게 표시됨 */
-/* 변경 후: height: 720px !important → 자연스러운 비율로 조금 더 크게 */
+/* 변경 후: height: 720px !important, object-position: top → 자연스러운 비율로 조금 더 크게, 위로 잘리지 않도록 */
 .hero-image {
   height: 720px !important;
   /* height: 720px !important - 자연스러운 비율로 조금 더 크게 */
@@ -2143,6 +2160,8 @@ textarea::placeholder {
   /* width: auto - 비율 유지 */
   object-fit: contain;
   /* object-fit: contain - 비율 유지하면서 컨테이너에 맞춤 */
+  object-position: top;
+  /* object-position: top - 우측 모델 이미지가 위로 잘리지 않도록 */
   /* 불필요한 효과 제거 */
   mix-blend-mode: normal !important;
   /* mix-blend-mode: normal !important - 블렌딩 제거하여 자연스러운 원본 이미지 컬러 */
@@ -2171,13 +2190,13 @@ textarea::placeholder {
 /* .hero-logo 스타일 제거됨 */
 
 /* 싸인 이미지 */
-/* 변경 전: right: -20px, bottom: -10px, opacity: 0.95 → 위치 조정 필요 */
-/* 변경 후: right: -10px, bottom: -20px, opacity: 1 → 모델 오른쪽 아래에 자연스럽게 붙도록 위치 조정 */
+/* 변경 전: right: -10px, bottom: -20px → 위치 조정 필요 */
+/* 변경 후: right: 5%, bottom: -20px → 모델의 오른쪽 끝부분에 자연스럽게 겹치도록 위치 조정 */
 .signature-image {
   position: absolute;
   /* position: absolute - 모델 오른쪽 아래에 자연스럽게 붙도록 배치 */
-  right: -10px;
-  /* right: -10px - 모델 이미지의 오른쪽에서 -10px 위치 (자연스럽게 붙음) */
+  right: 5%;
+  /* right: 5% - 모델의 오른쪽 끝부분에 자연스럽게 겹치도록 위치 조정 */
   bottom: -20px;
   /* bottom: -20px - 모델 이미지의 하단에서 -20px 위치 (자연스럽게 붙음) */
   width: 160px;
@@ -2192,9 +2211,9 @@ textarea::placeholder {
 /* 반응형: 태블릿에서 싸인 위치 조정 */
 @media (max-width: 1080px) {
   .signature-image {
-    /* 태블릿: 모델 오른쪽 아래에 자연스럽게 붙도록 위치 조정 */
-    right: -10px;
-    /* right: -10px - 모델 이미지의 오른쪽에서 -10px 위치 (자연스럽게 붙음) */
+    /* 태블릿: 모델의 오른쪽 끝부분에 자연스럽게 겹치도록 위치 조정 */
+    right: 5%;
+    /* right: 5% - 모델의 오른쪽 끝부분에 자연스럽게 겹치도록 위치 조정 */
     bottom: -20px;
     /* bottom: -20px - 모델 이미지의 하단에서 -20px 위치 (자연스럽게 붙음) */
     width: 160px;
@@ -2221,9 +2240,9 @@ textarea::placeholder {
 /* 반응형: 모바일에서 싸인 위치 조정 */
 @media (max-width: 768px) {
   .signature-image {
-    /* 모바일: 모델 오른쪽 아래에 자연스럽게 붙도록 위치 조정 */
-    right: -10px;
-    /* right: -10px - 모바일에서 모델 이미지의 오른쪽에서 -10px 위치 (자연스럽게 붙음) */
+    /* 모바일: 모델의 오른쪽 끝부분에 자연스럽게 겹치도록 위치 조정 */
+    right: 5%;
+    /* right: 5% - 모바일에서 모델의 오른쪽 끝부분에 자연스럽게 겹치도록 위치 조정 */
     bottom: -20px;
     /* bottom: -20px - 모델 이미지의 하단에서 -20px 위치 (자연스럽게 붙음) */
     width: 140px;
@@ -2243,6 +2262,20 @@ textarea::placeholder {
     flex: 1 1 100%;
     max-width: 100%;
     text-align: center;
+  }
+  
+  /* 모바일에서 메인 카피 스타일 조정 */
+  .hero-main-copy {
+    font-size: 32px !important;
+    /* font-size: 32px !important - 모바일에서 적당한 크기로 조정 */
+    line-height: 1.3;
+  }
+  
+  /* 모바일에서 서브 카피 스타일 조정 */
+  .hero-sub-copy {
+    font-size: 16px !important;
+    /* font-size: 16px !important - 모바일에서 적당한 크기로 조정 */
+    line-height: 1.5;
   }
   
   .hero-image-area {
