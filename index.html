@@ -96,9 +96,9 @@
         <!-- 로그인 전 환영 히어로 -->
         <!-- 변경 전: absolute positioning으로 왼쪽에 치우쳐 오른쪽에 큰 빈 공간 발생 -->
         <!-- 변경 후: flex 레이아웃으로 중앙 정렬, 왼쪽 텍스트와 오른쪽 이미지 영역 균형 배치 -->
-        <!-- 변경 전: padding-top:0px(pt-0), padding-bottom:16px(pb-4), max-height:70vh, overflow:hidden → 모델의 다리와 싸인 이미지가 섹션 아래로 잘려서 안 보임 -->
-        <!-- 변경 후: padding-top:0px(pt-0), padding-bottom:48px(pb-12), max-height:70vh, overflow:visible → 하단 패딩만 늘려서(pb-12~pb-20) 모델과 싸인 아래에 여유 공간 확보, overflow-visible로 변경하여 잘리지 않게 -->
-        <section class="card glass pre-login-welcome hero-section-container" style="position:relative;padding-top:0px;padding-bottom:48px;padding-left:48px;padding-right:48px;margin:0;height:auto;max-height:70vh;overflow:visible;border-radius:0;border:none !important;box-shadow:none !important;margin-top:0 !important;background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;">
+        <!-- 변경 전: padding-top:0px(pt-0), padding-bottom:48px(pb-12), max-height:70vh, overflow:visible, items-center → 모델과 싸인이 섹션 아래로 너무 내려가서 레이아웃이 깨짐 -->
+        <!-- 변경 후: padding-top:0px(pt-0), padding-bottom:32px(pb-8), max-height:70vh, overflow:visible, items-start → 하단 패딩 적당히 조정(pb-8~pb-16), 수직 중앙 정렬 해제(items-center 제거)하여 콘텐츠가 상단부터 시작하게 -->
+        <section class="card glass pre-login-welcome hero-section-container" style="position:relative;padding-top:0px;padding-bottom:32px;padding-left:48px;padding-right:48px;margin:0;height:auto;max-height:70vh;overflow:visible;border-radius:0;border:none !important;box-shadow:none !important;margin-top:0 !important;background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;">
           <div class="hero-content-wrapper">
             <!-- 왼쪽: 텍스트 영역 -->
             <div class="hero-text-area">

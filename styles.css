@@ -2077,19 +2077,19 @@ textarea::placeholder {
   /* overflow-visible: 모델의 다리와 싸인 이미지가 섹션 아래로 잘리지 않게 하기 위해 overflow-hidden에서 변경 */
   /* max-h-[70vh]: 섹션이 화면 높이의 70% 이하로 강제 제한하여 현재보다 추가로 10~20% 더 짧게 (인라인 스타일에서도 max-height:70vh 적용됨) */
   display: flex;
-  align-items: center;
-  /* items-center: 수직 중앙 정렬 - 텍스트와 모델이 세로 방향으로 정확히 섹션 중앙에 오게 */
+  align-items: flex-start;
+  /* items-start: 수직 중앙 정렬 해제 - 콘텐츠가 상단부터 시작하게 하여 너무 아래로 내려가지 않게 */
 }
 
 /* 히어로 콘텐츠 래퍼 - flex로 왼쪽 텍스트와 오른쪽 이미지 균형 배치 */
 /* 변경 전: justify-content: flex-start, align-items: flex-start → 콘텐츠가 상단에 붙어서 위아래 여백이 남음 */
-/* 변경 후: justify-content: center, align-items: center → 텍스트와 모델이 위아래 좌우 모두 정확히 중앙에 배치 */
+/* 변경 후: justify-content: center, align-items: flex-start → 좌우 중앙 정렬 유지, 수직 중앙 정렬 해제하여 콘텐츠가 상단부터 시작하게 */
 .hero-content-wrapper {
   display: flex;
   justify-content: center;
   /* justify-center: 좌우 중앙 정렬 유지 */
-  align-items: center;
-  /* items-center: 수직 중앙 정렬 - 텍스트와 모델이 세로 방향으로 정확히 섹션 중앙에 오게 */
+  align-items: flex-start;
+  /* items-start: 수직 중앙 정렬 해제 - 콘텐츠가 상단부터 시작하게 하여 너무 아래로 내려가지 않게 */
   gap: 40px;
   max-width: 100%;
   margin: 0 auto;
@@ -2142,14 +2142,14 @@ textarea::placeholder {
 /* .hero-logo 스타일 제거됨 */
 
 /* 싸인 이미지(449.png) 배치 및 합성 */
-/* 변경 전: right: 12px, bottom: 20px → 싸인 이미지가 섹션 아래로 잘려서 안 보임 */
-/* 변경 후: right: 12px, bottom: 12px → bottom-8~bottom-12 범위로 약간 위로 올려서 잘리지 않게 */
+/* 변경 전: right: 12px, bottom: 12px → 모델과 싸인이 섹션 아래로 너무 내려가서 레이아웃이 깨짐 */
+/* 변경 후: right: 12px, bottom: 8px → bottom-4~bottom-8 범위로 올려서 모델 다리 근처에 자연스럽게 위치 */
 .signature-image {
   position: absolute;
   /* 모델 오른쪽 아래 코너 근처로 이동 */
   right: 12px;
-  bottom: 12px;
-  /* bottom-12: 하단 여백 12px - bottom-8~bottom-12 범위로 약간 위로 올려서 잘리지 않게 */
+  bottom: 8px;
+  /* bottom-8: 하단 여백 8px - bottom-4~bottom-8 범위로 올려서 모델 다리 근처에 자연스럽게 위치 */
   /* 크기도 적당하게 유지 (w-48 ~ w-64 = 192px ~ 256px) */
   width: 240px;
   height: auto;
@@ -2166,8 +2166,8 @@ textarea::placeholder {
   .signature-image {
     /* 태블릿: 오른쪽 아래 코너 근처 유지, 크기 적당히 */
     right: 10px;
-    bottom: 12px;
-    /* bottom-12: 하단 여백 12px - bottom-8~bottom-12 범위로 약간 위로 올려서 잘리지 않게 */
+    bottom: 8px;
+    /* bottom-8: 하단 여백 8px - bottom-4~bottom-8 범위로 올려서 모델 다리 근처에 자연스럽게 위치 */
     width: 200px;
   }
   
@@ -2187,8 +2187,8 @@ textarea::placeholder {
   .signature-image {
     /* 모바일: 오른쪽 아래 코너 근처 유지, 크기 적당히 */
     right: 8px;
-    bottom: 12px;
-    /* bottom-12: 하단 여백 12px - bottom-8~bottom-12 범위로 약간 위로 올려서 잘리지 않게 */
+    bottom: 8px;
+    /* bottom-8: 하단 여백 8px - bottom-4~bottom-8 범위로 올려서 모델 다리 근처에 자연스럽게 위치 */
     width: 140px;
     opacity: 0.9;
   }
@@ -2233,13 +2233,13 @@ textarea::placeholder {
   }
   
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
-  /* 변경 전: padding-top: 0px(pt-0), padding-bottom: 8px(pb-2), max-height: 70vh, overflow:hidden → 모델의 다리와 싸인 이미지가 섹션 아래로 잘려서 안 보임 */
-  /* 변경 후: padding-top: 0px(pt-0), padding-bottom: 48px(pb-12), max-height: 70vh, overflow:visible → 하단 패딩만 늘려서(pb-12~pb-20) 모델과 싸인 아래에 여유 공간 확보, overflow-visible로 변경하여 잘리지 않게 */
+  /* 변경 전: padding-top: 0px(pt-0), padding-bottom: 48px(pb-12), max-height: 70vh, overflow:visible, items-center → 모델과 싸인이 섹션 아래로 너무 내려가서 레이아웃이 깨짐 */
+  /* 변경 후: padding-top: 0px(pt-0), padding-bottom: 32px(pb-8), max-height: 70vh, overflow:visible, items-start → 하단 패딩 적당히 조정(pb-8~pb-16), 수직 중앙 정렬 해제(items-center 제거)하여 콘텐츠가 상단부터 시작하게 */
   .hero-section-container {
     padding-top: 0px !important;
     /* pt-0: 상단 패딩 0px - 상단 패딩 거의 제거하여 위아래 여백 거의 없게 (현재 상태 그대로 유지) */
-    padding-bottom: 48px !important;
-    /* pb-12: 하단 패딩 48px - 하단 패딩만 늘려서(pb-12~pb-20) 모델과 싸인 아래에 여유 공간 확보 */
+    padding-bottom: 32px !important;
+    /* pb-8: 하단 패딩 32px - 하단 패딩 적당히 조정(pb-8~pb-16)하여 모델 다리와 싸인이 잘리지 않을 최소한의 패딩으로 */
     padding-left: 24px !important;
     padding-right: 24px !important;
     height: auto !important;
@@ -2248,16 +2248,16 @@ textarea::placeholder {
     overflow: visible !important;
     /* overflow-visible: 모델의 다리와 싸인 이미지가 섹션 아래로 잘리지 않게 하기 위해 overflow-hidden에서 변경 */
     display: flex !important;
-    align-items: center !important;
-    /* items-center: 수직 중앙 정렬 - 모바일에서도 텍스트와 모델이 세로 방향으로 정확히 섹션 중앙에 오게 */
+    align-items: flex-start !important;
+    /* items-start: 수직 중앙 정렬 해제 - 콘텐츠가 상단부터 시작하게 하여 너무 아래로 내려가지 않게 */
   }
   
   /* 모바일에서 콘텐츠 중앙 정렬 */
   .hero-content-wrapper {
     justify-content: center !important;
-    /* justify-center: 좌우 중앙 정렬 */
-    align-items: center !important;
-    /* items-center: 수직 중앙 정렬 */
+    /* justify-center: 좌우 중앙 정렬 유지 */
+    align-items: flex-start !important;
+    /* items-start: 수직 중앙 정렬 해제 - 콘텐츠가 상단부터 시작하게 하여 너무 아래로 내려가지 않게 */
   }
 }
 
