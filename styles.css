@@ -2607,63 +2607,51 @@ textarea::placeholder {
     /* mask-image: none !important - 마스크 제거 */
   }
   
-  /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
-  /* 변경 전: min-height: 650px, overflow-y: visible → 모바일에서 히어로 섹션 내부 콘텐츠가 보이지 않음 */
-  /* 변경 후: min-height: 700px, overflow: visible !important → 모바일에서 최소 높이를 700px로 증가하고 overflow를 visible로 설정하여 콘텐츠가 보이도록 */
-  .hero-section-container {
-    height: auto !important;
-    /* height: auto !important - 콘텐츠에 맞춰 자동으로 높이 조정 */
-    min-height: 700px !important;
-    /* min-height: 700px !important - 모바일에서 최소 높이를 700px로 설정하여 텍스트와 이미지가 모두 보이도록 */
-    overflow: visible !important;
-    /* overflow: visible !important - 모바일에서 콘텐츠가 보이도록 overflow 설정 */
-  }
-  
-  /* 모바일에서 콘텐츠 정렬 - 세로 배치 */
-  /* 변경 전: justify-content: flex-start → 모바일에서 히어로 섹션 내부 콘텐츠가 보이지 않음 */
-  /* 변경 후: height: auto, flex-direction: column, justify-content: center, align-items: center → 모바일에서 세로 정렬로 전환하고 중앙 정렬하여 콘텐츠가 보이도록 */
+  /* 모바일에서 히어로 섹션 강제 패치 - 모든 문제 해결 */
+  /* 변경 전: height: 0, min-height: 0, overflow: hidden, display: none, opacity: 0 등으로 인해 내용이 보이지 않음 */
+  /* 변경 후: 모든 속성을 강제로 리셋하여 flex 구조, height 0px, overflow 잘림, absolute/transform 밀림 문제 모두 해결 */
+  .hero-section-container,
   .hero-content-wrapper {
     height: auto !important;
-    /* height: auto !important - 콘텐츠에 맞춰 자동으로 높이 조정 */
+    /* height: auto !important - height: 0 문제 해결 */
+    min-height: auto !important;
+    /* min-height: auto !important - min-height: 0 문제 해결 */
+    overflow: visible !important;
+    /* overflow: visible !important - overflow: hidden으로 인한 잘림 문제 해결 */
+    display: flex !important;
+    /* display: flex !important - flex 구조 보장 */
     flex-direction: column !important;
-    /* flex-direction: column !important - 모바일에서 세로 정렬로 전환 */
-    justify-content: center !important;
-    /* justify-content: center !important - 중앙 정렬 */
+    /* flex-direction: column !important - 세로 정렬 */
+    justify-content: flex-start !important;
+    /* justify-content: flex-start !important - 위에서부터 배치 */
     align-items: center !important;
     /* align-items: center !important - 중앙 정렬 */
   }
   
-  /* 모바일에서 텍스트 영역 최적화 */
-  .hero-text-area {
-    width: 100% !important;
-    /* width: 100% !important - 모바일에서 전체 너비 사용 */
-    max-width: 100% !important;
-    /* max-width: 100% !important - 모바일에서 최대 너비 제한 */
-    padding: 0 !important;
-    /* padding: 0 !important - 패딩 제거 */
-    text-align: center !important;
-    /* text-align: center !important - 모바일에서 텍스트 중앙 정렬 */
-    opacity: 1 !important;
-    /* opacity: 1 !important - 모바일에서 텍스트 영역이 보이도록 */
-    display: block !important;
-    /* display: block !important - 모바일에서 텍스트 영역이 보이도록 */
-    visibility: visible !important;
-    /* visibility: visible !important - 모바일에서 텍스트 영역이 보이도록 */
-    transform: none !important;
-    /* transform: none !important - 모바일에서 transform 효과 제거 */
-  }
-  
-  /* 모바일에서 이미지 영역 및 이미지 가시성 보장 */
+  /* 모바일에서 텍스트 및 이미지 영역 강제 가시성 보장 */
+  .hero-text-area,
   .hero-image-area,
   .hero-image {
-    opacity: 1 !important;
-    /* opacity: 1 !important - 모바일에서 이미지 영역과 이미지가 보이도록 */
     display: block !important;
-    /* display: block !important - 모바일에서 이미지 영역과 이미지가 보이도록 */
+    /* display: block !important - display: none 문제 해결 */
+    opacity: 1 !important;
+    /* opacity: 1 !important - opacity: 0 문제 해결 */
     visibility: visible !important;
-    /* visibility: visible !important - 모바일에서 이미지 영역과 이미지가 보이도록 */
+    /* visibility: visible !important - visibility: hidden 문제 해결 */
     transform: none !important;
-    /* transform: none !important - 모바일에서 transform 효과 제거 */
+    /* transform: none !important - transform으로 인한 밀림 문제 해결 */
+    position: relative !important;
+    /* position: relative !important - absolute로 인한 밀림 문제 해결 */
+  }
+  
+  /* 모바일에서 이미지 높이 최적화 */
+  .hero-image {
+    height: 420px !important;
+    /* height: 420px !important - 이미지가 너무 커서 밀려나는 문제 해결 */
+    max-height: 420px !important;
+    /* max-height: 420px !important - 이미지 최대 높이 제한 */
+    object-fit: contain !important;
+    /* object-fit: contain !important - 비율 유지하면서 컨테이너에 맞춤 */
   }
 }
 
