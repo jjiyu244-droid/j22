@@ -2067,9 +2067,9 @@ textarea::placeholder {
   transition: all 0.3s ease;
 }
 
-/* 히어로 섹션 컨테이너 - 화면 이탈 방지 및 중앙 정렬 */
-/* 변경 전: align-items: flex-start → 텍스트와 모델 이미지 높이가 달라서 이미지가 아래로 눌림 */
-/* 변경 후: align-items: center !important, padding-top: 40px → 텍스트와 모델 이미지가 정확히 수평 중앙 정렬, 모델이 아래로 밀리지 않음 */
+/* 히어로 섹션 전체 컨테이너 */
+/* 변경 전: align-items: center !important → 텍스트는 상단 정렬, 모델 이미지는 중앙 정렬로 충돌 */
+/* 변경 후: align-items: flex-start !important, padding: 48px, padding-top: 60px !important → 전체를 위쪽 기준으로 정렬, 텍스트가 너무 위로 붙지 않도록 */
 .hero-section-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -2078,21 +2078,23 @@ textarea::placeholder {
   /* min-h-[560px]: 이미지가 잘리지 않도록 최소 높이 520~580px 범위에서 560px 설정 (인라인 스타일에서도 min-height:560px 적용됨) */
   /* max-h-[70vh]: 섹션이 화면 높이의 70% 이하로 강제 제한하여 현재보다 추가로 10~20% 더 짧게 (인라인 스타일에서도 max-height:70vh 적용됨) */
   display: flex;
-  align-items: center !important;
-  /* align-items: center !important - 가장 중요함: 텍스트와 모델 이미지가 정확히 수평 중앙 정렬, 모델이 아래로 밀리지 않음 */
-  padding-top: 40px;
-  /* padding-top: 40px - 상단 여백 추가 */
+  padding: 48px;
+  /* padding: 48px - 전체 패딩 설정 */
+  padding-top: 60px !important;
+  /* padding-top: 60px !important - 텍스트가 너무 위로 붙지 않도록 상단 패딩 추가 */
+  align-items: flex-start !important;
+  /* align-items: flex-start !important - 핵심: 전체를 위쪽 기준으로 정렬 */
 }
 
-/* 히어로 콘텐츠 래퍼 - flex로 왼쪽 텍스트와 오른쪽 이미지 균형 배치 */
-/* 변경 전: justify-content: center, align-items: flex-start → 텍스트와 모델 이미지 높이가 달라서 이미지가 아래로 눌림 */
-/* 변경 후: justify-content: space-between, align-items: center, width: 100% → 텍스트는 왼쪽, 모델은 오른쪽에 수평으로 정확히 맞추고, 세로 중앙 정렬 */
+/* 내부 레이아웃 */
+/* 변경 전: align-items: center → 텍스트는 상단 정렬, 모델 이미지는 중앙 정렬로 충돌 */
+/* 변경 후: align-items: flex-start !important → 텍스트도 모델도 위 정렬로 통일 */
 .hero-content-wrapper {
   display: flex;
   justify-content: space-between;
   /* justify-content: space-between - 텍스트는 왼쪽, 모델은 오른쪽에 수평으로 정확히 맞춤 */
-  align-items: center;
-  /* align-items: center - 세로 중앙 정렬: 텍스트와 모델 이미지가 정확히 수평 중앙 정렬 */
+  align-items: flex-start !important;
+  /* align-items: flex-start !important - 텍스트도 모델도 위 정렬 */
   width: 100%;
   /* width: 100% - 전체 너비 사용 */
   gap: 40px;
@@ -2111,33 +2113,37 @@ textarea::placeholder {
   min-width: 0;
 }
 
-/* 오른쪽: 이미지 영역 (모델 + 싸인) */
-/* 변경 전: flex: 0 1 50%, justify-content: flex-end → 모델과 싸인 이미지가 아래로 떨어져서 겹쳐 보임 */
-/* 변경 후: flex: 1, justify-content: center, align-items: flex-end → 오른쪽 영역이 유연하게 확장되면서 중앙 정렬, 하단 정렬 */
+/* 오른쪽 모델 이미지 컨테이너 */
+/* 변경 전: justify-content: center, align-items: flex-end → 모델 이미지가 아래로 내려감 */
+/* 변경 후: justify-content: flex-end, align-items: flex-start, padding-right: 0, margin-top: 0 → 위 정렬로 고정, 오른쪽 정렬 */
 .hero-image-area {
   flex: 1;
   /* flex: 1 - 오른쪽 영역이 유연하게 확장 */
   display: flex;
-  justify-content: center;
-  /* justify-content: center - 중앙 정렬 */
-  align-items: flex-end;
-  /* align-items: flex-end - 하단 정렬 */
+  justify-content: flex-end;
+  /* justify-content: flex-end - 오른쪽 정렬 */
+  align-items: flex-start;
+  /* align-items: flex-start - 위 정렬로 고정 */
   position: relative;
   /* position: relative - 싸인 이미지의 absolute positioning 기준점 */
+  padding-right: 0;
+  /* padding-right: 0 - 오른쪽 패딩 제거 */
+  margin-top: 0;
+  /* margin-top: 0 - 상단 마진 제거 */
   min-width: 0;
 }
 
-/* 인물 이미지 - 원본 색상으로 표시 */
-/* 변경 전: mix-blend-mode: luminosity, mask-image → 컬러 blending이 깨져서 원본 색이 죽음 */
-/* 변경 후: mix-blend-mode: normal, mask-image 제거 → 자연스러운 원본 이미지 컬러, 자동으로 화면에 딱 맞게 조정 */
+/* 모델 이미지 */
+/* 변경 전: height: 650px → 모델 이미지가 너무 작게 표시됨 */
+/* 변경 후: height: 720px !important → 자연스러운 비율로 조금 더 크게 */
 .hero-image {
-  height: 650px !important;
-  /* height: 650px !important - 자동으로 화면에 딱 맞게 줄임 (기존 850px에서 조정) */
+  height: 720px !important;
+  /* height: 720px !important - 자연스러운 비율로 조금 더 크게 */
   width: auto;
   /* width: auto - 비율 유지 */
   object-fit: contain;
   /* object-fit: contain - 비율 유지하면서 컨테이너에 맞춤 */
-  /* 불필요한 필터 제거 */
+  /* 불필요한 효과 제거 */
   mix-blend-mode: normal !important;
   /* mix-blend-mode: normal !important - 블렌딩 제거하여 자연스러운 원본 이미지 컬러 */
   -webkit-mask-image: none !important;
@@ -2146,14 +2152,16 @@ textarea::placeholder {
   /* mask-image: none !important - 마스크 제거 */
 }
 
-/* 인물 이미지 컨테이너 - 싸인 이미지 기준점 */
-/* 변경 전: display: block → 모델과 싸인 이미지가 아래로 떨어져서 겹쳐 보임 */
-/* 변경 후: position: relative, display: inline-block → 싸인 이미지의 absolute positioning 기준점으로 사용, 인라인 블록으로 자연스러운 배치 */
+/* 인물 이미지 컨테이너 */
+/* 변경 전: margin-top: 12px → 모델 이미지가 아래로 내려감 */
+/* 변경 후: margin-top: 0 !important → 상단 마진 제거하여 위 정렬 유지 */
 .person-image {
   position: relative;
   /* position: relative - 싸인 이미지의 absolute positioning 기준점 */
   display: inline-block;
   /* display: inline-block - 인라인 블록으로 자연스러운 배치 */
+  margin-top: 0 !important;
+  /* margin-top: 0 !important - 상단 마진 제거 */
   z-index: 10;
 }
 
@@ -2162,20 +2170,20 @@ textarea::placeholder {
 /* 변경 후: 로고 완전히 제거하여 모델 이미지에 집중 */
 /* .hero-logo 스타일 제거됨 */
 
-/* 싸인 이미지(449.png) 배치 및 합성 */
-/* 변경 전: right: 0, bottom: -20px, width: 180px, z-index: 1, mix-blend-mode: luminosity → 모델과 싸인 이미지가 아래로 떨어져서 겹쳐 보임 */
-/* 변경 후: right: -20px, bottom: -10px, width: 160px, z-index: 5 → 모델 오른쪽 아래에 자연스럽게 붙도록 위치 조정, z-index 높여서 위에 표시 */
+/* 싸인 이미지 */
+/* 변경 전: right: -20px, bottom: -10px, opacity: 0.95 → 위치 조정 필요 */
+/* 변경 후: right: -10px, bottom: -20px, opacity: 1 → 모델 오른쪽 아래에 자연스럽게 붙도록 위치 조정 */
 .signature-image {
   position: absolute;
   /* position: absolute - 모델 오른쪽 아래에 자연스럽게 붙도록 배치 */
-  right: -20px;
-  /* right: -20px - 모델 이미지의 오른쪽에서 -20px 위치 (자연스럽게 붙음) */
-  bottom: -10px;
-  /* bottom: -10px - 모델 이미지의 하단에서 -10px 위치 (자연스럽게 붙음) */
+  right: -10px;
+  /* right: -10px - 모델 이미지의 오른쪽에서 -10px 위치 (자연스럽게 붙음) */
+  bottom: -20px;
+  /* bottom: -20px - 모델 이미지의 하단에서 -20px 위치 (자연스럽게 붙음) */
   width: 160px;
   /* width: 160px - 적당한 크기로 조정 */
-  opacity: 0.95;
-  /* opacity: 0.95 - 약간 투명도 조정 */
+  opacity: 1;
+  /* opacity: 1 - 완전 불투명 */
   z-index: 5;
   /* z-index: 5 - 모델 이미지 위에 표시 */
   transition: all 0.3s ease;
@@ -2185,18 +2193,22 @@ textarea::placeholder {
 @media (max-width: 1080px) {
   .signature-image {
     /* 태블릿: 모델 오른쪽 아래에 자연스럽게 붙도록 위치 조정 */
-    right: -20px;
-    /* right: -20px - 모델 이미지의 오른쪽에서 -20px 위치 (자연스럽게 붙음) */
-    bottom: -10px;
-    /* bottom: -10px - 모델 이미지의 하단에서 -10px 위치 (자연스럽게 붙음) */
+    right: -10px;
+    /* right: -10px - 모델 이미지의 오른쪽에서 -10px 위치 (자연스럽게 붙음) */
+    bottom: -20px;
+    /* bottom: -20px - 모델 이미지의 하단에서 -20px 위치 (자연스럽게 붙음) */
     width: 160px;
     /* width: 160px - 적당한 크기로 조정 */
+    opacity: 1;
+    /* opacity: 1 - 완전 불투명 */
   }
   
   /* 태블릿에서 모델 이미지 크기 조정 */
   .person-image {
     display: inline-block;
     /* display: inline-block - 인라인 블록으로 자연스러운 배치 */
+    margin-top: 0 !important;
+    /* margin-top: 0 !important - 상단 마진 제거 */
   }
   
   .hero-image {
@@ -2212,12 +2224,12 @@ textarea::placeholder {
     /* 모바일: 모델 오른쪽 아래에 자연스럽게 붙도록 위치 조정 */
     right: -10px;
     /* right: -10px - 모바일에서 모델 이미지의 오른쪽에서 -10px 위치 (자연스럽게 붙음) */
-    bottom: -10px;
-    /* bottom: -10px - 모델 이미지의 하단에서 -10px 위치 (자연스럽게 붙음) */
+    bottom: -20px;
+    /* bottom: -20px - 모델 이미지의 하단에서 -20px 위치 (자연스럽게 붙음) */
     width: 140px;
     /* width: 140px - 모바일에서 적당한 크기로 조정 */
-    opacity: 0.95;
-    /* opacity: 0.95 - 약간 투명도 조정 */
+    opacity: 1;
+    /* opacity: 1 - 완전 불투명 */
   }
   
   /* 히어로 섹션 모바일 레이아웃 - 세로 배치 */
@@ -2240,14 +2252,19 @@ textarea::placeholder {
     /* position: relative - 싸인 이미지의 absolute positioning 기준점 */
     justify-content: center;
     /* justify-content: center - 중앙 정렬 */
-    align-items: flex-end;
-    /* align-items: flex-end - 하단 정렬 */
+    align-items: flex-start;
+    /* align-items: flex-start - 위 정렬로 고정 */
     padding-right: 0;
+    /* padding-right: 0 - 오른쪽 패딩 제거 */
+    margin-top: 0;
+    /* margin-top: 0 - 상단 마진 제거 */
   }
   
   .person-image {
     display: inline-block;
     /* display: inline-block - 인라인 블록으로 자연스러운 배치 */
+    margin-top: 0 !important;
+    /* margin-top: 0 !important - 상단 마진 제거 */
     max-height: 500px;
   }
   
@@ -2266,15 +2283,13 @@ textarea::placeholder {
   }
   
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
-  /* 변경 전: padding-top: 0px(pt-0), align-items: flex-start → 텍스트와 모델 이미지 높이가 달라서 이미지가 아래로 눌림 */
-  /* 변경 후: padding-top: 24px, align-items: center → 텍스트와 모델 이미지가 정확히 수평 중앙 정렬, 모델이 아래로 밀리지 않음 */
+  /* 변경 전: padding-top: 24px, align-items: center → 텍스트는 상단 정렬, 모델 이미지는 중앙 정렬로 충돌 */
+  /* 변경 후: padding: 24px, padding-top: 40px, align-items: flex-start → 전체를 위쪽 기준으로 정렬, 텍스트가 너무 위로 붙지 않도록 */
   .hero-section-container {
-    padding-top: 24px !important;
-    /* padding-top: 24px !important - 모바일에서 상단 여백 추가 */
-    padding-bottom: 32px !important;
-    /* pb-8: 하단 패딩 32px - 하단 패딩 적당히 조정(pb-8~pb-16)하여 모델 다리와 싸인이 잘리지 않을 최소한의 패딩으로 */
-    padding-left: 24px !important;
-    padding-right: 24px !important;
+    padding: 24px !important;
+    /* padding: 24px !important - 모바일에서 전체 패딩 설정 */
+    padding-top: 40px !important;
+    /* padding-top: 40px !important - 모바일에서 텍스트가 너무 위로 붙지 않도록 상단 패딩 추가 */
     height: auto !important;
     min-height: 520px !important;
     /* min-h-[520px]: 이미지가 잘리지 않도록 최소 높이 520~580px 범위에서 520px 설정 (모바일) */
@@ -2283,16 +2298,16 @@ textarea::placeholder {
     overflow: visible !important;
     /* overflow-visible: 모델의 다리와 싸인 이미지가 섹션 아래로 잘리지 않게 하기 위해 overflow-hidden에서 변경 */
     display: flex !important;
-    align-items: center !important;
-    /* align-items: center !important - 가장 중요함: 텍스트와 모델 이미지가 정확히 수평 중앙 정렬, 모델이 아래로 밀리지 않음 */
+    align-items: flex-start !important;
+    /* align-items: flex-start !important - 핵심: 전체를 위쪽 기준으로 정렬 */
   }
   
-  /* 모바일에서 콘텐츠 중앙 정렬 */
+  /* 모바일에서 콘텐츠 정렬 */
   .hero-content-wrapper {
     justify-content: center !important;
     /* justify-center: 좌우 중앙 정렬 유지 */
-    align-items: center !important;
-    /* align-items: center - 세로 중앙 정렬: 텍스트와 모델 이미지가 정확히 수평 중앙 정렬 */
+    align-items: flex-start !important;
+    /* align-items: flex-start !important - 텍스트도 모델도 위 정렬 */
   }
 }
 
@@ -2302,8 +2317,8 @@ textarea::placeholder {
     gap: 30px;
     justify-content: space-between;
     /* justify-content: space-between - 텍스트는 왼쪽, 모델은 오른쪽에 수평으로 정확히 맞춤 */
-    align-items: center;
-    /* align-items: center - 세로 중앙 정렬: 태블릿에서도 텍스트와 모델이 세로 방향으로 정확히 섹션 중앙에 오게 */
+    align-items: flex-start !important;
+    /* align-items: flex-start !important - 텍스트도 모델도 위 정렬 */
     width: 100%;
     /* width: 100% - 전체 너비 사용 */
   }
@@ -2316,15 +2331,22 @@ textarea::placeholder {
   .hero-image-area {
     flex: 1;
     /* flex: 1 - 오른쪽 영역이 유연하게 확장 */
-    justify-content: center;
-    /* justify-content: center - 중앙 정렬 */
-    padding-right: 10px;
+    justify-content: flex-end;
+    /* justify-content: flex-end - 오른쪽 정렬 */
+    align-items: flex-start;
+    /* align-items: flex-start - 위 정렬로 고정 */
+    padding-right: 0;
+    /* padding-right: 0 - 오른쪽 패딩 제거 */
+    margin-top: 0;
+    /* margin-top: 0 - 상단 마진 제거 */
   }
   
   /* 태블릿에서도 높이 적당히 유지 */
   .person-image {
     display: inline-block;
     /* display: inline-block - 인라인 블록으로 자연스러운 배치 */
+    margin-top: 0 !important;
+    /* margin-top: 0 !important - 상단 마진 제거 */
   }
   
   .hero-image {
