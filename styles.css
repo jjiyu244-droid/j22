@@ -2069,12 +2069,12 @@ textarea::placeholder {
 
 /* 히어로 섹션 컨테이너 - 화면 이탈 방지 및 중앙 정렬 */
 /* 변경 전: max-width만 있고 내부 콘텐츠가 absolute로 왼쪽 치우침 */
-/* 변경 후: flex 레이아웃으로 중앙 정렬, 양쪽 균형 배치, max-height:80vh로 화면 높이의 80% 이하로 강제 제한하여 현재보다 20~30% 더 짧게 */
+/* 변경 후: flex 레이아웃으로 중앙 정렬, 양쪽 균형 배치, max-height:70vh로 화면 높이의 70% 이하로 강제 제한하여 현재보다 추가로 10~20% 더 짧게 */
 .hero-section-container {
   max-width: 1400px;
   margin: 0 auto;
   overflow: hidden;
-  /* max-h-[80vh]: 섹션이 화면 높이의 80% 이하로 강제 제한하여 현재보다 20~30% 더 짧게 (인라인 스타일에서도 max-height:80vh 적용됨) */
+  /* max-h-[70vh]: 섹션이 화면 높이의 70% 이하로 강제 제한하여 현재보다 추가로 10~20% 더 짧게 (인라인 스타일에서도 max-height:70vh 적용됨) */
   display: flex;
   align-items: center;
   /* items-center: 수직 중앙 정렬 - 텍스트와 모델이 세로 방향으로 정확히 섹션 중앙에 오게 */
@@ -2229,18 +2229,18 @@ textarea::placeholder {
   }
   
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
-  /* 변경 전: padding-top: 8px(pt-2), padding-bottom: 16px(pb-4), max-height: 80vh → 상하 패딩이 다름 */
-  /* 변경 후: padding-top: 16px(pt-4), padding-bottom: 16px(pb-4), max-height: 80vh → py-4 (상하 패딩 16px로 통일) */
+  /* 변경 전: padding-top: 16px(pt-4), padding-bottom: 16px(pb-4), max-height: 80vh → 섹션 세로 길이가 아직 길어서 더 극단적으로 짧게 필요 */
+  /* 변경 후: padding-top: 0px(pt-0), padding-bottom: 8px(pb-2), max-height: 70vh → 상단 패딩 거의 제거(pt-0), 하단 패딩 최소화(pb-2), 섹션 높이 70vh로 강제 제한하여 현재보다 추가로 10~20% 더 짧게 */
   .hero-section-container {
-    padding-top: 16px !important;
-    /* pt-4: 상단 패딩 16px - py-4 (상하 패딩 16px로 통일) */
-    padding-bottom: 16px !important;
-    /* pb-4: 하단 패딩 16px - py-4 (상하 패딩 16px로 통일) */
+    padding-top: 0px !important;
+    /* pt-0: 상단 패딩 0px - 상단 패딩 거의 제거하여 위아래 여백 거의 없게 */
+    padding-bottom: 8px !important;
+    /* pb-2: 하단 패딩 8px - 하단 패딩 최소화(pb-2~pb-4 범위) */
     padding-left: 24px !important;
     padding-right: 24px !important;
     height: auto !important;
-    max-height: 80vh !important;
-    /* max-h-[80vh]: 섹션이 화면 높이의 80% 이하로 강제 제한하여 현재보다 20~30% 더 짧게 */
+    max-height: 70vh !important;
+    /* max-h-[70vh]: 섹션이 화면 높이의 70% 이하로 강제 제한하여 현재보다 추가로 10~20% 더 짧게 */
     display: flex !important;
     align-items: center !important;
     /* items-center: 수직 중앙 정렬 - 모바일에서도 텍스트와 모델이 세로 방향으로 정확히 섹션 중앙에 오게 */
