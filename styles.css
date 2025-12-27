@@ -2234,6 +2234,22 @@ textarea::placeholder {
   /* text-align: left - 좌측 정렬 */
 }
 
+/* 시작하기 버튼 컨테이너 */
+/* 변경 전: justify-content: flex-start, margin-left 없음 → 버튼이 좌측 하단에 치우침 */
+/* 변경 후: margin-left: 150px → 버튼을 우측으로 이동하여 상단 문장의 중앙 지점에 위치 */
+.hero-button-container {
+  display: flex;
+  /* display: flex - flex 레이아웃 사용 */
+  justify-content: flex-start;
+  /* justify-content: flex-start - 좌측 정렬 유지 */
+  align-self: flex-start;
+  /* align-self: flex-start - flex-start 정렬 */
+  margin-top: 30px;
+  /* margin-top: 30px - 마지막 문장과 버튼 사이의 간격 유지 */
+  margin-left: 150px;
+  /* margin-left: 150px - 버튼을 우측으로 이동하여 상단 문장의 중앙 지점에 위치 */
+}
+
 /* 오른쪽 모델 이미지 컨테이너 */
 /* 변경 전: margin-top: 0 → 모델 이미지가 텍스트와 같은 높이에 위치 */
 /* 변경 후: margin-top: -80px → 모델 이미지와 싸인 이미지만 위로 80px 이동, 텍스트 위치는 변경하지 않음 */
@@ -2446,6 +2462,18 @@ textarea::placeholder {
     /* color: #666 !important - 색상 부드럽게 조정 */
     line-height: 1.5 !important;
     /* line-height: 1.5 !important - 작은 글씨는 행간을 넓게 */
+  }
+  
+  /* 모바일에서 시작하기 버튼 중앙 정렬 */
+  /* 변경 전: margin-left: 150px → 모바일에서 버튼이 너무 오른쪽으로 치우쳐 모델 이미지를 가림 */
+  /* 변경 후: margin-left: 0, text-align: center → 모바일에서 중앙 정렬로 복귀 */
+  .hero-button-container {
+    margin-left: 0 !important;
+    /* margin-left: 0 !important - 모바일에서 좌측 마진 제거 */
+    justify-content: center !important;
+    /* justify-content: center !important - 모바일에서 중앙 정렬 */
+    text-align: center !important;
+    /* text-align: center !important - 모바일에서 중앙 정렬 */
   }
   
   .hero-image-area {
