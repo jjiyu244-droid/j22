@@ -2250,6 +2250,29 @@ textarea::placeholder {
   /* margin-left: 150px - 버튼을 우측으로 이동하여 상단 문장의 중앙 지점에 위치 */
 }
 
+/* 시작하기 버튼 가로 폭 확장 */
+/* 변경 전: padding: 16px 32px → 버튼이 좁아서 답답해 보임 */
+/* 변경 후: padding: 12px 60px, min-width: 200px, border-radius: 50px, letter-spacing: 1px → 가로 폭을 1.3배 이상 확장하고 세련된 디자인 적용 */
+.hero-button-container .btn-primary,
+.hero-start-button {
+  padding: 12px 60px !important;
+  /* padding: 12px 60px !important - 좌우 패딩을 대폭 늘려 가로 폭 확장 (기존 32px에서 60px로 약 1.9배 증가) */
+  min-width: 200px;
+  /* min-width: 200px - 최소 가로 폭 설정하여 버튼이 일정 크기 이상 유지되도록 */
+  text-align: center;
+  /* text-align: center - 버튼 내부 텍스트 중앙 정렬 */
+  justify-content: center;
+  /* justify-content: center - flex 내부 텍스트 중앙 정렬 */
+  border-radius: 50px !important;
+  /* border-radius: 50px !important - 모서리를 더 둥글게 처리하여 트렌디한 느낌 */
+  letter-spacing: 1px;
+  /* letter-spacing: 1px - 글자 사이 간격을 미세하게 주어 가독성과 고급스러움 향상 */
+  display: inline-flex;
+  /* display: inline-flex - flex 레이아웃 사용 */
+  align-items: center;
+  /* align-items: center - 수직 중앙 정렬 */
+}
+
 /* 오른쪽 모델 이미지 컨테이너 */
 /* 변경 전: margin-top: 0 → 모델 이미지가 텍스트와 같은 높이에 위치 */
 /* 변경 후: margin-top: -80px → 모델 이미지와 싸인 이미지만 위로 80px 이동, 텍스트 위치는 변경하지 않음 */
@@ -2464,9 +2487,9 @@ textarea::placeholder {
     /* line-height: 1.5 !important - 작은 글씨는 행간을 넓게 */
   }
   
-  /* 모바일에서 시작하기 버튼 중앙 정렬 */
-  /* 변경 전: margin-left: 150px → 모바일에서 버튼이 너무 오른쪽으로 치우쳐 모델 이미지를 가림 */
-  /* 변경 후: margin-left: 0, text-align: center → 모바일에서 중앙 정렬로 복귀 */
+  /* 모바일에서 시작하기 버튼 중앙 정렬 및 가로 폭 조정 */
+  /* 변경 전: margin-left: 150px, padding: 12px 60px → 모바일에서 버튼이 너무 오른쪽으로 치우쳐 모델 이미지를 가리고, 너무 길어서 화면을 뚫고 나갈 수 있음 */
+  /* 변경 후: margin-left: 0, width: 90%, padding 조정 → 모바일에서 중앙 정렬로 복귀하고 가로 폭을 유연하게 조절 */
   .hero-button-container {
     margin-left: 0 !important;
     /* margin-left: 0 !important - 모바일에서 좌측 마진 제거 */
@@ -2474,6 +2497,18 @@ textarea::placeholder {
     /* justify-content: center !important - 모바일에서 중앙 정렬 */
     text-align: center !important;
     /* text-align: center !important - 모바일에서 중앙 정렬 */
+  }
+  
+  .hero-button-container .btn-primary,
+  .hero-start-button {
+    width: 90% !important;
+    /* width: 90% !important - 모바일에서 버튼이 너무 길어지지 않도록 가로 폭을 90%로 제한 */
+    max-width: 100% !important;
+    /* max-width: 100% !important - 최대 가로 폭 제한 */
+    padding: 12px 24px !important;
+    /* padding: 12px 24px !important - 모바일에서 좌우 패딩을 줄여서 적절한 크기 유지 */
+    min-width: auto !important;
+    /* min-width: auto !important - 모바일에서 최소 가로 폭 제한 제거 */
   }
   
   .hero-image-area {
