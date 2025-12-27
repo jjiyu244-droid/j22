@@ -96,9 +96,9 @@
         <!-- 로그인 전 환영 히어로 -->
         <!-- 변경 전: absolute positioning으로 왼쪽에 치우쳐 오른쪽에 큰 빈 공간 발생 -->
         <!-- 변경 후: flex 레이아웃으로 중앙 정렬, 왼쪽 텍스트와 오른쪽 이미지 영역 균형 배치 -->
-        <!-- 변경 전: padding-top:60px → 섹션이 아래쪽으로 밀려 있음 -->
-        <!-- 변경 후: padding-top:40px → 화면 상단에 더 가깝게 붙도록 상단 여백 줄임, 텍스트와 모델 이미지는 기존 위치 비율 유지 -->
-        <section class="card glass pre-login-welcome hero-section-container" style="position:relative;padding:48px;padding-top:40px;margin:0;height:auto;min-height:560px;max-height:70vh;overflow:visible;border-radius:0;border:none !important;box-shadow:none !important;margin-top:0 !important;background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;">
+        <!-- 변경 전: overflow:visible → 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생길 수 있음 -->
+        <!-- 변경 후: overflow:hidden → 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 -->
+        <section class="card glass pre-login-welcome hero-section-container" style="position:relative;padding:48px;padding-top:40px;margin:0;height:auto;min-height:560px;max-height:70vh;overflow:hidden;border-radius:0;border:none !important;box-shadow:none !important;margin-top:0 !important;background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;">
           <div class="hero-content-wrapper">
             <!-- 왼쪽: 텍스트 영역 -->
             <div class="hero-text-area">

@@ -2068,13 +2068,14 @@ textarea::placeholder {
 }
 
 /* 히어로 섹션 전체 컨테이너 */
-/* 변경 전: padding-top: 60px !important → 섹션이 아래쪽으로 밀려 있음 */
-/* 변경 후: padding-top: 40px !important → 화면 상단에 더 가깝게 붙도록 상단 여백 줄임 */
+/* 변경 전: overflow: visible, max-width: 1400px → 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생길 수 있음 */
+/* 변경 후: overflow: hidden, max-width: 1200px → 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록, 본문 최대 폭 컨테이너 기준 */
 .hero-section-container {
-  max-width: 1400px;
+  max-width: 1200px;
+  /* max-width: 1200px - 본문 최대 폭 컨테이너 기준으로 배치 */
   margin: 0 auto;
-  overflow: visible;
-  /* overflow-visible: 모델의 다리와 싸인 이미지가 섹션 아래로 잘리지 않게 하기 위해 overflow-hidden에서 변경 */
+  overflow: hidden;
+  /* overflow: hidden - 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 */
   /* min-h-[560px]: 이미지가 잘리지 않도록 최소 높이 520~580px 범위에서 560px 설정 (인라인 스타일에서도 min-height:560px 적용됨) */
   /* max-h-[70vh]: 섹션이 화면 높이의 70% 이하로 강제 제한하여 현재보다 추가로 10~20% 더 짧게 (인라인 스타일에서도 max-height:70vh 적용됨) */
   display: flex;
@@ -2254,17 +2255,21 @@ textarea::placeholder {
 }
 
 /* 모델 이미지 */
-/* 변경 전: height: 720px, object-position: center 10% → 모델 이미지의 머리 부분이 잘릴 수 있음 */
-/* 변경 후: height: 750px, object-position: center 5% → 모델 이미지 머리 부분이 잘리지 않도록 높이 재조정 */
+/* 변경 전: height: 750px → 모델 이미지 크기가 작음 */
+/* 변경 후: height: 860px, object-position: top, right: -5% → 모델 이미지 크기를 10~15% 더 크게, 머리 윗부분이 잘리지 않도록, 좌측 텍스트와 겹치지 않도록 오른쪽으로 이동 */
 .hero-image {
-  height: 750px !important;
-  /* height: 750px !important - 모델 이미지 머리 부분이 잘리지 않도록 높이 재조정 */
+  height: 860px !important;
+  /* height: 860px !important - 모델 이미지 크기를 10~15% 더 크게 (750px * 1.15 = 862.5px) */
   width: auto;
   /* width: auto - 비율 유지 */
   object-fit: contain;
   /* object-fit: contain - 비율 유지하면서 컨테이너에 맞춤 */
-  object-position: center 5%;
-  /* object-position: center 5% - 모델 이미지의 머리 윗부분이 잘리지 않도록 위치 미세 조정 */
+  object-position: top;
+  /* object-position: top - 머리 윗부분이 잘리지 않도록 top 유지 */
+  position: relative;
+  /* position: relative - 오른쪽 이동을 위한 기준점 */
+  right: -5%;
+  /* right: -5% - 좌측 텍스트와 너무 겹치면 모델 이미지를 오른쪽으로 살짝 이동하여 여백 확보 */
   /* 불필요한 효과 제거 */
   mix-blend-mode: normal !important;
   /* mix-blend-mode: normal !important - 블렌딩 제거하여 자연스러운 원본 이미지 컬러 */
@@ -2293,34 +2298,34 @@ textarea::placeholder {
 /* .hero-logo 스타일 제거됨 */
 
 /* 싸인 이미지 */
-/* 변경 전: right: 2%, bottom: 10% → 모델의 오른쪽 팔 하단에 자연스럽게 위치하지 않음 */
-/* 변경 후: right: 3%, bottom: 15% → 모델의 오른쪽 팔 하단에 자연스럽게 위치 */
+/* 변경 전: right: 3%, bottom: 15%, width: 160px, z-index: 5 → 모델의 우측 하단에 완벽하게 안착되지 않음 */
+/* 변경 후: right: 2%, bottom: 5%, width: 180px, z-index: 5 → 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 완벽하게 안착 */
 .signature-image {
   position: absolute;
-  /* position: absolute - 모델 오른쪽 아래에 자연스럽게 붙도록 배치 */
-  right: 3%;
-  /* right: 3% - 모델의 오른쪽 팔 하단에 자연스럽게 위치 */
-  bottom: 15%;
-  /* bottom: 15% - 모델의 오른쪽 팔 하단에 자연스럽게 위치 */
-  width: 160px;
-  /* width: 160px - 적당한 크기로 조정 */
+  /* position: absolute - 모델 이미지의 우측 하단에 완벽하게 안착 */
+  right: 2%;
+  /* right: 2% - 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 배치 */
+  bottom: 5%;
+  /* bottom: 5% - 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 배치 */
+  width: 180px;
+  /* width: 180px - 크기는 적절히 조절 */
   opacity: 1;
   /* opacity: 1 - 완전 불투명 */
   z-index: 5;
-  /* z-index: 5 - 모델 이미지 위에 표시 */
+  /* z-index: 5 - 모델 이미지 위에 표시 (모델보다 뒤에 있는 느낌을 주려면 낮게, 모델 위로 올라오게 하려면 높게) */
   transition: all 0.3s ease;
 }
 
 /* 반응형: 태블릿에서 싸인 위치 조정 */
 @media (max-width: 1080px) {
   .signature-image {
-    /* 태블릿: 모델의 오른쪽 팔 하단에 자연스럽게 위치 */
-    right: 3%;
-    /* right: 3% - 모델의 오른쪽 팔 하단에 자연스럽게 위치 */
-    bottom: 15%;
-    /* bottom: 15% - 모델의 오른쪽 팔 하단에 자연스럽게 위치 */
-    width: 160px;
-    /* width: 160px - 적당한 크기로 조정 */
+    /* 태블릿: 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 완벽하게 안착 */
+    right: 2%;
+    /* right: 2% - 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 배치 */
+    bottom: 5%;
+    /* bottom: 5% - 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 배치 */
+    width: 180px;
+    /* width: 180px - 크기는 적절히 조절 */
     opacity: 1;
     /* opacity: 1 - 완전 불투명 */
   }
@@ -2334,24 +2339,26 @@ textarea::placeholder {
   }
   
   .hero-image {
-    height: 650px !important;
-    /* height: 650px !important - 태블릿에서 모델 이미지 머리 부분이 잘리지 않도록 높이 재조정 */
+    height: 750px !important;
+    /* height: 750px !important - 태블릿에서 모델 이미지 크기를 10~15% 더 크게 */
     max-height: none !important;
-    object-position: center 5% !important;
-    /* object-position: center 5% !important - 모델 이미지의 머리 윗부분이 잘리지 않도록 위치 미세 조정 */
+    object-position: top !important;
+    /* object-position: top !important - 머리 윗부분이 잘리지 않도록 top 유지 */
+    right: -5% !important;
+    /* right: -5% !important - 좌측 텍스트와 너무 겹치면 모델 이미지를 오른쪽으로 살짝 이동 */
   }
 }
 
 /* 반응형: 모바일에서 싸인 위치 조정 */
 @media (max-width: 768px) {
   .signature-image {
-    /* 모바일: 모델의 오른쪽 팔 하단에 자연스럽게 위치 */
-    right: 3%;
-    /* right: 3% - 모바일에서 모델의 오른쪽 팔 하단에 자연스럽게 위치 */
-    bottom: 15%;
-    /* bottom: 15% - 모델의 오른쪽 팔 하단에 자연스럽게 위치 */
-    width: 140px;
-    /* width: 140px - 모바일에서 적당한 크기로 조정 */
+    /* 모바일: 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 완벽하게 안착 */
+    right: 2%;
+    /* right: 2% - 모바일에서 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 배치 */
+    bottom: 5%;
+    /* bottom: 5% - 모델 이미지의 우측 하단(오른쪽 팔 뒤나 끝부분)에 배치 */
+    width: 160px;
+    /* width: 160px - 모바일에서 적당한 크기로 조정 */
     opacity: 1;
     /* opacity: 1 - 완전 불투명 */
   }
@@ -2437,8 +2444,10 @@ textarea::placeholder {
     height: auto !important;
     width: 100% !important;
     object-fit: contain !important;
-    object-position: center 5% !important;
-    /* object-position: center 5% !important - 모바일에서 모델 이미지의 머리 윗부분이 잘리지 않도록 위치 미세 조정 */
+    object-position: top !important;
+    /* object-position: top !important - 모바일에서 머리 윗부분이 잘리지 않도록 top 유지 */
+    right: 0 !important;
+    /* right: 0 !important - 모바일에서는 오른쪽 이동 제거 */
     /* 불필요한 필터 제거 */
     mix-blend-mode: normal !important;
     /* mix-blend-mode: normal !important - 블렌딩 제거하여 자연스러운 원본 이미지 컬러 */
@@ -2450,19 +2459,21 @@ textarea::placeholder {
   
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
   /* 변경 전: padding-top: 24px, align-items: center → 텍스트는 상단 정렬, 모델 이미지는 중앙 정렬로 충돌 */
-  /* 변경 후: padding: 24px, padding-top: 40px, align-items: flex-start → 전체를 위쪽 기준으로 정렬, 텍스트가 너무 위로 붙지 않도록 */
+  /* 변경 후: padding: 24px, padding-top: 40px, align-items: flex-start, overflow: hidden → 전체를 위쪽 기준으로 정렬, 텍스트가 너무 위로 붙지 않도록, 스크롤바 방지 */
   .hero-section-container {
     padding: 24px !important;
     /* padding: 24px !important - 모바일에서 전체 패딩 설정 */
     padding-top: 40px !important;
     /* padding-top: 40px !important - 모바일에서 텍스트가 너무 위로 붙지 않도록 상단 패딩 추가 */
+    overflow: hidden !important;
+    /* overflow: hidden !important - 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 */
     height: auto !important;
     min-height: 520px !important;
     /* min-h-[520px]: 이미지가 잘리지 않도록 최소 높이 520~580px 범위에서 520px 설정 (모바일) */
     max-height: 70vh !important;
     /* max-h-[70vh]: 섹션이 화면 높이의 70% 이하로 강제 제한하여 현재보다 추가로 10~20% 더 짧게 (현재 상태 그대로 유지) */
-    overflow: visible !important;
-    /* overflow-visible: 모델의 다리와 싸인 이미지가 섹션 아래로 잘리지 않게 하기 위해 overflow-hidden에서 변경 */
+    overflow: hidden !important;
+    /* overflow: hidden !important - 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 */
     display: flex !important;
     align-items: flex-start !important;
     /* align-items: flex-start !important - 핵심: 전체를 위쪽 기준으로 정렬 */
