@@ -2607,56 +2607,29 @@ textarea::placeholder {
   }
   
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
-  /* 변경 전: min-height: auto, max-height: none → 인라인 스타일의 max-height: 70vh가 우선 적용되어 히어로 섹션이 너무 짧아짐 */
-  /* 변경 후: min-height: 650px, max-height: none !important → 모바일에서 최소 높이를 충분히 확보하여 텍스트와 이미지가 모두 보이도록 */
+  /* 변경 전: min-height: 650px, overflow-y: visible → 모바일에서 히어로 섹션 내부 콘텐츠가 보이지 않음 */
+  /* 변경 후: min-height: 700px, overflow: visible !important → 모바일에서 최소 높이를 700px로 증가하고 overflow를 visible로 설정하여 콘텐츠가 보이도록 */
   .hero-section-container {
-    padding: 20px 16px !important;
-    /* padding: 20px 16px !important - 모바일에서 패딩 최적화 */
-    padding-top: 32px !important;
-    /* padding-top: 32px !important - 모바일에서 상단 패딩 조정 */
-    overflow-x: hidden !important;
-    /* overflow-x: hidden !important - 모바일에서 가로 스크롤 방지 */
-    overflow-y: visible !important;
-    /* overflow-y: visible !important - 세로 스크롤은 허용 */
     height: auto !important;
     /* height: auto !important - 콘텐츠에 맞춰 자동으로 높이 조정 */
-    min-height: 650px !important;
-    /* min-height: 650px !important - 모바일에서 최소 높이를 650px로 설정하여 텍스트와 이미지가 모두 보이도록 */
-    max-height: none !important;
-    /* max-height: none !important - 모바일에서 높이 제한 완전히 제거 (인라인 스타일의 max-height: 70vh 무효화) */
-    display: flex !important;
-    flex-direction: column !important;
-    /* flex-direction: column !important - 모바일에서 세로 정렬로 전환 */
-    align-items: center !important;
-    /* align-items: center !important - 모바일에서 중앙 정렬 */
-    width: 100% !important;
-    /* width: 100% !important - 모바일에서 전체 너비 사용 */
-    max-width: 100% !important;
-    /* max-width: 100% !important - 모바일에서 최대 너비 제한 */
-    box-sizing: border-box !important;
-    /* box-sizing: border-box !important - padding 포함하여 전체 너비 계산 */
+    min-height: 700px !important;
+    /* min-height: 700px !important - 모바일에서 최소 높이를 700px로 설정하여 텍스트와 이미지가 모두 보이도록 */
+    overflow: visible !important;
+    /* overflow: visible !important - 모바일에서 콘텐츠가 보이도록 overflow 설정 */
   }
   
   /* 모바일에서 콘텐츠 정렬 - 세로 배치 */
-  /* 변경 전: flex-direction: row, justify-content: center → 모바일에서 가로 정렬로 인한 빈 공간 발생 */
-  /* 변경 후: flex-direction: column, height: auto, align-items: center → 모바일에서 세로 정렬로 전환하여 텍스트 위, 이미지 아래 배치, 콘텐츠에 맞춰 높이 자동 조정 */
+  /* 변경 전: justify-content: flex-start → 모바일에서 히어로 섹션 내부 콘텐츠가 보이지 않음 */
+  /* 변경 후: height: auto, flex-direction: column, justify-content: center, align-items: center → 모바일에서 세로 정렬로 전환하고 중앙 정렬하여 콘텐츠가 보이도록 */
   .hero-content-wrapper {
-    flex-direction: column !important;
-    /* flex-direction: column !important - 모바일에서 세로 정렬로 전환 */
-    justify-content: flex-start !important;
-    /* justify-content: flex-start !important - 위에서부터 배치 */
-    align-items: center !important;
-    /* align-items: center !important - 중앙 정렬 */
-    width: 100% !important;
-    /* width: 100% !important - 모바일에서 전체 너비 사용 */
-    max-width: 100% !important;
-    /* max-width: 100% !important - 모바일에서 최대 너비 제한 */
     height: auto !important;
     /* height: auto !important - 콘텐츠에 맞춰 자동으로 높이 조정 */
-    gap: 24px !important;
-    /* gap: 24px !important - 텍스트와 이미지 사이 간격 */
-    margin: 0 !important;
-    /* margin: 0 !important - 마진 제거 */
+    flex-direction: column !important;
+    /* flex-direction: column !important - 모바일에서 세로 정렬로 전환 */
+    justify-content: center !important;
+    /* justify-content: center !important - 중앙 정렬 */
+    align-items: center !important;
+    /* align-items: center !important - 중앙 정렬 */
   }
   
   /* 모바일에서 텍스트 영역 최적화 */
@@ -2669,6 +2642,27 @@ textarea::placeholder {
     /* padding: 0 !important - 패딩 제거 */
     text-align: center !important;
     /* text-align: center !important - 모바일에서 텍스트 중앙 정렬 */
+    opacity: 1 !important;
+    /* opacity: 1 !important - 모바일에서 텍스트 영역이 보이도록 */
+    display: block !important;
+    /* display: block !important - 모바일에서 텍스트 영역이 보이도록 */
+    visibility: visible !important;
+    /* visibility: visible !important - 모바일에서 텍스트 영역이 보이도록 */
+    transform: none !important;
+    /* transform: none !important - 모바일에서 transform 효과 제거 */
+  }
+  
+  /* 모바일에서 이미지 영역 및 이미지 가시성 보장 */
+  .hero-image-area,
+  .hero-image {
+    opacity: 1 !important;
+    /* opacity: 1 !important - 모바일에서 이미지 영역과 이미지가 보이도록 */
+    display: block !important;
+    /* display: block !important - 모바일에서 이미지 영역과 이미지가 보이도록 */
+    visibility: visible !important;
+    /* visibility: visible !important - 모바일에서 이미지 영역과 이미지가 보이도록 */
+    transform: none !important;
+    /* transform: none !important - 모바일에서 transform 효과 제거 */
   }
 }
 
