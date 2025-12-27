@@ -2117,10 +2117,20 @@ textarea::placeholder {
   /* text-align: left - 모든 텍스트는 좌측 정렬 */
 }
 
-/* 메인 카피 스타일 (1~2번 줄 통합) */
-/* 변경 전: 두 개의 <p> 태그로 분리 → 줄바꿈이 어긋남 */
-/* 변경 후: 하나의 <p> 태그에 <br /> 태그 사용 → 정확히 지정한 위치에서 줄바꿈 강제 */
-.hero-main-copy {
+/* 메인 카피 래퍼 */
+.hero-main-copy-wrapper {
+  display: block;
+  /* display: block - 각 줄이 독립적으로 표시되도록 */
+  width: 100%;
+  /* width: 100% - 전체 너비 사용 */
+  max-width: 700px;
+  /* max-width: 700px - 텍스트 박스의 너비를 충분히 넓혀서 자동 줄바꿈 방지 */
+}
+
+/* 메인 카피 1번째 줄 스타일 */
+/* 변경 전: 하나의 <p> 태그에 <br /> 태그 사용 → 브라우저가 자동으로 줄을 넘김 */
+/* 변경 후: 독립된 <div> 태그로 분리, display: block, white-space: nowrap → 한 줄에 하나씩만 나오게 강제 */
+.hero-main-copy-line1 {
   font-size: 56px;
   /* font-size: 56px - 메인 타이틀 크기 확대, 웅장하게 */
   font-weight: 800;
@@ -2134,6 +2144,33 @@ textarea::placeholder {
   /* margin-bottom: 0px - 하단 문구와의 간격 조정 */
   text-align: left;
   /* text-align: left - 좌측 정렬 */
+  display: block;
+  /* display: block - 한 줄에 하나씩만 나오게 */
+  white-space: nowrap;
+  /* white-space: nowrap - 너비가 좁아지더라도 이 줄만큼은 나누지 않음 */
+}
+
+/* 메인 카피 2번째 줄 스타일 */
+/* 변경 전: 하나의 <p> 태그에 <br /> 태그 사용 → 브라우저가 자동으로 줄을 넘김 */
+/* 변경 후: 독립된 <div> 태그로 분리, display: block, white-space: nowrap → 한 줄에 하나씩만 나오게 강제 */
+.hero-main-copy-line2 {
+  font-size: 56px;
+  /* font-size: 56px - 메인 타이틀 크기 확대, 웅장하게 */
+  font-weight: 800;
+  /* font-weight: 800 - 아주 크고 굵게 강조 */
+  color: #1e293b;
+  line-height: 1.2;
+  /* line-height: 1.2 - 큰 글씨는 행간을 좁게 (1.1~1.2) */
+  letter-spacing: -0.02em;
+  /* letter-spacing: -0.02em - 글자 간격 조정 */
+  margin-bottom: 0px;
+  /* margin-bottom: 0px - 하단 문구와의 간격 조정 */
+  text-align: left;
+  /* text-align: left - 좌측 정렬 */
+  display: block;
+  /* display: block - 한 줄에 하나씩만 나오게 */
+  white-space: nowrap;
+  /* white-space: nowrap - 너비가 좁아지더라도 이 줄만큼은 나누지 않음 */
 }
 
 /* 서브 카피 1행 스타일 (3번 줄: 코어위브와 함께 더 안전한 내일을 설계하세요.) */
@@ -2336,13 +2373,16 @@ textarea::placeholder {
   }
   
   /* 모바일에서 메인 카피 스타일 조정 */
-  .hero-main-copy {
+  .hero-main-copy-line1,
+  .hero-main-copy-line2 {
     font-size: 32px !important;
     /* font-size: 32px !important - 모바일에서 적당한 크기로 조정 */
     line-height: 1.2 !important;
     /* line-height: 1.2 !important - 큰 글씨는 행간을 좁게 */
     letter-spacing: -0.02em !important;
     /* letter-spacing: -0.02em !important - 글자 간격 조정 */
+    white-space: normal !important;
+    /* white-space: normal !important - 모바일에서는 자동 줄바꿈 허용 */
   }
   
   /* 모바일에서 서브 카피 스타일 조정 */
