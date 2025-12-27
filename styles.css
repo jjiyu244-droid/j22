@@ -2069,12 +2069,13 @@ textarea::placeholder {
 
 /* 히어로 섹션 컨테이너 - 화면 이탈 방지 및 중앙 정렬 */
 /* 변경 전: max-width만 있고 내부 콘텐츠가 absolute로 왼쪽 치우침 */
-/* 변경 후: flex 레이아웃으로 중앙 정렬, 양쪽 균형 배치, max-height:70vh로 화면 높이의 70% 이하로 강제 제한하여 현재보다 추가로 10~20% 더 짧게 */
+/* 변경 후: flex 레이아웃으로 중앙 정렬, 양쪽 균형 배치, min-height:560px, max-height:70vh로 이미지가 잘리지 않도록 높이 설정 */
 .hero-section-container {
   max-width: 1400px;
   margin: 0 auto;
   overflow: visible;
   /* overflow-visible: 모델의 다리와 싸인 이미지가 섹션 아래로 잘리지 않게 하기 위해 overflow-hidden에서 변경 */
+  /* min-h-[560px]: 이미지가 잘리지 않도록 최소 높이 520~580px 범위에서 560px 설정 (인라인 스타일에서도 min-height:560px 적용됨) */
   /* max-h-[70vh]: 섹션이 화면 높이의 70% 이하로 강제 제한하여 현재보다 추가로 10~20% 더 짧게 (인라인 스타일에서도 max-height:70vh 적용됨) */
   display: flex;
   align-items: flex-start;
@@ -2102,20 +2103,30 @@ textarea::placeholder {
   min-width: 0;
 }
 
-/* 오른쪽: 이미지 영역 (모델 + 로고 + 싸인) */
+/* 오른쪽: 이미지 영역 (모델 + 싸인) */
+/* 변경 전: justify-content: center, align-items: flex-end → 모델과 싸인 이미지가 아래로 떨어져서 겹쳐 보임 */
+/* 변경 후: position: relative, justify-content: flex-end, align-items: flex-end → 오른쪽 영역을 position: relative로 설정, 모델을 오른쪽에 고정 배치, 싸인을 모델 하단 오른쪽에 겹쳐지는 형태로 배치 */
 .hero-image-area {
   flex: 0 1 50%;
   position: relative;
+  /* position: relative - 싸인 이미지의 absolute positioning 기준점 */
   display: flex;
   align-items: flex-end;
-  justify-content: center;
+  /* align-items: flex-end - 하단 정렬 */
+  justify-content: flex-end;
+  /* justify-content: flex-end - 오른쪽 영역의 중앙 오른쪽에 고정 배치 */
   min-width: 0;
   padding-right: 20px;
 }
 
 /* 인물 이미지 - 스티커 느낌 최종 해결 */
+/* 변경 전: position: relative → 모델과 싸인 이미지가 아래로 떨어져서 겹쳐 보임 */
+/* 변경 후: position: relative, z-index: 2 → 모델 이미지를 오른쪽 영역의 중앙 오른쪽에 고정 배치, 싸인 이미지 위에 표시 */
 .hero-image {
   position: relative;
+  /* position: relative - 오른쪽 영역의 중앙 오른쪽에 고정 배치 */
+  z-index: 2;
+  /* z-index: 2 - 싸인 이미지 위에 표시 */
   /* 인물 하단이 배경 남색 속으로 스르륵 녹아들게 */
   -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
@@ -2124,14 +2135,15 @@ textarea::placeholder {
 }
 
 /* 인물 이미지 컨테이너 - 싸인 이미지 기준점 */
-/* 변경 전: height: 720px → 모델 이미지가 너무 작음 */
-/* 변경 후: height: 850px (h-[850px]) → 모델이 화면 오른쪽 절반을 꽉 차게 크게 표시 */
+/* 변경 전: height: 850px, display: flex, align-items: flex-end, justify-content: center → 모델과 싸인 이미지가 아래로 떨어져서 겹쳐 보임 */
+/* 변경 후: position: relative → 싸인 이미지의 absolute positioning 기준점으로 사용 */
 .person-image {
   position: relative;
-  height: 850px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  /* position: relative - 싸인 이미지의 absolute positioning 기준점 */
+  height: auto;
+  /* height: auto - 콘텐츠에 맞게 자동 높이 */
+  display: block;
+  /* display: block - flex 제거하여 자연스러운 배치 */
   z-index: 10;
   margin-top: 12px;
 }
@@ -2142,38 +2154,45 @@ textarea::placeholder {
 /* .hero-logo 스타일 제거됨 */
 
 /* 싸인 이미지(449.png) 배치 및 합성 */
-/* 변경 전: right: 12px, bottom: 12px → 모델과 싸인이 섹션 아래로 너무 내려가서 레이아웃이 깨짐 */
-/* 변경 후: right: 12px, bottom: 8px → bottom-4~bottom-8 범위로 올려서 모델 다리 근처에 자연스럽게 위치 */
+/* 변경 전: right: 12px, bottom: 8px → 모델과 싸인 이미지가 아래로 떨어져서 겹쳐 보임 */
+/* 변경 후: position: absolute, bottom: -20px, right: 0, z-index: 1 → profile.png의 하단 오른쪽에 겹쳐지는 형태로 배치 */
 .signature-image {
   position: absolute;
-  /* 모델 오른쪽 아래 코너 근처로 이동 */
-  right: 12px;
-  bottom: 8px;
-  /* bottom-8: 하단 여백 8px - bottom-4~bottom-8 범위로 올려서 모델 다리 근처에 자연스럽게 위치 */
+  /* position: absolute - profile.png의 하단 오른쪽에 겹쳐지는 형태로 배치 */
+  right: 0;
+  /* right: 0 - 모델 이미지의 오른쪽 끝에 맞춤 */
+  bottom: -20px;
+  /* bottom: -20px - 모델 이미지의 하단에서 -20px 위치 (겹쳐지는 형태) */
   /* 크기도 적당하게 유지 (w-48 ~ w-64 = 192px ~ 256px) */
-  width: 240px;
+  width: 180px;
+  /* width: 180px - 적당한 크기로 조정 */
   height: auto;
-  /* 모델 위에 표시되도록 z-index 높임 */
-  z-index: 25;
+  /* 모델 아래에 표시되도록 z-index 낮춤 */
+  z-index: 1;
+  /* z-index: 1 - 모델 이미지 아래에 표시 */
   /* 남색 배경과 톤 일치 */
   mix-blend-mode: luminosity;
-  opacity: 0.85;
+  opacity: 0.95;
+  /* opacity: 0.95 - 약간 투명도 조정 */
   transition: all 0.3s ease;
 }
 
 /* 반응형: 태블릿에서 싸인 위치 조정 */
 @media (max-width: 1080px) {
   .signature-image {
-    /* 태블릿: 오른쪽 아래 코너 근처 유지, 크기 적당히 */
-    right: 10px;
-    bottom: 8px;
-    /* bottom-8: 하단 여백 8px - bottom-4~bottom-8 범위로 올려서 모델 다리 근처에 자연스럽게 위치 */
-    width: 200px;
+    /* 태블릿: 모델 이미지의 하단 오른쪽에 겹쳐지는 형태로 배치 */
+    right: 0;
+    /* right: 0 - 모델 이미지의 오른쪽 끝에 맞춤 */
+    bottom: -20px;
+    /* bottom: -20px - 모델 이미지의 하단에서 -20px 위치 (겹쳐지는 형태) */
+    width: 180px;
+    /* width: 180px - 적당한 크기로 조정 */
   }
   
   /* 태블릿에서 모델 이미지 크기 조정 */
   .person-image {
-    height: 700px;
+    height: auto;
+    /* height: auto - 콘텐츠에 맞게 자동 높이 */
   }
   
   .hero-image {
@@ -2185,12 +2204,15 @@ textarea::placeholder {
 /* 반응형: 모바일에서 싸인 위치 조정 */
 @media (max-width: 768px) {
   .signature-image {
-    /* 모바일: 오른쪽 아래 코너 근처 유지, 크기 적당히 */
-    right: 8px;
-    bottom: 8px;
-    /* bottom-8: 하단 여백 8px - bottom-4~bottom-8 범위로 올려서 모델 다리 근처에 자연스럽게 위치 */
+    /* 모바일: 모델 이미지의 하단 오른쪽에 겹쳐지는 형태로 배치 */
+    right: 0;
+    /* right: 0 - 모델 이미지의 오른쪽 끝에 맞춤 */
+    bottom: -20px;
+    /* bottom: -20px - 모델 이미지의 하단에서 -20px 위치 (겹쳐지는 형태) */
     width: 140px;
-    opacity: 0.9;
+    /* width: 140px - 모바일에서 적당한 크기로 조정 */
+    opacity: 0.95;
+    /* opacity: 0.95 - 약간 투명도 조정 */
   }
   
   /* 히어로 섹션 모바일 레이아웃 - 세로 배치 */
@@ -2209,7 +2231,12 @@ textarea::placeholder {
   .hero-image-area {
     flex: 1 1 100%;
     width: 100%;
-    justify-content: center;
+    position: relative;
+    /* position: relative - 싸인 이미지의 absolute positioning 기준점 */
+    justify-content: flex-end;
+    /* justify-content: flex-end - 오른쪽 정렬 (세로 배치일 때는 align-items 사용) */
+    align-items: flex-end;
+    /* align-items: flex-end - 하단 정렬 */
     padding-right: 0;
   }
   
@@ -2225,16 +2252,9 @@ textarea::placeholder {
     object-fit: contain !important;
   }
   
-  /* 모바일에서 싸인 위치 조정 */
-  .signature-image {
-    right: 8px;
-    bottom: 12px;
-    width: 180px;
-  }
-  
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
-  /* 변경 전: padding-top: 0px(pt-0), padding-bottom: 48px(pb-12), max-height: 70vh, overflow:visible, items-center → 모델과 싸인이 섹션 아래로 너무 내려가서 레이아웃이 깨짐 */
-  /* 변경 후: padding-top: 0px(pt-0), padding-bottom: 32px(pb-8), max-height: 70vh, overflow:visible, items-start → 하단 패딩 적당히 조정(pb-8~pb-16), 수직 중앙 정렬 해제(items-center 제거)하여 콘텐츠가 상단부터 시작하게 */
+  /* 변경 전: padding-top: 0px(pt-0), padding-bottom: 32px(pb-8), max-height: 70vh, overflow:visible, items-start → 모델과 싸인 이미지가 아래로 떨어져서 겹쳐 보임 */
+  /* 변경 후: padding-top: 0px(pt-0), padding-bottom: 32px(pb-8), min-height:520px, max-height: 70vh, overflow:visible, items-start → 이미지가 잘리지 않도록 min-height 추가, 모델과 싸인을 하나의 그룹처럼 오른쪽 영역에 정확하게 정렬 */
   .hero-section-container {
     padding-top: 0px !important;
     /* pt-0: 상단 패딩 0px - 상단 패딩 거의 제거하여 위아래 여백 거의 없게 (현재 상태 그대로 유지) */
@@ -2243,6 +2263,8 @@ textarea::placeholder {
     padding-left: 24px !important;
     padding-right: 24px !important;
     height: auto !important;
+    min-height: 520px !important;
+    /* min-h-[520px]: 이미지가 잘리지 않도록 최소 높이 520~580px 범위에서 520px 설정 (모바일) */
     max-height: 70vh !important;
     /* max-h-[70vh]: 섹션이 화면 높이의 70% 이하로 강제 제한하여 현재보다 추가로 10~20% 더 짧게 (현재 상태 그대로 유지) */
     overflow: visible !important;
