@@ -2068,12 +2068,17 @@ textarea::placeholder {
 }
 
 /* 히어로 섹션 전체 컨테이너 */
-/* 변경 전: overflow: visible, max-width: 1400px → 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생길 수 있음 */
-/* 변경 후: overflow: hidden, max-width: 1200px → 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록, 본문 최대 폭 컨테이너 기준 */
+/* 변경 전: max-width: 1200px → 하단 섹션(max-width: 1400px)과 정렬이 맞지 않아 왼쪽으로 치우침 */
+/* 변경 후: max-width: 1400px, margin: 0 auto !important → 하단 섹션과 동일한 너비로 중앙 정렬하여 균형 맞춤 */
 .hero-section-container {
-  max-width: 1200px;
-  /* max-width: 1200px - 본문 최대 폭 컨테이너 기준으로 배치 */
-  margin: 0 auto;
+  max-width: 1400px !important;
+  /* max-width: 1400px !important - 하단 섹션(총 스테이킹 자산, Features 등)과 동일한 최대 너비로 정렬 일치 */
+  margin: 0 auto !important;
+  /* margin: 0 auto !important - 화면 정중앙에 배치하여 좌우 균형 맞춤 (인라인 스타일의 margin:0을 덮어씀) */
+  width: 100%;
+  /* width: 100% - 반응형 대응을 위해 전체 너비 사용 */
+  box-sizing: border-box;
+  /* box-sizing: border-box - padding 포함하여 전체 너비 계산 */
   overflow: hidden;
   /* overflow: hidden - 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 */
   /* min-h-[560px]: 이미지가 잘리지 않도록 최소 높이 520~580px 범위에서 560px 설정 (인라인 스타일에서도 min-height:560px 적용됨) */
