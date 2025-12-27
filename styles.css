@@ -2229,13 +2229,13 @@ textarea::placeholder {
   }
   
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
-  /* 변경 전: padding-top: 24px(pt-6), padding-bottom: 32px(pb-8), max-height: 85vh → 전체 세로 높이가 조금 길어서 더 컴팩트하게 필요 */
-  /* 변경 후: padding-top: 8px(pt-2), padding-bottom: 16px(pb-4), max-height: 80vh → 상하 패딩 최소화(py-2~py-4), 섹션 높이가 화면의 80% 이하로 강제 제한하여 현재보다 20~30% 더 짧게 */
+  /* 변경 전: padding-top: 8px(pt-2), padding-bottom: 16px(pb-4), max-height: 80vh → 상하 패딩이 다름 */
+  /* 변경 후: padding-top: 16px(pt-4), padding-bottom: 16px(pb-4), max-height: 80vh → py-4 (상하 패딩 16px로 통일) */
   .hero-section-container {
-    padding-top: 8px !important;
-    /* pt-2: 상단 패딩 8px - 위쪽 공백 최소화 (py-2~py-4 범위) */
+    padding-top: 16px !important;
+    /* pt-4: 상단 패딩 16px - py-4 (상하 패딩 16px로 통일) */
     padding-bottom: 16px !important;
-    /* pb-4: 하단 패딩 16px - 전체 높이 컴팩트하게 (pb-4~pb-6 범위) */
+    /* pb-4: 하단 패딩 16px - py-4 (상하 패딩 16px로 통일) */
     padding-left: 24px !important;
     padding-right: 24px !important;
     height: auto !important;

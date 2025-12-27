@@ -96,9 +96,9 @@
         <!-- 로그인 전 환영 히어로 -->
         <!-- 변경 전: absolute positioning으로 왼쪽에 치우쳐 오른쪽에 큰 빈 공간 발생 -->
         <!-- 변경 후: flex 레이아웃으로 중앙 정렬, 왼쪽 텍스트와 오른쪽 이미지 영역 균형 배치 -->
-        <!-- 변경 전: padding-top:32px(pt-8), padding-bottom:48px(pb-12), max-height:85vh → 섹션 전체 세로 길이가 아직 조금 길어서 더 컴팩트하게 필요 -->
-        <!-- 변경 후: padding-top:16px(pt-4), padding-bottom:32px(pb-8), max-height:80vh → 상하 패딩 최소화(py-4~py-8), 섹션 높이가 화면의 80% 이하로 강제 제한하여 현재보다 20~30% 더 짧게 -->
-        <section class="card glass pre-login-welcome hero-section-container" style="position:relative;padding-top:16px;padding-bottom:32px;padding-left:48px;padding-right:48px;margin:0;height:auto;max-height:80vh;overflow:hidden;border-radius:0;border:none !important;box-shadow:none !important;margin-top:0 !important;background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;">
+        <!-- 변경 전: padding-top:16px(pt-4), padding-bottom:32px(pb-8), max-height:80vh → 상하 패딩이 다름 -->
+        <!-- 변경 후: padding-top:16px(pt-4), padding-bottom:16px(pb-4), max-height:80vh → py-4 (상하 패딩 16px로 통일) -->
+        <section class="card glass pre-login-welcome hero-section-container" style="position:relative;padding-top:16px;padding-bottom:16px;padding-left:48px;padding-right:48px;margin:0;height:auto;max-height:80vh;overflow:hidden;border-radius:0;border:none !important;box-shadow:none !important;margin-top:0 !important;background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;">
           <div class="hero-content-wrapper">
             <!-- 왼쪽: 텍스트 영역 -->
             <div class="hero-text-area">
