@@ -31,6 +31,13 @@ body {
   background: #ffffff;
   color: var(--text);
   min-height: 100vh;
+  overflow-x: hidden;
+  /* overflow-x: hidden - 모바일에서 가로 스크롤 방지 */
+}
+
+html {
+  overflow-x: hidden;
+  /* overflow-x: hidden - 모바일에서 가로 스크롤 방지 */
 }
 
 .app {
@@ -2520,42 +2527,74 @@ textarea::placeholder {
     /* min-width: auto !important - 모바일에서 최소 가로 폭 제한 제거 */
   }
   
+  /* 모바일에서 이미지 영역 최적화 */
+  /* 변경 전: width: 100%, margin-top: -40px → 모바일에서 화면 밖으로 밀려나 빈 공간 발생 */
+  /* 변경 후: width: 100%, max-width: 100%, margin: 0 auto → 모바일에서 화면 안에 완전히 포함되도록 조정 */
   .hero-image-area {
-    flex: 1 1 100%;
-    width: 100%;
+    flex: 1 1 100% !important;
+    /* flex: 1 1 100% !important - 모바일에서 전체 너비 사용 */
+    width: 100% !important;
+    /* width: 100% !important - 모바일에서 전체 너비 사용 */
+    max-width: 100% !important;
+    /* max-width: 100% !important - 모바일에서 최대 너비 제한 */
     position: relative;
     /* position: relative - 싸인 이미지의 absolute positioning 기준점 */
-    justify-content: center;
-    /* justify-content: center - 중앙 정렬 */
-    align-items: flex-start;
-    /* align-items: flex-start - 위 정렬로 고정 */
-    padding-right: 0;
-    /* padding-right: 0 - 오른쪽 패딩 제거 */
-    margin-top: -40px;
-    /* margin-top: -40px - 모바일에서 모델 이미지와 싸인 이미지만 위로 40px 이동, 텍스트 위치는 변경하지 않음 */
+    display: flex !important;
+    /* display: flex !important - flex 레이아웃 사용 */
+    justify-content: center !important;
+    /* justify-content: center !important - 중앙 정렬 */
+    align-items: center !important;
+    /* align-items: center !important - 중앙 정렬 */
+    padding: 0 !important;
+    /* padding: 0 !important - 패딩 제거 */
+    margin: 0 auto !important;
+    /* margin: 0 auto !important - 중앙 정렬 */
+    box-sizing: border-box !important;
+    /* box-sizing: border-box !important - padding 포함하여 전체 너비 계산 */
   }
   
+  /* 모바일에서 이미지 컨테이너 최적화 */
   .person-image {
-    display: inline-block;
-    /* display: inline-block - 인라인 블록으로 자연스러운 배치 */
-    margin-top: 0 !important;
-    /* margin-top: 0 !important - 상단 마진 제거 */
-    max-height: 500px;
-    overflow: visible !important;
-    /* overflow: visible !important - 모바일에서도 싸인이 박스 밖으로 밀려나더라도 잘리지 않고 보이게 */
+    display: block !important;
+    /* display: block !important - 블록 레벨 요소로 변경 */
+    width: 100% !important;
+    /* width: 100% !important - 모바일에서 전체 너비 사용 */
+    max-width: 100% !important;
+    /* max-width: 100% !important - 모바일에서 최대 너비 제한 */
+    margin: 0 auto !important;
+    /* margin: 0 auto !important - 중앙 정렬 */
+    max-height: 400px !important;
+    /* max-height: 400px !important - 모바일에서 적당한 높이로 제한 */
+    overflow: hidden !important;
+    /* overflow: hidden !important - 모바일에서 넘치는 부분 숨김 */
+    box-sizing: border-box !important;
+    /* box-sizing: border-box !important - padding 포함하여 전체 너비 계산 */
   }
   
+  /* 모바일에서 모델 이미지 최적화 */
   .hero-image {
-    max-height: 500px !important;
+    max-height: 400px !important;
+    /* max-height: 400px !important - 모바일에서 적당한 높이로 제한 */
     height: auto !important;
+    /* height: auto !important - 비율 유지 */
     width: 100% !important;
+    /* width: 100% !important - 모바일에서 전체 너비 사용 */
+    max-width: 100% !important;
+    /* max-width: 100% !important - 모바일에서 최대 너비 제한 */
     object-fit: contain !important;
-    object-position: top !important;
-    /* object-position: top !important - 모바일에서 머리 윗부분이 잘리지 않도록 top 유지 */
+    /* object-fit: contain !important - 비율 유지하면서 컨테이너에 맞춤 */
+    object-position: center !important;
+    /* object-position: center !important - 모바일에서 중앙 정렬 */
+    position: relative !important;
+    /* position: relative !important - 위치 조정 */
     right: 0 !important;
-    /* right: 0 !important - 모바일에서는 오른쪽 이동 제거 */
-    margin-left: -20px !important;
-    /* margin-left: -20px !important - 모바일에서 모델 이미지를 왼쪽으로 20px 이동 */
+    /* right: 0 !important - 오른쪽 이동 제거 */
+    left: 0 !important;
+    /* left: 0 !important - 왼쪽 이동 제거 */
+    margin: 0 auto !important;
+    /* margin: 0 auto !important - 중앙 정렬 */
+    display: block !important;
+    /* display: block !important - 블록 레벨 요소로 변경 */
     /* 불필요한 필터 제거 */
     mix-blend-mode: normal !important;
     /* mix-blend-mode: normal !important - 블렌딩 제거하여 자연스러운 원본 이미지 컬러 */
@@ -2566,31 +2605,65 @@ textarea::placeholder {
   }
   
   /* 모바일에서 히어로 섹션 패딩 및 높이 조정 */
-  /* 변경 전: overflow: hidden, max-height: 70vh → 모바일에서 히어로 섹션이 보이지 않음 */
-  /* 변경 후: overflow: visible, max-height: none → 모바일에서 히어로 섹션이 보이도록 */
+  /* 변경 전: overflow: visible, flex-direction: row → 모바일에서 가로 스크롤 발생, 빈 공간 표시 */
+  /* 변경 후: overflow-x: hidden, flex-direction: column → 모바일에서 가로 스크롤 제거, 세로 정렬로 전환 */
   .hero-section-container {
-    padding: 24px !important;
-    /* padding: 24px !important - 모바일에서 전체 패딩 설정 */
-    padding-top: 40px !important;
-    /* padding-top: 40px !important - 모바일에서 텍스트가 너무 위로 붙지 않도록 상단 패딩 추가 */
-    overflow: visible !important;
-    /* overflow: visible !important - 모바일에서 히어로 섹션이 보이도록 */
+    padding: 20px 16px !important;
+    /* padding: 20px 16px !important - 모바일에서 패딩 최적화 */
+    padding-top: 32px !important;
+    /* padding-top: 32px !important - 모바일에서 상단 패딩 조정 */
+    overflow-x: hidden !important;
+    /* overflow-x: hidden !important - 모바일에서 가로 스크롤 방지 */
+    overflow-y: visible !important;
+    /* overflow-y: visible !important - 세로 스크롤은 허용 */
     height: auto !important;
-    min-height: 520px !important;
-    /* min-h-[520px]: 이미지가 잘리지 않도록 최소 높이 520~580px 범위에서 520px 설정 (모바일) */
+    min-height: auto !important;
+    /* min-height: auto !important - 모바일에서 최소 높이 제한 제거 */
     max-height: none !important;
     /* max-height: none !important - 모바일에서 높이 제한 제거하여 콘텐츠가 모두 보이도록 */
     display: flex !important;
-    align-items: flex-start !important;
-    /* align-items: flex-start !important - 핵심: 전체를 위쪽 기준으로 정렬 */
+    flex-direction: column !important;
+    /* flex-direction: column !important - 모바일에서 세로 정렬로 전환 */
+    align-items: center !important;
+    /* align-items: center !important - 모바일에서 중앙 정렬 */
+    width: 100% !important;
+    /* width: 100% !important - 모바일에서 전체 너비 사용 */
+    max-width: 100% !important;
+    /* max-width: 100% !important - 모바일에서 최대 너비 제한 */
+    box-sizing: border-box !important;
+    /* box-sizing: border-box !important - padding 포함하여 전체 너비 계산 */
   }
   
-  /* 모바일에서 콘텐츠 정렬 */
+  /* 모바일에서 콘텐츠 정렬 - 세로 배치 */
+  /* 변경 전: flex-direction: row, justify-content: center → 모바일에서 가로 정렬로 인한 빈 공간 발생 */
+  /* 변경 후: flex-direction: column → 모바일에서 세로 정렬로 전환하여 텍스트 위, 이미지 아래 배치 */
   .hero-content-wrapper {
-    justify-content: center !important;
-    /* justify-center: 좌우 중앙 정렬 유지 */
-    align-items: flex-start !important;
-    /* align-items: flex-start !important - 텍스트도 모델도 위 정렬 */
+    flex-direction: column !important;
+    /* flex-direction: column !important - 모바일에서 세로 정렬로 전환 */
+    justify-content: flex-start !important;
+    /* justify-content: flex-start !important - 위에서부터 배치 */
+    align-items: center !important;
+    /* align-items: center !important - 중앙 정렬 */
+    width: 100% !important;
+    /* width: 100% !important - 모바일에서 전체 너비 사용 */
+    max-width: 100% !important;
+    /* max-width: 100% !important - 모바일에서 최대 너비 제한 */
+    gap: 24px !important;
+    /* gap: 24px !important - 텍스트와 이미지 사이 간격 */
+    margin: 0 !important;
+    /* margin: 0 !important - 마진 제거 */
+  }
+  
+  /* 모바일에서 텍스트 영역 최적화 */
+  .hero-text-area {
+    width: 100% !important;
+    /* width: 100% !important - 모바일에서 전체 너비 사용 */
+    max-width: 100% !important;
+    /* max-width: 100% !important - 모바일에서 최대 너비 제한 */
+    padding: 0 !important;
+    /* padding: 0 !important - 패딩 제거 */
+    text-align: center !important;
+    /* text-align: center !important - 모바일에서 텍스트 중앙 정렬 */
   }
 }
 
