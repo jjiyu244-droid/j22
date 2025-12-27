@@ -2300,15 +2300,15 @@ textarea::placeholder {
 /* .hero-logo 스타일 제거됨 */
 
 /* 싸인 이미지 */
-/* 변경 전: right: 5%, bottom: 5% → 모델 이미지의 투명 여백 때문에 중앙으로 몰림 */
-/* 변경 후: right: -20px, bottom: 0px, transform: none !important → 마이너스 값을 사용하여 모델 이미지 박스 바깥으로 강제 이동, 화면 오른쪽 구석으로 이동 */
+/* 변경 전: right: -20px, bottom: 0px → 더 오른쪽, 더 아래로 이동 필요 */
+/* 변경 후: right: -40px, bottom: -20px → 더 오른쪽으로, 더 아래로 이동 */
 .signature-image {
   position: absolute;
   /* position: absolute - 부모 컨테이너를 기준으로 absolute 좌표 설정 */
-  right: -20px;
-  /* right: -20px - 마이너스 값을 사용하여 모델 이미지 박스 바깥으로 밀어내어 화면 오른쪽 구석으로 강제 이동 */
-  bottom: 0px;
-  /* bottom: 0px - 하단에 바짝 붙임 */
+  right: -40px;
+  /* right: -40px - 더 오른쪽으로 이동 (마이너스 값을 더 크게) */
+  bottom: -20px;
+  /* bottom: -20px - 더 아래로 이동 (마이너스 값 사용) */
   width: 160px;
   /* width: 160px - 적당한 크기 유지 */
   transform: none !important;
@@ -2329,11 +2329,11 @@ textarea::placeholder {
 /* 반응형: 태블릿에서 싸인 위치 조정 */
 @media (max-width: 1080px) {
   .signature-image {
-    /* 태블릿: 마이너스 값을 사용하여 모델 이미지 박스 바깥으로 강제 이동 */
-    right: -20px;
-    /* right: -20px - 마이너스 값을 사용하여 모델 이미지 박스 바깥으로 밀어내어 화면 오른쪽 구석으로 강제 이동 */
-    bottom: 0px;
-    /* bottom: 0px - 하단에 바짝 붙임 */
+    /* 태블릿: 더 오른쪽, 더 아래로 이동 */
+    right: -30px;
+    /* right: -30px - 더 오른쪽으로 이동 (태블릿에서는 데스크톱보다 작은 값) */
+    bottom: -15px;
+    /* bottom: -15px - 더 아래로 이동 (태블릿에서는 데스크톱보다 작은 값) */
     width: 160px;
     /* width: 160px - 적당한 크기 유지 */
     transform: none !important;
@@ -2374,11 +2374,11 @@ textarea::placeholder {
 /* 반응형: 모바일에서 싸인 위치 조정 */
 @media (max-width: 768px) {
   .signature-image {
-    /* 모바일: 마이너스 값을 사용하여 모델 이미지 박스 바깥으로 강제 이동 */
-    right: -10px;
-    /* right: -10px - 모바일에서 마이너스 값을 사용하여 모델 이미지 박스 바깥으로 밀어내어 화면 오른쪽 구석으로 강제 이동 (태블릿보다 작은 값) */
-    bottom: 0px;
-    /* bottom: 0px - 하단에 바짝 붙임 */
+    /* 모바일: 더 오른쪽, 더 아래로 이동 */
+    right: -20px;
+    /* right: -20px - 모바일에서 더 오른쪽으로 이동 (태블릿보다 작은 값) */
+    bottom: -10px;
+    /* bottom: -10px - 모바일에서 더 아래로 이동 (태블릿보다 작은 값) */
     width: 140px;
     /* width: 140px - 모바일에서 적당한 크기 유지 */
     transform: none !important;
