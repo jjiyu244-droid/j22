@@ -1569,7 +1569,7 @@ textarea::placeholder {
   /* 이 규칙이 .hero-content-wrapper를 숨겨서 히어로 섹션이 비어 보이게 만듦 */
   /* CoreWeave 로고는 이미 제거되었으므로 이 규칙 불필요 */
 
-  /* 모바일(768px 이하)에서 싸인 이미지 강제 작게 + 모델 기준 우측 하단 고정 */
+  /* 모바일(768px 이하)에서 싸인 이미지 강제 작게 + 모델 박스 우측 하단 고정 (70px, 5%) */
   .signature-image,
   img.signature-image,
   img[src="./449.png"],
@@ -1577,27 +1577,29 @@ textarea::placeholder {
   .person-image img.signature-image,
   .hero-image-area .signature-image {
     position: absolute !important;
-    /* width: 80px - 모바일에서 싸인 크기 대폭 축소 (모델 이미지를 방해하지 않도록) */
-    width: 80px !important;
+    /* width: 70px - 모바일에서 싸인 크기 대폭 축소 (모델을 가리지 않도록) */
+    width: 70px !important;
     height: auto !important;
-    /* bottom: 5% - 모델 이미지 컨테이너 기준 하단 5% (모델의 오른쪽 골반이나 팔 하단 영역) */
+    /* bottom: 5% - 모델 이미지 박스의 오른쪽 하단 끝 (모델의 오른쪽 골반이나 팔 하단 영역) */
     bottom: 5% !important;
-    /* right: 5% - 모델 이미지 컨테이너 기준 우측 5% (모델의 오른쪽 하단 구석) */
+    /* right: 5% - 모델 이미지 박스의 오른쪽 하단 끝 */
     right: 5% !important;
-    /* transform: none - 중앙 정렬 코드 완전 제거 (left: 50%, translateX(-50%) 등) */
+    /* transform: none !important - 기존의 중앙 정렬(left: 50%, translateX(-50%))을 강제로 무효화 */
     transform: none !important;
-    /* left: auto - left 속성 완전 제거 */
+    /* left: auto - left: 50% 등 중앙 정렬 속성 완전 제거 */
     left: auto !important;
+    /* top: unset - top 관련 속성 제거 */
+    top: unset !important;
     /* margin: 0 - 기존 중앙 정렬 마진 제거 */
     margin: 0 !important;
-    /* z-index-10 - 모델 위에 오게 */
+    /* z-index: 10 - 모델 위에 오게 */
     z-index: 10 !important;
     opacity: 0.85 !important;
     /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
     mix-blend-mode: multiply !important;
   }
 
-  /* 모바일(768px 이하)에서 모델 이미지 컨테이너 relative 강제 */
+  /* 모바일(768px 이하)에서 모델 이미지 컨테이너 relative 강제 (싸인 배치의 기준점) */
   .person-image,
   .hero-image-area {
     position: relative !important;
@@ -2634,24 +2636,29 @@ textarea::placeholder {
     margin: 0 !important;
   }
 
-  /* 10. person-image - w-full h-auto + relative 강제 */
+  /* 10. person-image - w-full h-auto + relative 강제 (모델 이미지 중앙 정렬 기준점) */
   .person-image {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
     display: block !important;
-    /* relative - absolute 요소(싸인)의 부모로 설정 (강제) */
+    /* relative - absolute 요소(싸인)의 부모로 설정 (강제) - 싸인 배치의 기준점 */
     position: relative !important;
     overflow: visible !important;
+    /* 모델 이미지 중앙 정렬을 위한 컨테이너 */
+    margin: 0 auto !important;
   }
 
-  /* 11. hero-image - 모바일에서 모델 이미지 강제 크게 (인라인 스타일 오버라이드) */
+  /* 11. hero-image - 모바일에서 모델 이미지 중앙 정렬 + 크게 (인라인 스타일 오버라이드) */
   .hero-image,
   img.hero-image,
   img[src="./profile.png"],
   img[src="profile.png"],
   .person-image img.hero-image {
+    /* display: block; margin: 0 auto; - 모바일 뷰포트에서 모델 이미지가 화면 정중앙에 오도록 */
+    display: block !important;
+    margin: 0 auto !important;
     /* width: 90% - 모바일에서 화면 너비의 90% 차지하도록 크게 (인라인 width:auto 오버라이드) */
     width: 90% !important;
     /* max-width: 90vw - 모바일에서 화면 너비의 90%로 제한 (인라인 max-height:none 오버라이드) */
@@ -2664,11 +2671,9 @@ textarea::placeholder {
     object-fit: contain !important;
     object-position: center bottom !important;
     /* object-position: center bottom - 모바일에서 모델이 중앙~하단에 위치하도록 */
-    display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
     position: relative !important;
-    margin: 0 auto !important;
     /* 인라인 스타일 오버라이드 */
     filter: none !important;
     image-rendering: auto !important;
