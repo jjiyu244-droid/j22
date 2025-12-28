@@ -2098,12 +2098,13 @@ textarea::placeholder {
   /* width: 100% - 반응형 대응을 위해 전체 너비 사용 */
   box-sizing: border-box;
   /* box-sizing: border-box - padding 포함하여 전체 너비 계산 */
-  overflow: hidden;
-  /* overflow: hidden - 데스크톱에서 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 */
-  max-height: 70vh;
-  /* max-height: 70vh - 데스크톱에서 섹션이 화면 높이의 70% 이하로 강제 제한 */
-  min-height: 560px;
-  /* min-height: 560px - 데스크톱에서 이미지가 잘리지 않도록 최소 높이 설정 (인라인 스타일에서 제거되어 CSS로 관리) */
+  overflow: visible;
+  /* overflow: visible - 콘텐츠가 잘리지 않도록 overflow-hidden 제거 */
+  max-height: none;
+  /* max-height: none - max-height 제한 제거하여 콘텐츠가 잘리지 않도록 */
+  /* min-height는 반응형 미디어 쿼리에서 vh 단위로 설정 */
+  height: auto;
+  /* height: auto - 높이 자동 조정 */
   display: flex;
   padding: 48px;
   /* padding: 48px - 전체 패딩 설정 */
@@ -2113,14 +2114,74 @@ textarea::placeholder {
   /* align-items: flex-start !important - 핵심: 전체를 위쪽 기준으로 정렬 */
 }
 
-/* 데스크톱(640px 이상) - sm:min-h-[60vh] */
+/* 반응형 min-height 설정 - vh 단위만 사용 (고정 px 값 완전 제거) */
+/* 모바일 (375px ~ 640px) - min-h-[60vh] */
+@media (max-width: 640px) {
+  .hero-section-container,
+  .pre-login-welcome.hero-section-container,
+  section.hero-section-container,
+  section.pre-login-welcome.hero-section-container {
+    /* min-h-[60vh] - 모바일에서 최소 높이를 화면의 60%로 설정 */
+    min-height: 60vh;
+  }
+}
+
+/* sm (640px 이상) - sm:min-h-[70vh], sm:items-center, sm:justify-center */
 @media (min-width: 641px) {
   .hero-section-container,
   .pre-login-welcome.hero-section-container,
   section.hero-section-container,
   section.pre-login-welcome.hero-section-container {
-    /* sm:min-h-[60vh] - 데스크톱에서 최소 높이를 화면의 60%로 설정 (640px 이상) */
-    min-height: 60vh;
+    /* sm:min-h-[70vh] - 640px 이상에서 최소 높이를 화면의 70%로 설정 */
+    min-height: 70vh;
+    /* overflow-visible - 콘텐츠가 잘리지 않도록 */
+    overflow: visible;
+  }
+
+  .hero-content-wrapper {
+    /* sm:items-center sm:justify-center - 640px 이상에서 중앙 정렬 */
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .hero-text-area {
+    /* sm:text-left - 640px 이상에서 좌측 정렬 */
+    text-align: left !important;
+  }
+
+  .hero-main-copy-line1,
+  .hero-main-copy-line2 {
+    /* sm:text-left - 640px 이상에서 좌측 정렬 */
+    text-align: left !important;
+  }
+
+  .hero-sub-copy-line1,
+  .hero-sub-copy-line2,
+  .hero-sub-copy-line3 {
+    /* sm:text-left - 640px 이상에서 좌측 정렬 */
+    text-align: left !important;
+  }
+}
+
+/* md (768px 이상) - md:min-h-[80vh] */
+@media (min-width: 768px) {
+  .hero-section-container,
+  .pre-login-welcome.hero-section-container,
+  section.hero-section-container,
+  section.pre-login-welcome.hero-section-container {
+    /* md:min-h-[80vh] - 768px 이상에서 최소 높이를 화면의 80%로 설정 */
+    min-height: 80vh;
+  }
+}
+
+/* lg (1024px 이상) - lg:min-h-[85vh] */
+@media (min-width: 1024px) {
+  .hero-section-container,
+  .pre-login-welcome.hero-section-container,
+  section.hero-section-container,
+  section.pre-login-welcome.hero-section-container {
+    /* lg:min-h-[85vh] - 1024px 이상에서 최소 높이를 화면의 85%로 설정 */
+    min-height: 85vh;
   }
 }
 
@@ -2481,26 +2542,25 @@ textarea::placeholder {
     width: 100% !important;
   }
 
-  /* 2. hero-content-wrapper - flex-col, items-center, justify-center */
+  /* 2. hero-content-wrapper - flex-col, items-start, justify-start (모바일 상단부터 시작) */
   .hero-content-wrapper {
     /* flex flex-col - 모바일에서 세로 배치 */
     display: flex !important;
     flex-direction: column !important;
-    /* items-center justify-center - 중앙 정렬 */
-    align-items: center !important;
-    justify-content: center !important;
+    /* items-start justify-start - 모바일은 상단부터 시작해서 잘림 방지 */
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
-    /* min-h-[50vh] - 최소 높이 보장 */
-    min-height: 50vh !important;
+    /* min-height 제거 - 고정 px 값 제거, 부모의 vh min-height에 의존 */
     /* overflow-visible - overflow-hidden 제거 */
     overflow: visible !important;
     gap: 24px !important;
   }
 
-  /* 3. hero-text-area - w-full, h-auto */
+  /* 3. hero-text-area - w-full, h-auto, text-left */
   .hero-text-area {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
@@ -2512,16 +2572,21 @@ textarea::placeholder {
     visibility: visible !important;
     transform: none !important;
     position: relative !important;
-    /* min-height 보장 */
-    min-height: 200px !important;
+    /* min-height 제거 - 고정 px 값 제거 */
     padding: 0 16px !important;
-    text-align: center !important;
+    /* text-left - 모바일에서 좌측 정렬 */
+    text-align: left !important;
   }
 
-  /* 4. hero-image-area - w-full, h-auto, relative (absolute 요소 부모) */
+  /* 4. hero-image-area - w-full, h-auto, relative (absolute 요소 부모), max-w-md, mx-auto */
   .hero-image-area {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
+    /* max-w-md - 모바일에서 최대 너비 제한 (28rem = 448px) */
+    max-width: 448px !important;
+    /* mx-auto - 중앙 정렬 */
+    margin-left: auto !important;
+    margin-right: auto !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
     /* relative - absolute 요소(싸인)의 부모로 설정 */
@@ -2532,10 +2597,10 @@ textarea::placeholder {
     justify-content: center !important;
     /* overflow-visible - overflow-hidden 제거 */
     overflow: visible !important;
-    /* min-height 보장 */
-    min-height: 300px !important;
+    /* min-height 제거 - 고정 px 값 제거 */
     padding: 0 !important;
-    margin: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
   }
 
   /* 5. person-image - relative (absolute 요소 부모), w-full, h-auto */
@@ -2547,8 +2612,7 @@ textarea::placeholder {
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
     display: block !important;
-    /* min-height 보장 */
-    min-height: 300px !important;
+    /* min-height 제거 - 고정 px 값 제거 */
     overflow: visible !important;
   }
 
@@ -2572,9 +2636,9 @@ textarea::placeholder {
   /* 7. signature-image - bottom-4, right-4 (모바일 반응형) */
   .signature-image {
     position: absolute !important;
-    /* bottom-4 - 모바일에서 하단 16px (1rem) */
+    /* bottom-4 - 모바일에서 하단 16px (1rem = 0.25rem * 4) */
     bottom: 16px !important;
-    /* right-4 - 모바일에서 우측 16px (1rem) */
+    /* right-4 - 모바일에서 우측 16px (1rem = 0.25rem * 4) */
     right: 16px !important;
     width: 120px !important; /* 모바일에서 작게 */
     height: auto !important;
@@ -2584,8 +2648,18 @@ textarea::placeholder {
     left: auto !important;
     margin: 0 !important;
   }
+}
 
-  /* 8. 메인 타이틀 텍스트 - 가시성 보장 */
+/* sm (640px 이상) - signature-image bottom-8, right-8 */
+@media (min-width: 641px) {
+  .signature-image {
+    /* bottom-8 - 640px 이상에서 하단 32px (2rem = 0.25rem * 8) */
+    bottom: 32px !important;
+    /* right-8 - 640px 이상에서 우측 32px (2rem = 0.25rem * 8) */
+    right: 32px !important;
+  }
+
+  /* 8. 메인 타이틀 텍스트 - 가시성 보장, text-left */
   .hero-main-copy-line1,
   .hero-main-copy-line2 {
     white-space: normal !important;
@@ -2593,11 +2667,12 @@ textarea::placeholder {
     opacity: 1 !important;
     visibility: visible !important;
     width: 100% !important;
-    text-align: center !important;
+    /* text-left - 모바일에서 좌측 정렬 */
+    text-align: left !important;
     font-size: 32px !important;
   }
 
-  /* 9. 서브 텍스트 - 가시성 보장 */
+  /* 9. 서브 텍스트 - 가시성 보장, text-left */
   .hero-sub-copy-line1,
   .hero-sub-copy-line2,
   .hero-sub-copy-line3 {
@@ -2605,7 +2680,8 @@ textarea::placeholder {
     opacity: 1 !important;
     visibility: visible !important;
     width: 100% !important;
-    text-align: center !important;
+    /* text-left - 모바일에서 좌측 정렬 */
+    text-align: left !important;
   }
 
   /* 10. 버튼 컨테이너 - 가시성 보장 */
@@ -2833,25 +2909,23 @@ textarea::placeholder {
   .hero-content-wrapper {
     height: auto !important;
     /* height: auto !important - 콘텐츠에 맞춰 자동으로 높이 조정 */
-    min-height: 600px !important;
-    /* min-height: 600px !important - 모바일에서 최소 높이를 600px로 강제 설정하여 콘텐츠가 보이도록 (auto는 높이가 0이 될 수 있음) */
+    /* min-height 제거 - 고정 px 값(600px) 제거, 부모의 vh min-height에 의존 */
     overflow: visible !important;
     /* overflow: visible !important - overflow: hidden으로 인한 잘림 문제 해결 */
     display: flex !important;
     /* display: flex !important - flex 구조 보장 */
     flex-direction: column !important;
     /* flex-direction: column !important - 세로 정렬 */
+    /* items-start justify-start - 모바일은 상단부터 시작해서 잘림 방지 */
+    align-items: flex-start !important;
     justify-content: flex-start !important;
-    /* justify-content: flex-start !important - 위에서부터 배치 */
-    align-items: center !important;
-    /* align-items: center !important - 중앙 정렬 */
     width: 100% !important;
     /* width: 100% !important - 모바일에서 전체 너비 사용 */
     gap: 24px !important;
     /* gap: 24px !important - 텍스트와 이미지 사이 간격 */
   }
   
-  /* 모바일에서 텍스트 영역 강제 가시성 보장 */
+  /* 모바일에서 텍스트 영역 강제 가시성 보장 - w-full, text-left */
   .hero-text-area {
     display: block !important;
     /* display: block !important - display: none 문제 해결 */
@@ -2865,10 +2939,11 @@ textarea::placeholder {
     /* position: relative !important - absolute로 인한 밀림 문제 해결 */
     width: 100% !important;
     /* width: 100% !important - 모바일에서 전체 너비 사용 */
-    min-height: 300px !important;
-    /* min-height: 300px !important - 텍스트 영역이 보이도록 최소 높이 설정 */
+    /* min-height 제거 - 고정 px 값(300px) 제거 */
     padding: 0 16px !important;
     /* padding: 0 16px !important - 모바일에서 좌우 패딩 추가 */
+    /* text-left - 모바일에서 좌측 정렬 */
+    text-align: left !important;
   }
   
   /* 모바일에서 메인 타이틀 텍스트 강제 가시성 보장 */
@@ -2920,7 +2995,7 @@ textarea::placeholder {
     /* margin-left: 0 !important - 모바일에서 좌측 마진 제거 */
   }
   
-  /* 모바일에서 이미지 영역 강제 가시성 보장 */
+  /* 모바일에서 이미지 영역 강제 가시성 보장 - w-full, max-w-md, mx-auto */
   .hero-image-area {
     display: flex !important;
     /* display: flex !important - flex 레이아웃 사용 */
@@ -2934,8 +3009,12 @@ textarea::placeholder {
     /* position: relative !important - absolute로 인한 밀림 문제 해결 */
     width: 100% !important;
     /* width: 100% !important - 모바일에서 전체 너비 사용 */
-    min-height: 300px !important;
-    /* min-height: 300px !important - 이미지 영역이 보이도록 최소 높이 설정 */
+    /* max-w-md - 모바일에서 최대 너비 제한 (28rem = 448px) */
+    max-width: 448px !important;
+    /* mx-auto - 중앙 정렬 */
+    margin-left: auto !important;
+    margin-right: auto !important;
+    /* min-height 제거 - 고정 px 값(300px) 제거 */
     justify-content: center !important;
     /* justify-content: center !important - 중앙 정렬 */
     align-items: center !important;
@@ -2970,8 +3049,7 @@ textarea::placeholder {
     /* display: block !important - display: none 문제 해결 */
     width: 100% !important;
     /* width: 100% !important - 모바일에서 전체 너비 사용 */
-    min-height: 300px !important;
-    /* min-height: 300px !important - 이미지 컨테이너가 보이도록 최소 높이 설정 */
+    /* min-height 제거 - 고정 px 값(300px) 제거 */
     position: relative !important;
     /* position: relative !important - absolute로 인한 밀림 문제 해결 */
   }
