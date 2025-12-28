@@ -1569,7 +1569,7 @@ textarea::placeholder {
   /* 이 규칙이 .hero-content-wrapper를 숨겨서 히어로 섹션이 비어 보이게 만듦 */
   /* CoreWeave 로고는 이미 제거되었으므로 이 규칙 불필요 */
 
-  /* 모바일(768px 이하)에서 싸인 이미지 강제 작게 + 모델 박스 우측 하단 고정 (70px, 5%) */
+  /* 모바일(768px 이하)에서 싸인 이미지 강제 작게 + 모델 박스 우측 하단 고정 (10px, 5%) */
   .signature-image,
   img.signature-image,
   img[src="./449.png"],
@@ -1577,8 +1577,8 @@ textarea::placeholder {
   .person-image img.signature-image,
   .hero-image-area .signature-image {
     position: absolute !important;
-    /* width: 70px - 모바일에서 싸인 크기 대폭 축소 (모델을 가리지 않도록) */
-    width: 70px !important;
+    /* width: 10px - 모바일에서 싸인 크기 아주 작게 (모델을 전혀 가리지 않도록) */
+    width: 10px !important;
     height: auto !important;
     /* bottom: 5% - 모델 이미지 박스의 오른쪽 하단 끝 (모델의 오른쪽 골반이나 팔 하단 영역) */
     bottom: 5% !important;
@@ -2681,15 +2681,15 @@ textarea::placeholder {
     border: none !important;
   }
 
-  /* 12. signature-image - 모바일에서 싸인 이미지 강제 작게 + 모델 기준 우측 하단 고정 (70px, 5%) */
+  /* 12. signature-image - 모바일에서 싸인 이미지 강제 작게 + 모델 기준 우측 하단 고정 (10px, 5%) */
   .signature-image,
   img.signature-image,
   img[src="./449.png"],
   img[src="449.png"],
   .person-image img.signature-image {
     position: absolute !important;
-    /* width: 70px - 모바일에서 싸인 크기 대폭 축소 (모델을 가리지 않도록) */
-    width: 70px !important;
+    /* width: 10px - 모바일에서 싸인 크기 아주 작게 (모델을 전혀 가리지 않도록) */
+    width: 10px !important;
     height: auto !important;
     /* bottom: 5% - 모델 이미지 컨테이너 기준 하단 5% (모델의 오른쪽 골반이나 팔 하단 영역) */
     bottom: 5% !important;
