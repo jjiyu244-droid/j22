@@ -2662,10 +2662,10 @@ textarea::placeholder {
     /* display: block; margin: 0 auto; - 모바일 뷰포트에서 모델 이미지가 화면 정중앙에 오도록 */
     display: block !important;
     margin: 0 auto !important;
-    /* width: 90% - 모바일에서 화면 너비의 90% 차지하도록 크게 (인라인 width:auto 오버라이드) */
-    width: 90% !important;
-    /* max-width: 90vw - 모바일에서 화면 너비의 90%로 제한 (인라인 max-height:none 오버라이드) */
-    max-width: 90vw !important;
+    /* width: 135% - 모바일에서 화면 너비의 135% 차지하도록 크게 (기존 90%의 1.5배) */
+    width: 135% !important;
+    /* max-width: 135vw - 모바일에서 화면 너비의 135%로 제한 (기존 90vw의 1.5배) */
+    max-width: 135vw !important;
     /* height: auto - 높이 자동 조정 (인라인 height:850px 오버라이드) */
     height: auto !important;
     /* max-height 제거 - 인라인 max-height:none 오버라이드 */
