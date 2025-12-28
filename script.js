@@ -5061,14 +5061,17 @@ async function navigateToPage(page) {
         }
       });
       
-      // pre-login-welcome 숨기기
-      document.querySelectorAll('.pre-login-welcome').forEach((section) => {
-        section.style.setProperty('display', 'none', 'important');
-        section.style.setProperty('visibility', 'hidden', 'important');
-        section.style.setProperty('opacity', '0', 'important');
-        section.style.setProperty('height', '0', 'important');
-        section.style.setProperty('overflow', 'hidden', 'important');
-      });
+      // pre-login-welcome 숨기기 (모바일에서는 제외 - 모바일에서는 히어로 섹션이 항상 보이도록)
+      const isMobile = window.innerWidth <= 640;
+      if (!isMobile) {
+        document.querySelectorAll('.pre-login-welcome').forEach((section) => {
+          section.style.setProperty('display', 'none', 'important');
+          section.style.setProperty('visibility', 'hidden', 'important');
+          section.style.setProperty('opacity', '0', 'important');
+          section.style.setProperty('height', '0', 'important');
+          section.style.setProperty('overflow', 'hidden', 'important');
+        });
+      }
       
       // feature-card들 숨기기 (더 강력하게)
       document.querySelectorAll('.feature-card').forEach((card) => {
@@ -5140,10 +5143,17 @@ async function navigateToPage(page) {
         container.style.setProperty('height', '0', 'important');
       });
   } else {
-      // 다른 페이지들은 기존 로직 사용
-    document.querySelectorAll('.content-section:not(.page-section), .pre-login-welcome').forEach((section) => {
-      section.style.display = 'none';
-    });
+      // 다른 페이지들은 기존 로직 사용 (모바일에서는 히어로 섹션 제외)
+      const isMobile = window.innerWidth <= 640;
+      document.querySelectorAll('.content-section:not(.page-section)').forEach((section) => {
+        section.style.display = 'none';
+      });
+      // 모바일이 아닐 때만 pre-login-welcome 숨기기
+      if (!isMobile) {
+        document.querySelectorAll('.pre-login-welcome').forEach((section) => {
+          section.style.display = 'none';
+        });
+      }
     
       // Footer 섹션도 숨기기
       document.querySelectorAll('.footer-left, .footer-right').forEach((footer) => {

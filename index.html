@@ -98,8 +98,8 @@
         <!-- 변경 후: flex 레이아웃으로 중앙 정렬, 왼쪽 텍스트와 오른쪽 이미지 영역 균형 배치 -->
         <!-- 변경 전: overflow:visible → 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생길 수 있음 -->
         <!-- 변경 후: overflow:hidden → 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 -->
-        <!-- 변경 취소: 08ff96e 이전 상태로 복구 - padding-top:0px, padding-bottom:16px(pb-4), max-height:70vh, overflow:hidden -->
-        <section class="card glass pre-login-welcome hero-section-container" style="position:relative;padding-top:0px;padding-bottom:16px;padding-left:48px;padding-right:48px;margin:0;height:auto;max-height:70vh;overflow:hidden;border-radius:0;border:none !important;box-shadow:none !important;margin-top:0 !important;background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;">
+        <!-- 모바일 반응형 수정: 인라인 스타일에서 max-height와 overflow 제거하여 CSS로만 관리 -->
+        <section class="card glass pre-login-welcome hero-section-container" style="position:relative;padding-top:0px;padding-bottom:16px;padding-left:48px;padding-right:48px;margin:0;border-radius:0;border:none !important;box-shadow:none !important;margin-top:0 !important;background:linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;">
           <div class="hero-content-wrapper">
             <!-- 왼쪽: 텍스트 영역 -->
             <div class="hero-text-area">

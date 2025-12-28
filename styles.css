@@ -2111,6 +2111,18 @@ textarea::placeholder {
   /* align-items: flex-start !important - 핵심: 전체를 위쪽 기준으로 정렬 */
 }
 
+/* 데스크톱 전용 스타일 - 모바일에서는 적용되지 않도록 미디어 쿼리로 분리 */
+@media (min-width: 641px) {
+  .hero-section-container,
+  .pre-login-welcome.hero-section-container,
+  section.hero-section-container,
+  section.pre-login-welcome.hero-section-container {
+    /* 데스크톱에서만 overflow: hidden, max-height: 70vh 적용 */
+    overflow: hidden;
+    max-height: 70vh;
+  }
+}
+
 /* 반응형 min-height 설정 제거 - 08ff96e 이전 상태로 복구 (컴팩트한 레이아웃 유지) */
 /* 변경 취소: 최근 추가된 반응형 vh min-height 값들 제거하여 원래의 컴팩트한 높이로 복구 */
 
