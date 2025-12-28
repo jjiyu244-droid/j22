@@ -1565,14 +1565,9 @@ textarea::placeholder {
     height: 120% !important;
   }
 
-  .pre-login-welcome > div:last-child {
-    display: none !important;
-  }
-
-  /* CoreWeave 로고 모바일 조정 */
-  .pre-login-welcome > div:last-child {
-    display: none !important;
-  }
+  /* 변경 취소: .pre-login-welcome > div:last-child { display: none !important; } 제거 */
+  /* 이 규칙이 .hero-content-wrapper를 숨겨서 히어로 섹션이 비어 보이게 만듦 */
+  /* CoreWeave 로고는 이미 제거되었으므로 이 규칙 불필요 */
 }
 
 /* FAQ Styles */
