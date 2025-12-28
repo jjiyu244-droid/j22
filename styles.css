@@ -2102,7 +2102,8 @@ textarea::placeholder {
   /* overflow: hidden - 데스크톱에서 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 */
   max-height: 70vh;
   /* max-height: 70vh - 데스크톱에서 섹션이 화면 높이의 70% 이하로 강제 제한 */
-  /* min-h-[560px]: 이미지가 잘리지 않도록 최소 높이 520~580px 범위에서 560px 설정 (인라인 스타일에서도 min-height:560px 적용됨) */
+  min-height: 560px;
+  /* min-height: 560px - 데스크톱에서 이미지가 잘리지 않도록 최소 높이 설정 (인라인 스타일에서 제거되어 CSS로 관리) */
   display: flex;
   padding: 48px;
   /* padding: 48px - 전체 패딩 설정 */
@@ -2652,8 +2653,8 @@ textarea::placeholder {
   .hero-content-wrapper {
     height: auto !important;
     /* height: auto !important - 콘텐츠에 맞춰 자동으로 높이 조정 */
-    min-height: auto !important;
-    /* min-height: auto !important - 콘텐츠에 맞춰 자동으로 높이 조정 */
+    min-height: 600px !important;
+    /* min-height: 600px !important - 모바일에서 최소 높이를 600px로 강제 설정하여 콘텐츠가 보이도록 (auto는 높이가 0이 될 수 있음) */
     overflow: visible !important;
     /* overflow: visible !important - overflow: hidden으로 인한 잘림 문제 해결 */
     display: flex !important;
