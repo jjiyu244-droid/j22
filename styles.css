@@ -2445,55 +2445,56 @@ textarea::placeholder {
   }
 }
 
-/* 반응형: 640px 이하 모바일 - 히어로 섹션 완전 수정 */
-/* 사용자 요청: 모바일에서 히어로 섹션이 비어 보이는 버그 수정 */
+/* 반응형: 640px 이하 모바일 - 히어로 섹션 완전 반응형 수정 */
+/* PC 스타일은 변경하지 않고 모바일만 반응형으로 수정 */
 @media (max-width: 640px) {
-  /* 1. 히어로 섹션 컨테이너 - min-height 설정, overflow 수정 */
+  /* 1. 히어로 섹션 컨테이너 - min-h-[70vh], overflow-visible, pb-8 */
   .hero-section-container,
   .pre-login-welcome.hero-section-container,
   section.hero-section-container,
   section.pre-login-welcome.hero-section-container {
-    /* min-h-[50vh] - 모바일에서 최소 높이를 화면의 50%로 설정 (640px 이하) */
-    min-height: 50vh !important;
+    /* min-h-[70vh] - 모바일에서 최소 높이를 화면의 70%로 설정 (모델 전체가 보이도록) */
+    min-height: 70vh !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
-    /* overflow-visible - overflow-hidden 제거하여 콘텐츠가 보이도록 */
+    /* overflow-visible - 콘텐츠가 잘리지 않도록 overflow-hidden 제거 */
     overflow: visible !important;
     /* flex flex-col - 모바일에서 세로 배치 */
     display: flex !important;
     flex-direction: column !important;
-    /* items-center justify-center - 중앙 정렬 */
+    /* items-center justify-center - 모바일에서 중앙 정렬 */
     align-items: center !important;
     justify-content: center !important;
-    /* pt-8 pb-16 - 모바일에서 상하 여유 패딩 */
-    padding-top: 32px !important; /* pt-8 = 2rem = 32px */
-    padding-bottom: 64px !important; /* pb-16 = 4rem = 64px */
+    /* pb-8 - 모바일에서 하단 여유 패딩 32px (2rem = 0.25rem * 8) */
+    padding-top: 24px !important;
+    padding-bottom: 32px !important; /* pb-8 = 2rem = 32px */
     padding-left: 16px !important;
     padding-right: 16px !important;
     /* 배경색 보장 */
     background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%) !important;
     width: 100% !important;
+    /* max-height 제거 - 모바일에서 제한 없음 */
+    max-height: none !important;
   }
 
-  /* 2. hero-content-wrapper - flex-col, items-start, justify-start (모바일 상단부터 시작) */
+  /* 2. hero-content-wrapper - flex flex-col items-center justify-center */
   .hero-content-wrapper {
     /* flex flex-col - 모바일에서 세로 배치 */
     display: flex !important;
     flex-direction: column !important;
-    /* items-start justify-start - 모바일은 상단부터 시작해서 잘림 방지 */
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
+    /* items-center justify-center - 모바일에서 중앙 정렬 */
+    align-items: center !important;
+    justify-content: center !important;
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
-    /* min-height 제거 - 고정 px 값 제거, 부모의 vh min-height에 의존 */
     /* overflow-visible - overflow-hidden 제거 */
     overflow: visible !important;
     gap: 24px !important;
   }
 
-  /* 3. hero-text-area - w-full, h-auto, text-left */
+  /* 3. hero-text-area - w-full text-center */
   .hero-text-area {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
@@ -2505,57 +2506,112 @@ textarea::placeholder {
     visibility: visible !important;
     transform: none !important;
     position: relative !important;
-    /* min-height 제거 - 고정 px 값 제거 */
     padding: 0 16px !important;
-    /* text-left - 모바일에서 좌측 정렬 */
-    text-align: left !important;
+    /* text-center - 모바일에서 중앙 정렬 */
+    text-align: center !important;
   }
 
-  /* 4. hero-image-area - w-full, h-auto, relative (absolute 요소 부모), max-w-md, mx-auto */
+  /* 4. "코어위브 스테이킹" 작은 텍스트 - text-xs */
+  .hero-text-area > p:first-child {
+    /* text-xs - 모바일에서 작은 텍스트 크기 (0.75rem = 12px) */
+    font-size: 12px !important;
+    text-align: center !important;
+  }
+
+  /* 5. hero-main-copy-line1, hero-main-copy-line2 - text-3xl */
+  .hero-main-copy-line1,
+  .hero-main-copy-line2 {
+    /* text-3xl - 모바일에서 타이틀 크기 (1.875rem = 30px) */
+    font-size: 30px !important;
+    white-space: normal !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: 100% !important;
+    /* text-center - 모바일에서 중앙 정렬 */
+    text-align: center !important;
+    line-height: 1.2 !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* 6. hero-sub-copy-line1 - text-sm */
+  .hero-sub-copy-line1 {
+    /* text-sm - 모바일에서 서브 텍스트 크기 (0.875rem = 14px) */
+    font-size: 14px !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: 100% !important;
+    /* text-center - 모바일에서 중앙 정렬 */
+    text-align: center !important;
+    margin-top: 12px !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* 7. hero-sub-copy-line2, hero-sub-copy-line3 - text-sm */
+  .hero-sub-copy-line2,
+  .hero-sub-copy-line3 {
+    /* text-sm - 모바일에서 서브 텍스트 크기 (0.875rem = 14px) */
+    font-size: 14px !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: 100% !important;
+    /* text-center - 모바일에서 중앙 정렬 */
+    text-align: center !important;
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* 8. hero-button-container - 가시성 보장 */
+  .hero-button-container {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: 100% !important;
+    justify-content: center !important;
+    margin-left: 0 !important;
+    margin-top: 24px !important;
+  }
+
+  /* 9. hero-image-area - w-full flex justify-center */
   .hero-image-area {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
-    /* max-w-md - 모바일에서 최대 너비 제한 (28rem = 448px) */
-    max-width: 448px !important;
-    /* mx-auto - 중앙 정렬 */
-    margin-left: auto !important;
-    margin-right: auto !important;
+    /* flex justify-center - 모바일에서 중앙 정렬 */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
     /* relative - absolute 요소(싸인)의 부모로 설정 */
     position: relative !important;
-    /* flex items-center justify-center - 중앙 정렬 */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
     /* overflow-visible - overflow-hidden 제거 */
     overflow: visible !important;
-    /* min-height 제거 - 고정 px 값 제거 */
     padding: 0 !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
+    margin: 0 !important;
   }
 
-  /* 5. person-image - relative (absolute 요소 부모), w-full, h-auto */
+  /* 10. person-image - w-full h-auto */
   .person-image {
-    /* relative - absolute 요소(싸인)의 부모로 설정 */
-    position: relative !important;
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
     display: block !important;
-    /* min-height 제거 - 고정 px 값 제거 */
+    /* relative - absolute 요소(싸인)의 부모로 설정 */
+    position: relative !important;
     overflow: visible !important;
   }
 
-  /* 6. hero-image - w-full, h-auto, object-contain */
+  /* 11. hero-image - w-full max-w-sm h-auto object-contain */
   .hero-image {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
+    /* max-w-sm - 모바일에서 최대 너비 제한 (24rem = 384px) */
+    max-width: 384px !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
-    max-height: 400px !important;
     /* object-contain - 비율 유지하면서 컨테이너에 맞춤 */
     object-fit: contain !important;
     object-position: center !important;
@@ -2566,14 +2622,15 @@ textarea::placeholder {
     margin: 0 auto !important;
   }
 
-  /* 7. signature-image - bottom-4, right-4 (모바일 반응형) */
+  /* 12. signature-image - bottom-4 right-4 w-32 */
   .signature-image {
     position: absolute !important;
     /* bottom-4 - 모바일에서 하단 16px (1rem = 0.25rem * 4) */
     bottom: 16px !important;
     /* right-4 - 모바일에서 우측 16px (1rem = 0.25rem * 4) */
     right: 16px !important;
-    width: 120px !important; /* 모바일에서 작게 */
+    /* w-32 - 모바일에서 싸인 크기 (8rem = 128px) */
+    width: 128px !important;
     height: auto !important;
     opacity: 0.85 !important;
     z-index: 10 !important;
@@ -2583,51 +2640,115 @@ textarea::placeholder {
   }
 }
 
-/* sm (640px 이상) - signature-image bottom-8, right-8 */
+/* sm (640px 이상) - 반응형 스타일 추가 */
 @media (min-width: 641px) {
-  .signature-image {
-    /* bottom-8 - 640px 이상에서 하단 32px (2rem = 0.25rem * 8) */
-    bottom: 32px !important;
-    /* right-8 - 640px 이상에서 우측 32px (2rem = 0.25rem * 8) */
-    right: 32px !important;
+  /* sm:min-h-[80vh] - 640px 이상에서 최소 높이를 화면의 80%로 설정 */
+  .hero-section-container,
+  .pre-login-welcome.hero-section-container,
+  section.hero-section-container,
+  section.pre-login-welcome.hero-section-container {
+    min-height: 80vh;
   }
 
-  /* 8. 메인 타이틀 텍스트 - 가시성 보장, text-left */
+  /* sm:pb-16 - 640px 이상에서 하단 여유 패딩 64px (4rem = 0.25rem * 16) */
+  .hero-section-container,
+  .pre-login-welcome.hero-section-container,
+  section.hero-section-container,
+  section.pre-login-welcome.hero-section-container {
+    padding-bottom: 64px !important; /* pb-16 = 4rem = 64px */
+  }
+
+  /* sm:flex-row sm:justify-between - 640px 이상에서 가로 배치 */
+  .hero-content-wrapper {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+  }
+
+  /* sm:w-1/2 sm:text-left - 640px 이상에서 텍스트 영역 너비 50%, 좌측 정렬 */
+  .hero-text-area {
+    width: 50% !important;
+    text-align: left !important;
+  }
+
+  /* sm:text-5xl sm:text-left - 640px 이상에서 타이틀 크기 및 좌측 정렬 */
   .hero-main-copy-line1,
   .hero-main-copy-line2 {
-    white-space: normal !important;
-    display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    width: 100% !important;
-    /* text-left - 모바일에서 좌측 정렬 */
+    /* sm:text-5xl - 640px 이상에서 타이틀 크기 (3rem = 48px) */
+    font-size: 48px !important;
     text-align: left !important;
-    font-size: 32px !important;
   }
 
-  /* 9. 서브 텍스트 - 가시성 보장, text-left */
+  /* sm:text-sm - 640px 이상에서 "코어위브 스테이킹" 작은 텍스트 크기 */
+  .hero-text-area > p:first-child {
+    /* sm:text-sm - 640px 이상에서 작은 텍스트 크기 (0.875rem = 14px) */
+    font-size: 14px !important;
+    text-align: left !important;
+  }
+
+  /* sm:text-base - 640px 이상에서 서브 텍스트 크기 */
+  .hero-sub-copy-line1 {
+    /* sm:text-base - 640px 이상에서 서브 텍스트 크기 (1rem = 16px) */
+    font-size: 16px !important;
+  }
+
+  .hero-sub-copy-line2,
+  .hero-sub-copy-line3 {
+    /* sm:text-base - 640px 이상에서 서브 텍스트 크기 (1rem = 16px) */
+    font-size: 16px !important;
+  }
+
+  /* sm:text-left - 640px 이상에서 서브 텍스트 좌측 정렬 */
   .hero-sub-copy-line1,
   .hero-sub-copy-line2,
   .hero-sub-copy-line3 {
-    display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    width: 100% !important;
-    /* text-left - 모바일에서 좌측 정렬 */
     text-align: left !important;
   }
 
-  /* 10. 버튼 컨테이너 - 가시성 보장 */
-  .hero-button-container {
-    display: flex !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    width: 100% !important;
-    justify-content: center !important;
-    margin-left: 0 !important;
-    margin-top: 24px !important;
+  /* sm:w-1/2 - 640px 이상에서 이미지 영역 너비 50% */
+  .hero-image-area {
+    width: 50% !important;
+  }
+
+  /* sm:max-w-lg - 640px 이상에서 모델 이미지 최대 너비 (32rem = 512px) */
+  .hero-image {
+    max-width: 512px !important;
+  }
+
+  /* sm:bottom-8 sm:right-12 sm:w-48 - 640px 이상에서 싸인 위치 및 크기 */
+  .signature-image {
+    /* sm:bottom-8 - 640px 이상에서 하단 32px (2rem = 0.25rem * 8) */
+    bottom: 32px !important;
+    /* sm:right-12 - 640px 이상에서 우측 48px (3rem = 0.25rem * 12) */
+    right: 48px !important;
+    /* sm:w-48 - 640px 이상에서 싸인 크기 (12rem = 192px) */
+    width: 192px !important;
   }
 }
+
+/* md (768px 이상) - 반응형 스타일 추가 */
+@media (min-width: 768px) {
+  /* md:text-6xl - 768px 이상에서 타이틀 크기 (3.75rem = 60px) */
+  .hero-main-copy-line1,
+  .hero-main-copy-line2 {
+    font-size: 60px !important;
+  }
+
+  /* md:text-lg - 768px 이상에서 서브 텍스트 크기 (1.125rem = 18px) */
+  .hero-sub-copy-line1 {
+    font-size: 18px !important;
+  }
+
+  .hero-sub-copy-line2,
+  .hero-sub-copy-line3 {
+    font-size: 18px !important;
+  }
+
+  /* md:max-w-xl - 768px 이상에서 모델 이미지 최대 너비 (36rem = 576px) */
+  .hero-image {
+    max-width: 576px !important;
+  }
+}
+
 
 /* 반응형: 모바일에서 싸인 위치 조정 */
 /* 변경 취소: 08ff96e 이전 상태로 복구 */
