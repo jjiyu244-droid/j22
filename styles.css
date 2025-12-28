@@ -1520,11 +1520,14 @@ textarea::placeholder {
   /* 변경 전: min-height: auto !important → 모바일에서 높이가 0이 되어 히어로 섹션이 비어 보임 */
   /* 변경 후: min-height: 70vh !important → 모바일에서 최소 높이를 화면의 70%로 강제 설정 */
   .pre-login-welcome,
-  .pre-login-welcome.hero-section-container {
+  .pre-login-welcome.hero-section-container,
+  .hero-section-container,
+  section.hero-section-container,
+  section.pre-login-welcome.hero-section-container {
     padding: 24px 16px !important;
     /* padding: 24px 16px !important - 모바일에서 적절한 패딩 */
     min-height: 70vh !important;
-    /* min-height: 70vh !important - 모바일에서 최소 높이를 화면의 70%로 강제 설정 (iPhone SE 375px 기준 약 525px) */
+    /* min-height: 70vh !important - 모바일(768px 이하)에서 최소 높이를 화면의 70%로 강제 설정 (PC 기준 큰 min-height 오버라이드) */
     height: auto !important;
     /* height: auto !important - 콘텐츠에 맞춰 자동으로 높이 조정 */
     display: flex !important;
