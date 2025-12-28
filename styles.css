@@ -2614,14 +2614,16 @@ textarea::placeholder {
   /* 11. hero-image - w-full max-w-md h-auto object-contain (모바일에서 모델 이미지 크게) */
   .hero-image {
     /* w-full - 모바일에서 전체 너비 */
-    width: 100% !important;
+    width: 90% !important;
+    /* width: 90% - 모바일에서 화면 너비의 90% 차지하도록 크게 */
     /* max-w-md - 모바일에서 최대 너비 제한 (28rem = 448px) - 화면 너비의 80~90% 정도 차지하도록 크게 */
     max-width: 448px !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
     /* object-contain - 비율 유지하면서 컨테이너에 맞춤 */
     object-fit: contain !important;
-    object-position: center !important;
+    object-position: center bottom !important;
+    /* object-position: center bottom - 모바일에서 모델이 중앙~하단에 위치하도록 */
     display: block !important;
     opacity: 1 !important;
     visibility: visible !important;
@@ -2645,6 +2647,8 @@ textarea::placeholder {
     transform: none !important;
     left: auto !important;
     margin: 0 !important;
+    /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
+    mix-blend-mode: multiply;
   }
 }
 
