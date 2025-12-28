@@ -2098,13 +2098,10 @@ textarea::placeholder {
   /* width: 100% - 반응형 대응을 위해 전체 너비 사용 */
   box-sizing: border-box;
   /* box-sizing: border-box - padding 포함하여 전체 너비 계산 */
-  overflow: visible;
-  /* overflow: visible - 콘텐츠가 잘리지 않도록 overflow-hidden 제거 */
-  max-height: none;
-  /* max-height: none - max-height 제한 제거하여 콘텐츠가 잘리지 않도록 */
-  /* min-height는 반응형 미디어 쿼리에서 vh 단위로 설정 */
-  height: auto;
-  /* height: auto - 높이 자동 조정 */
+  overflow: hidden;
+  /* overflow: hidden - 데스크톱에서 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 (08ff96e 이전 상태로 복구) */
+  max-height: 70vh;
+  /* max-height: 70vh - 데스크톱에서 섹션이 화면 높이의 70% 이하로 강제 제한하여 컴팩트한 레이아웃 유지 (08ff96e 이전 상태로 복구) */
   display: flex;
   padding: 48px;
   /* padding: 48px - 전체 패딩 설정 */
@@ -2114,76 +2111,8 @@ textarea::placeholder {
   /* align-items: flex-start !important - 핵심: 전체를 위쪽 기준으로 정렬 */
 }
 
-/* 반응형 min-height 설정 - vh 단위만 사용 (고정 px 값 완전 제거) */
-/* 모바일 (375px ~ 640px) - min-h-[60vh] */
-@media (max-width: 640px) {
-  .hero-section-container,
-  .pre-login-welcome.hero-section-container,
-  section.hero-section-container,
-  section.pre-login-welcome.hero-section-container {
-    /* min-h-[60vh] - 모바일에서 최소 높이를 화면의 60%로 설정 */
-    min-height: 60vh;
-  }
-}
-
-/* sm (640px 이상) - sm:min-h-[70vh], sm:items-center, sm:justify-center */
-@media (min-width: 641px) {
-  .hero-section-container,
-  .pre-login-welcome.hero-section-container,
-  section.hero-section-container,
-  section.pre-login-welcome.hero-section-container {
-    /* sm:min-h-[70vh] - 640px 이상에서 최소 높이를 화면의 70%로 설정 */
-    min-height: 70vh;
-    /* overflow-visible - 콘텐츠가 잘리지 않도록 */
-    overflow: visible;
-  }
-
-  .hero-content-wrapper {
-    /* sm:items-center sm:justify-center - 640px 이상에서 중앙 정렬 */
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  .hero-text-area {
-    /* sm:text-left - 640px 이상에서 좌측 정렬 */
-    text-align: left !important;
-  }
-
-  .hero-main-copy-line1,
-  .hero-main-copy-line2 {
-    /* sm:text-left - 640px 이상에서 좌측 정렬 */
-    text-align: left !important;
-  }
-
-  .hero-sub-copy-line1,
-  .hero-sub-copy-line2,
-  .hero-sub-copy-line3 {
-    /* sm:text-left - 640px 이상에서 좌측 정렬 */
-    text-align: left !important;
-  }
-}
-
-/* md (768px 이상) - md:min-h-[80vh] */
-@media (min-width: 768px) {
-  .hero-section-container,
-  .pre-login-welcome.hero-section-container,
-  section.hero-section-container,
-  section.pre-login-welcome.hero-section-container {
-    /* md:min-h-[80vh] - 768px 이상에서 최소 높이를 화면의 80%로 설정 */
-    min-height: 80vh;
-  }
-}
-
-/* lg (1024px 이상) - lg:min-h-[85vh] */
-@media (min-width: 1024px) {
-  .hero-section-container,
-  .pre-login-welcome.hero-section-container,
-  section.hero-section-container,
-  section.pre-login-welcome.hero-section-container {
-    /* lg:min-h-[85vh] - 1024px 이상에서 최소 높이를 화면의 85%로 설정 */
-    min-height: 85vh;
-  }
-}
+/* 반응형 min-height 설정 제거 - 08ff96e 이전 상태로 복구 (컴팩트한 레이아웃 유지) */
+/* 변경 취소: 최근 추가된 반응형 vh min-height 값들 제거하여 원래의 컴팩트한 높이로 복구 */
 
 /* 내부 레이아웃 */
 /* 변경 전: align-items: center → 텍스트는 상단 정렬, 모델 이미지는 중앙 정렬로 충돌 */
@@ -2439,17 +2368,20 @@ textarea::placeholder {
 /* .hero-logo 스타일 제거됨 */
 
 /* 싸인 이미지 */
-/* 변경 전: right: -80px, bottom: -50px → 더 오른쪽으로만 이동 필요하되 히어로 섹션 밖으로 벗어나지 않게 */
-/* 변경 후: right: -90px, bottom: -50px → 더 오른쪽으로만 이동하되 히어로 섹션 밖으로 벗어나지 않도록 (bottom은 유지) */
+/* 변경 취소: 08ff96e 이전 상태로 복구 - right: 12px, bottom: 20px로 되돌림 */
+/* 변경 전: right: -90px, bottom: -50px → 최근 변경으로 인한 위치 변경 */
+/* 변경 후: right: 12px, bottom: 20px → 08ff96e 이전 완벽했던 상태로 복구 */
 .signature-image {
   position: absolute;
   /* position: absolute - 부모 컨테이너를 기준으로 absolute 좌표 설정 */
-  right: -90px;
-  /* right: -90px - 더 오른쪽으로 이동 (마이너스 값을 더 크게) */
-  bottom: -50px;
-  /* bottom: -50px - 아래 위치는 유지 (변경 없음) */
-  width: 160px;
-  /* width: 160px - 적당한 크기 유지 */
+  right: 12px;
+  /* right: 12px - 08ff96e 이전 완벽했던 상태로 복구 (모델 오른쪽 아래 코너 근처) */
+  bottom: 20px;
+  /* bottom: 20px - 08ff96e 이전 완벽했던 상태로 복구 (자연스러운 위치) */
+  width: 240px;
+  /* width: 240px - 08ff96e 이전 완벽했던 크기로 복구 */
+  height: auto;
+  /* height: auto - 비율 유지 */
   transform: none !important;
   /* transform: none !important - left: 50%나 translate: -50% 같은 중앙 정렬 코드 제거 */
   left: auto !important;
@@ -2466,15 +2398,16 @@ textarea::placeholder {
 }
 
 /* 반응형: 태블릿에서 싸인 위치 조정 */
+/* 변경 취소: 08ff96e 이전 상태로 복구 */
 @media (max-width: 1080px) {
   .signature-image {
-    /* 태블릿: 더 오른쪽으로만 이동하되 히어로 섹션 밖으로 벗어나지 않게 */
-    right: -80px;
-    /* right: -80px - 더 오른쪽으로 이동 (태블릿에서는 데스크톱보다 작은 값) */
-    bottom: -45px;
-    /* bottom: -45px - 아래 위치는 유지 (변경 없음) */
-    width: 160px;
-    /* width: 160px - 적당한 크기 유지 */
+    /* 태블릿: 08ff96e 이전 완벽했던 상태로 복구 */
+    right: 10px;
+    /* right: 10px - 08ff96e 이전 완벽했던 상태로 복구 */
+    bottom: 16px;
+    /* bottom: 16px - 08ff96e 이전 완벽했던 상태로 복구 */
+    width: 200px;
+    /* width: 200px - 08ff96e 이전 완벽했던 크기로 복구 */
     transform: none !important;
     /* transform: none !important - left: 50%나 translate: -50% 같은 중앙 정렬 코드 제거 */
     left: auto !important;
@@ -2697,23 +2630,24 @@ textarea::placeholder {
 }
 
 /* 반응형: 모바일에서 싸인 위치 조정 */
+/* 변경 취소: 08ff96e 이전 상태로 복구 */
 @media (max-width: 768px) {
   .signature-image {
-    /* 모바일: 더 오른쪽으로만 이동하되 히어로 섹션 밖으로 벗어나지 않게 */
-    right: -70px;
-    /* right: -70px - 모바일에서 더 오른쪽으로 이동 (태블릿보다 작은 값) */
-    bottom: -40px;
-    /* bottom: -40px - 아래 위치는 유지 (변경 없음) */
+    /* 모바일: 08ff96e 이전 완벽했던 상태로 복구 */
+    right: 8px;
+    /* right: 8px - 08ff96e 이전 완벽했던 상태로 복구 */
+    bottom: 8px;
+    /* bottom: 8px - 08ff96e 이전 완벽했던 상태로 복구 */
     width: 140px;
     /* width: 140px - 모바일에서 적당한 크기 유지 */
+    opacity: 0.9;
+    /* opacity: 0.9 - 모바일에서 약간 더 진하게 */
     transform: none !important;
     /* transform: none !important - left: 50%나 translate: -50% 같은 중앙 정렬 코드 제거 */
     left: auto !important;
     /* left: auto !important - left 속성이 있다면 제거 */
     margin: 0;
     /* margin: 0 - 기존에 설정된 중앙 정렬 값이 남아있지 않게 초기화 */
-    opacity: 0.85;
-    /* opacity: 0.85 - 약간 은은하게 보이도록 */
     mix-blend-mode: multiply;
     /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
     z-index: 10;
