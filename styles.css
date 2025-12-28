@@ -1568,6 +1568,41 @@ textarea::placeholder {
   /* 변경 취소: .pre-login-welcome > div:last-child { display: none !important; } 제거 */
   /* 이 규칙이 .hero-content-wrapper를 숨겨서 히어로 섹션이 비어 보이게 만듦 */
   /* CoreWeave 로고는 이미 제거되었으므로 이 규칙 불필요 */
+
+  /* 모바일(768px 이하)에서 싸인 이미지 강제 작게 + 모델 기준 우측 하단 고정 */
+  .signature-image,
+  img.signature-image,
+  img[src="./449.png"],
+  img[src="449.png"],
+  .person-image img.signature-image,
+  .hero-image-area .signature-image {
+    position: absolute !important;
+    /* width: 80px - 모바일에서 싸인 크기 대폭 축소 (모델 이미지를 방해하지 않도록) */
+    width: 80px !important;
+    height: auto !important;
+    /* bottom: 5% - 모델 이미지 컨테이너 기준 하단 5% (모델의 오른쪽 골반이나 팔 하단 영역) */
+    bottom: 5% !important;
+    /* right: 5% - 모델 이미지 컨테이너 기준 우측 5% (모델의 오른쪽 하단 구석) */
+    right: 5% !important;
+    /* transform: none - 중앙 정렬 코드 완전 제거 (left: 50%, translateX(-50%) 등) */
+    transform: none !important;
+    /* left: auto - left 속성 완전 제거 */
+    left: auto !important;
+    /* margin: 0 - 기존 중앙 정렬 마진 제거 */
+    margin: 0 !important;
+    /* z-index-10 - 모델 위에 오게 */
+    z-index: 10 !important;
+    opacity: 0.85 !important;
+    /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
+    mix-blend-mode: multiply !important;
+  }
+
+  /* 모바일(768px 이하)에서 모델 이미지 컨테이너 relative 강제 */
+  .person-image,
+  .hero-image-area {
+    position: relative !important;
+    /* position: relative - absolute 싸인의 부모로 설정 (모델 이미지 컨테이너 내에서만 움직이게) */
+  }
 }
 
 /* FAQ Styles */
@@ -2641,26 +2676,29 @@ textarea::placeholder {
     border: none !important;
   }
 
-  /* 12. signature-image - 모바일에서 싸인 이미지 강제 작게 + 오른쪽 아래 코너 (80px) */
+  /* 12. signature-image - 모바일에서 싸인 이미지 강제 작게 + 모델 기준 우측 하단 고정 (80px, 5%) */
   .signature-image,
   img.signature-image,
   img[src="./449.png"],
   img[src="449.png"],
   .person-image img.signature-image {
     position: absolute !important;
-    /* width: 80px - 모바일에서 싸인 크기 작게 (기존 96px에서 더 축소) */
+    /* width: 80px - 모바일에서 싸인 크기 대폭 축소 (모델 이미지를 방해하지 않도록) */
     width: 80px !important;
     height: auto !important;
-    /* bottom-4 - 모바일에서 하단 16px (1rem = 0.25rem * 4) - 모델 오른쪽 아래 다리 근처 */
-    bottom: 16px !important;
-    /* right-4 - 모바일에서 우측 16px (1rem = 0.25rem * 4) - 오른쪽 아래 코너 */
-    right: 16px !important;
+    /* bottom: 5% - 모델 이미지 컨테이너 기준 하단 5% (모델의 오른쪽 골반이나 팔 하단 영역) */
+    bottom: 5% !important;
+    /* right: 5% - 모델 이미지 컨테이너 기준 우측 5% (모델의 오른쪽 하단 구석) */
+    right: 5% !important;
+    /* transform: none - 중앙 정렬 코드 완전 제거 (left: 50%, translateX(-50%) 등) */
+    transform: none !important;
+    /* left: auto - left 속성 완전 제거 */
+    left: auto !important;
+    /* margin: 0 - 기존 중앙 정렬 마진 제거 */
+    margin: 0 !important;
     /* z-index-10 - 모델 위에 오게 */
     z-index: 10 !important;
     opacity: 0.85 !important;
-    transform: none !important;
-    left: auto !important;
-    margin: 0 !important;
     /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
     mix-blend-mode: multiply !important;
   }
