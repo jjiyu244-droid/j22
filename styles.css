@@ -1569,7 +1569,7 @@ textarea::placeholder {
   /* 이 규칙이 .hero-content-wrapper를 숨겨서 히어로 섹션이 비어 보이게 만듦 */
   /* CoreWeave 로고는 이미 제거되었으므로 이 규칙 불필요 */
 
-  /* 모바일(768px 이하)에서 싸인 이미지 강제 작게 + 모델 박스 우측 하단 고정 (10px, 5%) */
+  /* 모바일(768px 이하)에서 싸인 이미지 강제 작게 + 모델 박스 우측 하단 고정 (30px, 5%) */
   /* 기본 스타일(width: 240px)과 태블릿 스타일(width: 200px)을 강제로 오버라이드 */
   .signature-image,
   img.signature-image,
@@ -1579,9 +1579,9 @@ textarea::placeholder {
   .hero-image-area .signature-image,
   .person-image .signature-image {
     position: absolute !important;
-    /* width: 10px - 모바일에서 싸인 크기 아주 작게 (기본 240px, 태블릿 200px를 강제 오버라이드) */
-    width: 10px !important;
-    max-width: 10px !important;
+    /* width: 30px - 모바일에서 싸인 크기 적당하게 (기본 240px, 태블릿 200px를 강제 오버라이드) */
+    width: 30px !important;
+    max-width: 30px !important;
     height: auto !important;
     /* bottom: 5% - 모델 이미지 박스의 오른쪽 하단 끝 (모델의 오른쪽 골반이나 팔 하단 영역) */
     bottom: 5% !important;
@@ -2684,7 +2684,7 @@ textarea::placeholder {
     border: none !important;
   }
 
-  /* 12. signature-image - 모바일에서 싸인 이미지 강제 작게 + 모델 기준 우측 하단 고정 (10px, 5%) */
+  /* 12. signature-image - 모바일에서 싸인 이미지 강제 작게 + 모델 기준 우측 하단 고정 (30px, 5%) */
   /* 기본 스타일(width: 240px)과 태블릿 스타일(width: 200px)을 강제로 오버라이드 */
   .signature-image,
   img.signature-image,
@@ -2694,9 +2694,9 @@ textarea::placeholder {
   .hero-image-area .signature-image,
   .person-image .signature-image {
     position: absolute !important;
-    /* width: 10px - 모바일에서 싸인 크기 아주 작게 (기본 240px, 태블릿 200px를 강제 오버라이드) */
-    width: 10px !important;
-    max-width: 10px !important;
+    /* width: 30px - 모바일에서 싸인 크기 적당하게 (기본 240px, 태블릿 200px를 강제 오버라이드) */
+    width: 30px !important;
+    max-width: 30px !important;
     height: auto !important;
     /* bottom: 5% - 모델 이미지 컨테이너 기준 하단 5% (모델의 오른쪽 골반이나 팔 하단 영역) */
     bottom: 5% !important;
