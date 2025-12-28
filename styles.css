@@ -2611,12 +2611,12 @@ textarea::placeholder {
     overflow: visible !important;
   }
 
-  /* 11. hero-image - w-full max-w-sm h-auto object-contain */
+  /* 11. hero-image - w-full max-w-md h-auto object-contain (모바일에서 모델 이미지 크게) */
   .hero-image {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
-    /* max-w-sm - 모바일에서 최대 너비 제한 (24rem = 384px) */
-    max-width: 384px !important;
+    /* max-w-md - 모바일에서 최대 너비 제한 (28rem = 448px) - 화면 너비의 80~90% 정도 차지하도록 크게 */
+    max-width: 448px !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
     /* object-contain - 비율 유지하면서 컨테이너에 맞춤 */
@@ -2629,17 +2629,18 @@ textarea::placeholder {
     margin: 0 auto !important;
   }
 
-  /* 12. signature-image - bottom-4 right-4 w-32 */
+  /* 12. signature-image - bottom-4 right-4 w-24 (모바일에서 싸인 이미지 작게 + 오른쪽 아래 코너) */
   .signature-image {
     position: absolute !important;
-    /* bottom-4 - 모바일에서 하단 16px (1rem = 0.25rem * 4) */
+    /* bottom-4 - 모바일에서 하단 16px (1rem = 0.25rem * 4) - 모델 오른쪽 아래 다리 근처 */
     bottom: 16px !important;
-    /* right-4 - 모바일에서 우측 16px (1rem = 0.25rem * 4) */
+    /* right-4 - 모바일에서 우측 16px (1rem = 0.25rem * 4) - 오른쪽 아래 코너 */
     right: 16px !important;
-    /* w-32 - 모바일에서 싸인 크기 (8rem = 128px) */
-    width: 128px !important;
+    /* w-24 - 모바일에서 싸인 크기 작게 (6rem = 96px) - 기존 128px에서 축소 */
+    width: 96px !important;
     height: auto !important;
     opacity: 0.85 !important;
+    /* z-index-10 - 모델 위에 오게 */
     z-index: 10 !important;
     transform: none !important;
     left: auto !important;
@@ -2721,14 +2722,14 @@ textarea::placeholder {
     max-width: 512px !important;
   }
 
-  /* sm:bottom-8 sm:right-12 sm:w-48 - 640px 이상에서 싸인 위치 및 크기 */
+  /* sm:bottom-8 sm:right-8 sm:w-32 - 640px 이상에서 싸인 위치 및 크기 */
   .signature-image {
     /* sm:bottom-8 - 640px 이상에서 하단 32px (2rem = 0.25rem * 8) */
     bottom: 32px !important;
-    /* sm:right-12 - 640px 이상에서 우측 48px (3rem = 0.25rem * 12) */
-    right: 48px !important;
-    /* sm:w-48 - 640px 이상에서 싸인 크기 (12rem = 192px) */
-    width: 192px !important;
+    /* sm:right-8 - 640px 이상에서 우측 32px (2rem = 0.25rem * 8) */
+    right: 32px !important;
+    /* sm:w-32 - 640px 이상에서 싸인 크기 (8rem = 128px) - 모바일보다 조금 크게 */
+    width: 128px !important;
   }
 }
 
@@ -2754,33 +2755,21 @@ textarea::placeholder {
   .hero-image {
     max-width: 576px !important;
   }
+
+  /* md:bottom-12 md:right-12 md:w-40 - 768px 이상에서 싸인 위치 및 크기 */
+  .signature-image {
+    /* md:bottom-12 - 768px 이상에서 하단 48px (3rem = 0.25rem * 12) */
+    bottom: 48px !important;
+    /* md:right-12 - 768px 이상에서 우측 48px (3rem = 0.25rem * 12) */
+    right: 48px !important;
+    /* md:w-40 - 768px 이상에서 싸인 크기 (10rem = 160px) */
+    width: 160px !important;
+  }
 }
 
 
-/* 반응형: 모바일에서 싸인 위치 조정 */
-/* 변경 취소: 08ff96e 이전 상태로 복구 */
-@media (max-width: 768px) {
-  .signature-image {
-    /* 모바일: 08ff96e 이전 완벽했던 상태로 복구 */
-    right: 8px;
-    /* right: 8px - 08ff96e 이전 완벽했던 상태로 복구 */
-    bottom: 8px;
-    /* bottom: 8px - 08ff96e 이전 완벽했던 상태로 복구 */
-    width: 140px;
-    /* width: 140px - 모바일에서 적당한 크기 유지 */
-    opacity: 0.9;
-    /* opacity: 0.9 - 모바일에서 약간 더 진하게 */
-    transform: none !important;
-    /* transform: none !important - left: 50%나 translate: -50% 같은 중앙 정렬 코드 제거 */
-    left: auto !important;
-    /* left: auto !important - left 속성이 있다면 제거 */
-    margin: 0;
-    /* margin: 0 - 기존에 설정된 중앙 정렬 값이 남아있지 않게 초기화 */
-    mix-blend-mode: multiply;
-    /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
-    z-index: 10;
-    /* z-index: 10 - 모델 위로 올라와야 한다면 확실히 보이게 */
-  }
+/* 반응형: 640px 이하 모바일에서 싸인 위치는 이미 위의 @media (max-width: 640px)에서 처리됨 */
+/* 768px 이하 미디어 쿼리는 640px 이하와 겹치므로 제거 (640px 이하에서 이미 처리) */
   
   /* 히어로 섹션 모바일 레이아웃 - 세로 배치 */
   .hero-content-wrapper {
