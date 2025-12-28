@@ -1613,6 +1613,18 @@ textarea::placeholder {
     position: relative !important;
     /* position: relative - absolute 싸인의 부모로 설정 (모델 이미지 컨테이너 내에서만 움직이게) */
   }
+
+  /* 모바일(768px 이하)에서 hero-image-area 상단 여백 추가 (버튼과 모델 이미지 사이 간격 확보) */
+  .hero-image-area {
+    /* margin-top: 32px - 버튼과 모델 이미지 사이 충분한 간격 확보 (24px 이상) */
+    margin-top: 32px !important;
+  }
+
+  /* 모바일(768px 이하)에서 person-image 상단 마진 초기화 (wrapper에만 margin-top 적용) */
+  .person-image {
+    /* margin-top: 0 - 모델 이미지 자체의 상단 마진 초기화 (wrapper에만 margin-top 적용) */
+    margin-top: 0 !important;
+  }
 }
 
 /* FAQ Styles */
@@ -2629,7 +2641,7 @@ textarea::placeholder {
     margin-top: 24px !important;
   }
 
-  /* 9. hero-image-area - w-full flex justify-center + relative 강제 + 하단 여백 최소화 */
+  /* 9. hero-image-area - w-full flex justify-center + relative 강제 + 하단 여백 최소화 + 상단 여백 추가 */
   .hero-image-area {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
@@ -2644,13 +2656,16 @@ textarea::placeholder {
     /* overflow-visible - overflow-hidden 제거 */
     overflow: visible !important;
     padding: 0 !important;
-    margin: 0 !important;
+    /* margin-top: 32px - 버튼과 모델 이미지 사이 충분한 간격 확보 (24px 이상) */
+    margin-top: 32px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
     /* margin-bottom: 0, padding-bottom: 0 - 모델 이미지 아래 여백 최소화 */
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
   }
 
-  /* 10. person-image - w-full h-auto + relative 강제 (모델 이미지 중앙 정렬 기준점) + 하단 여백 최소화 */
+  /* 10. person-image - w-full h-auto + relative 강제 (모델 이미지 중앙 정렬 기준점) + 하단 여백 최소화 + 상단 마진 초기화 */
   .person-image {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
@@ -2661,7 +2676,10 @@ textarea::placeholder {
     position: relative !important;
     overflow: visible !important;
     /* 모델 이미지 중앙 정렬을 위한 컨테이너 */
-    margin: 0 auto !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    /* margin-top: 0 - 모델 이미지 자체의 상단 마진 초기화 (wrapper에만 margin-top 적용) */
+    margin-top: 0 !important;
     /* margin-bottom: 0, padding-bottom: 0 - 모델 이미지 아래 여백 최소화 */
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
