@@ -2472,9 +2472,9 @@ textarea::placeholder {
     /* items-center justify-center - 모바일에서 중앙 정렬 */
     align-items: center !important;
     justify-content: center !important;
-    /* pb-8 - 모바일에서 하단 여유 패딩 32px (2rem = 0.25rem * 8) */
+    /* pb-16 - 모바일에서 하단 여유 패딩 64px (4rem = 0.25rem * 16) - 잘림 방지 */
     padding-top: 24px !important;
-    padding-bottom: 32px !important; /* pb-8 = 2rem = 32px */
+    padding-bottom: 64px !important; /* pb-16 = 4rem = 64px */
     padding-left: 16px !important;
     padding-right: 16px !important;
     /* 배경색 보장 */
@@ -2581,7 +2581,7 @@ textarea::placeholder {
     margin-top: 24px !important;
   }
 
-  /* 9. hero-image-area - w-full flex justify-center */
+  /* 9. hero-image-area - w-full flex justify-center + relative 강제 */
   .hero-image-area {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
@@ -2591,7 +2591,7 @@ textarea::placeholder {
     align-items: center !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
-    /* relative - absolute 요소(싸인)의 부모로 설정 */
+    /* relative - absolute 요소(싸인)의 부모로 설정 (강제) */
     position: relative !important;
     /* overflow-visible - overflow-hidden 제거 */
     overflow: visible !important;
@@ -2599,28 +2599,33 @@ textarea::placeholder {
     margin: 0 !important;
   }
 
-  /* 10. person-image - w-full h-auto */
+  /* 10. person-image - w-full h-auto + relative 강제 */
   .person-image {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
     display: block !important;
-    /* relative - absolute 요소(싸인)의 부모로 설정 */
+    /* relative - absolute 요소(싸인)의 부모로 설정 (강제) */
     position: relative !important;
     overflow: visible !important;
   }
 
-  /* 11. hero-image - w-full max-w-md h-auto object-contain (모바일에서 모델 이미지 크게) */
-  .hero-image {
-    /* w-full - 모바일에서 전체 너비 */
+  /* 11. hero-image - 모바일에서 모델 이미지 강제 크게 (인라인 스타일 오버라이드) */
+  .hero-image,
+  img.hero-image,
+  img[src="./profile.png"],
+  img[src="profile.png"],
+  .person-image img.hero-image {
+    /* width: 90% - 모바일에서 화면 너비의 90% 차지하도록 크게 (인라인 width:auto 오버라이드) */
     width: 90% !important;
-    /* width: 90% - 모바일에서 화면 너비의 90% 차지하도록 크게 */
-    /* max-w-md - 모바일에서 최대 너비 제한 (28rem = 448px) - 화면 너비의 80~90% 정도 차지하도록 크게 */
-    max-width: 448px !important;
-    /* h-auto - 높이 자동 조정 */
+    /* max-width: 90vw - 모바일에서 화면 너비의 90%로 제한 (인라인 max-height:none 오버라이드) */
+    max-width: 90vw !important;
+    /* height: auto - 높이 자동 조정 (인라인 height:850px 오버라이드) */
     height: auto !important;
-    /* object-contain - 비율 유지하면서 컨테이너에 맞춤 */
+    /* max-height 제거 - 인라인 max-height:none 오버라이드 */
+    max-height: none !important;
+    /* object-fit: contain - 비율 유지하면서 컨테이너에 맞춤 */
     object-fit: contain !important;
     object-position: center bottom !important;
     /* object-position: center bottom - 모바일에서 모델이 중앙~하단에 위치하도록 */
@@ -2629,26 +2634,35 @@ textarea::placeholder {
     visibility: visible !important;
     position: relative !important;
     margin: 0 auto !important;
+    /* 인라인 스타일 오버라이드 */
+    filter: none !important;
+    image-rendering: auto !important;
+    outline: none !important;
+    border: none !important;
   }
 
-  /* 12. signature-image - bottom-4 right-4 w-24 (모바일에서 싸인 이미지 작게 + 오른쪽 아래 코너) */
-  .signature-image {
+  /* 12. signature-image - 모바일에서 싸인 이미지 강제 작게 + 오른쪽 아래 코너 (80px) */
+  .signature-image,
+  img.signature-image,
+  img[src="./449.png"],
+  img[src="449.png"],
+  .person-image img.signature-image {
     position: absolute !important;
+    /* width: 80px - 모바일에서 싸인 크기 작게 (기존 96px에서 더 축소) */
+    width: 80px !important;
+    height: auto !important;
     /* bottom-4 - 모바일에서 하단 16px (1rem = 0.25rem * 4) - 모델 오른쪽 아래 다리 근처 */
     bottom: 16px !important;
     /* right-4 - 모바일에서 우측 16px (1rem = 0.25rem * 4) - 오른쪽 아래 코너 */
     right: 16px !important;
-    /* w-24 - 모바일에서 싸인 크기 작게 (6rem = 96px) - 기존 128px에서 축소 */
-    width: 96px !important;
-    height: auto !important;
-    opacity: 0.85 !important;
     /* z-index-10 - 모델 위에 오게 */
     z-index: 10 !important;
+    opacity: 0.85 !important;
     transform: none !important;
     left: auto !important;
     margin: 0 !important;
     /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
-    mix-blend-mode: multiply;
+    mix-blend-mode: multiply !important;
   }
 }
 
@@ -2726,14 +2740,17 @@ textarea::placeholder {
     max-width: 512px !important;
   }
 
-  /* sm:bottom-8 sm:right-8 sm:w-32 - 640px 이상에서 싸인 위치 및 크기 */
-  .signature-image {
-    /* sm:bottom-8 - 640px 이상에서 하단 32px (2rem = 0.25rem * 8) */
-    bottom: 32px !important;
-    /* sm:right-8 - 640px 이상에서 우측 32px (2rem = 0.25rem * 8) */
-    right: 32px !important;
-    /* sm:w-32 - 640px 이상에서 싸인 크기 (8rem = 128px) - 모바일보다 조금 크게 */
-    width: 128px !important;
+  /* sm:bottom-6 sm:right-6 sm:w-24 - 640px 이상에서 싸인 위치 및 크기 */
+  .signature-image,
+  img.signature-image,
+  img[src="./449.png"],
+  img[src="449.png"] {
+    /* sm:bottom-6 - 640px 이상에서 하단 24px (1.5rem = 0.25rem * 6) */
+    bottom: 24px !important;
+    /* sm:right-6 - 640px 이상에서 우측 24px (1.5rem = 0.25rem * 6) */
+    right: 24px !important;
+    /* sm:w-24 - 640px 이상에서 싸인 크기 (6rem = 96px) - 모바일보다 조금 크게 */
+    width: 96px !important;
   }
 }
 
@@ -2760,14 +2777,17 @@ textarea::placeholder {
     max-width: 576px !important;
   }
 
-  /* md:bottom-12 md:right-12 md:w-40 - 768px 이상에서 싸인 위치 및 크기 */
-  .signature-image {
-    /* md:bottom-12 - 768px 이상에서 하단 48px (3rem = 0.25rem * 12) */
-    bottom: 48px !important;
-    /* md:right-12 - 768px 이상에서 우측 48px (3rem = 0.25rem * 12) */
-    right: 48px !important;
-    /* md:w-40 - 768px 이상에서 싸인 크기 (10rem = 160px) */
-    width: 160px !important;
+  /* md:bottom-8 md:right-8 md:w-32 - 768px 이상에서 싸인 위치 및 크기 */
+  .signature-image,
+  img.signature-image,
+  img[src="./449.png"],
+  img[src="449.png"] {
+    /* md:bottom-8 - 768px 이상에서 하단 32px (2rem = 0.25rem * 8) */
+    bottom: 32px !important;
+    /* md:right-8 - 768px 이상에서 우측 32px (2rem = 0.25rem * 8) */
+    right: 32px !important;
+    /* md:w-32 - 768px 이상에서 싸인 크기 (8rem = 128px) */
+    width: 128px !important;
   }
 }
 
