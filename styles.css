@@ -1518,7 +1518,7 @@ textarea::placeholder {
   /* 모바일에서 동그라미 크기 조정 */
   /* 모바일에서 pre-login-welcome (히어로 섹션) 최소 높이 강제 설정 */
   /* 변경 전: min-height: auto !important → 모바일에서 높이가 0이 되어 히어로 섹션이 비어 보임 */
-  /* 변경 후: min-height: 70vh !important → 모바일에서 최소 높이를 화면의 70%로 강제 설정 */
+  /* 변경 후: min-height: 60vh !important → 모바일에서 최소 높이를 화면의 60%로 강제 설정 (하단 여백 최소화) */
   .pre-login-welcome,
   .pre-login-welcome.hero-section-container,
   .hero-section-container,
@@ -1526,14 +1526,16 @@ textarea::placeholder {
   section.pre-login-welcome.hero-section-container {
     padding: 24px 16px !important;
     /* padding: 24px 16px !important - 모바일에서 적절한 패딩 */
-    min-height: 70vh !important;
-    /* min-height: 70vh !important - 모바일(768px 이하)에서 최소 높이를 화면의 70%로 강제 설정 (PC 기준 큰 min-height 오버라이드) */
+    min-height: 60vh !important;
+    /* min-height: 60vh !important - 모바일(768px 이하)에서 최소 높이를 화면의 60%로 강제 설정 (하단 빈 공간 최소화) */
     height: auto !important;
     /* height: auto !important - 콘텐츠에 맞춰 자동으로 높이 조정 */
     display: flex !important;
     /* display: flex !important - flex 구조 보장 */
     overflow: visible !important;
     /* overflow: visible !important - 콘텐츠가 보이도록 */
+    padding-bottom: 20px !important;
+    /* padding-bottom: 20px !important - 하단 여백 최소화 */
   }
 
   .pre-login-welcome > div:first-child {
@@ -2498,13 +2500,13 @@ textarea::placeholder {
 /* 반응형: 640px 이하 모바일 - 히어로 섹션 완전 반응형 수정 */
 /* PC 스타일은 변경하지 않고 모바일만 반응형으로 수정 */
 @media (max-width: 640px) {
-  /* 1. 히어로 섹션 컨테이너 - min-h-[70vh], overflow-visible, pb-8 */
+  /* 1. 히어로 섹션 컨테이너 - min-h-[60vh], overflow-visible, pb-20 (하단 여백 최소화) */
   .hero-section-container,
   .pre-login-welcome.hero-section-container,
   section.hero-section-container,
   section.pre-login-welcome.hero-section-container {
-    /* min-h-[70vh] - 모바일에서 최소 높이를 화면의 70%로 설정 (모델 전체가 보이도록) */
-    min-height: 70vh !important;
+    /* min-h-[60vh] - 모바일에서 최소 높이를 화면의 60%로 설정 (하단 빈 공간 최소화) */
+    min-height: 60vh !important;
     /* h-auto - 높이 자동 조정 */
     height: auto !important;
     /* overflow-visible - 콘텐츠가 잘리지 않도록 overflow-hidden 제거 */
@@ -2515,9 +2517,9 @@ textarea::placeholder {
     /* items-center justify-center - 모바일에서 중앙 정렬 */
     align-items: center !important;
     justify-content: center !important;
-    /* pb-16 - 모바일에서 하단 여유 패딩 64px (4rem = 0.25rem * 16) - 잘림 방지 */
+    /* pb-20 - 모바일에서 하단 여유 패딩 20px (하단 여백 최소화) */
     padding-top: 24px !important;
-    padding-bottom: 64px !important; /* pb-16 = 4rem = 64px */
+    padding-bottom: 20px !important;
     padding-left: 16px !important;
     padding-right: 16px !important;
     /* 배경색 보장 */
@@ -2527,14 +2529,15 @@ textarea::placeholder {
     max-height: none !important;
   }
 
-  /* 2. hero-content-wrapper - flex flex-col items-center justify-center */
+  /* 2. hero-content-wrapper - flex flex-col items-center justify-start + padding-bottom 최소화 */
   .hero-content-wrapper {
     /* flex flex-col - 모바일에서 세로 배치 */
     display: flex !important;
     flex-direction: column !important;
-    /* items-center justify-center - 모바일에서 중앙 정렬 */
+    /* items-center - 모바일에서 중앙 정렬 */
     align-items: center !important;
-    justify-content: center !important;
+    /* justify-content: flex-start - 모바일에서 위쪽부터 시작 (하단 여백 최소화) */
+    justify-content: flex-start !important;
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
     /* h-auto - 높이 자동 조정 */
@@ -2542,6 +2545,8 @@ textarea::placeholder {
     /* overflow-visible - overflow-hidden 제거 */
     overflow: visible !important;
     gap: 24px !important;
+    /* padding-bottom: 20px - 하단 여백 최소화 */
+    padding-bottom: 20px !important;
   }
 
   /* 3. hero-text-area - w-full text-center */
@@ -2624,7 +2629,7 @@ textarea::placeholder {
     margin-top: 24px !important;
   }
 
-  /* 9. hero-image-area - w-full flex justify-center + relative 강제 */
+  /* 9. hero-image-area - w-full flex justify-center + relative 강제 + 하단 여백 최소화 */
   .hero-image-area {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
@@ -2640,9 +2645,12 @@ textarea::placeholder {
     overflow: visible !important;
     padding: 0 !important;
     margin: 0 !important;
+    /* margin-bottom: 0, padding-bottom: 0 - 모델 이미지 아래 여백 최소화 */
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
   }
 
-  /* 10. person-image - w-full h-auto + relative 강제 (모델 이미지 중앙 정렬 기준점) */
+  /* 10. person-image - w-full h-auto + relative 강제 (모델 이미지 중앙 정렬 기준점) + 하단 여백 최소화 */
   .person-image {
     /* w-full - 모바일에서 전체 너비 */
     width: 100% !important;
@@ -2654,6 +2662,9 @@ textarea::placeholder {
     overflow: visible !important;
     /* 모델 이미지 중앙 정렬을 위한 컨테이너 */
     margin: 0 auto !important;
+    /* margin-bottom: 0, padding-bottom: 0 - 모델 이미지 아래 여백 최소화 */
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
   }
 
   /* 11. hero-image - 모바일에서 모델 이미지 중앙 정렬 + 크게 (인라인 스타일 오버라이드) */
@@ -2671,6 +2682,8 @@ textarea::placeholder {
     max-width: 135vw !important;
     /* height: auto - 높이 자동 조정 (인라인 height:850px 오버라이드) */
     height: auto !important;
+    /* transform: scale(1.5) - 모델 이미지 높이를 1.5배로 확대 (현재 360px 기준 540px) */
+    transform: scale(1.5) !important;
     /* max-height 제거 - 인라인 max-height:none 오버라이드 */
     max-height: none !important;
     /* object-fit: contain - 비율 유지하면서 컨테이너에 맞춤 */
