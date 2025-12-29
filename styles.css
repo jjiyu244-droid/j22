@@ -2716,8 +2716,8 @@ textarea::placeholder {
     max-width: 135vw !important;
     /* height: auto - 높이 자동 조정 (인라인 height:850px 오버라이드) */
     height: auto !important;
-    /* transform: scale(1.5) - 모델 이미지 높이를 1.5배로 확대 (현재 360px 기준 540px) */
-    transform: scale(1.5) !important;
+    /* transform: scale(1.5) translateX(-10px) - 모델 이미지 높이를 1.5배로 확대하고 약간 왼쪽으로 이동 */
+    transform: scale(1.5) translateX(-10px) !important;
     /* max-height 제거 - 인라인 max-height:none 오버라이드 */
     max-height: none !important;
     /* object-fit: contain - 비율 유지하면서 컨테이너에 맞춤 */
