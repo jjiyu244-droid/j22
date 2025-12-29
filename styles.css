@@ -2512,7 +2512,7 @@ textarea::placeholder {
 /* 반응형: 640px 이하 모바일 - 히어로 섹션 완전 반응형 수정 */
 /* PC 스타일은 변경하지 않고 모바일만 반응형으로 수정 */
 @media (max-width: 640px) {
-  /* 1. 히어로 섹션 컨테이너 - min-h-[60vh], overflow-visible, pb-20 (하단 여백 최소화) */
+  /* 1. 히어로 섹션 컨테이너 - min-h-[60vh], overflow-visible, pb-0 (하단 여백 제거) */
   .hero-section-container,
   .pre-login-welcome.hero-section-container,
   section.hero-section-container,
@@ -2529,9 +2529,9 @@ textarea::placeholder {
     /* items-center justify-center - 모바일에서 중앙 정렬 */
     align-items: center !important;
     justify-content: center !important;
-    /* pb-20 - 모바일에서 하단 여유 패딩 20px (하단 여백 최소화) */
+    /* pb-0 - 모바일에서 하단 패딩 제거 (모델 다리가 섹션 하단에 딱 붙게) */
     padding-top: 24px !important;
-    padding-bottom: 20px !important;
+    padding-bottom: 0 !important;
     padding-left: 16px !important;
     padding-right: 16px !important;
     /* 배경색 보장 */
@@ -2669,15 +2669,15 @@ textarea::placeholder {
     height: auto !important;
     /* relative - absolute 요소(싸인)의 부모로 설정 (강제) */
     position: relative !important;
-    /* overflow-visible - overflow-hidden 제거 */
+    /* overflow-visible - overflow-hidden 제거 (잘림 방지) */
     overflow: visible !important;
     padding: 0 !important;
     /* margin-top: 32px - 버튼과 모델 이미지 사이 충분한 간격 확보 (24px 이상) */
     margin-top: 32px !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
-    /* margin-bottom: 0, padding-bottom: 0 - 모델 이미지 아래 여백 최소화 */
-    margin-bottom: 0 !important;
+    /* margin-bottom: -32px - 모델 이미지가 섹션 하단으로 약간 삐져나가게 (잘림 방지) */
+    margin-bottom: -32px !important;
     padding-bottom: 0 !important;
   }
 
@@ -2716,8 +2716,8 @@ textarea::placeholder {
     max-width: 135vw !important;
     /* height: auto - 높이 자동 조정 (인라인 height:850px 오버라이드) */
     height: auto !important;
-    /* transform: scale(1.5) translateX(-10px) - 모델 이미지 높이를 1.5배로 확대하고 약간 왼쪽으로 이동 */
-    transform: scale(1.5) translateX(-10px) !important;
+    /* transform: scale(1.5) translateX(-10px) translateY(16px) - 모델 이미지 높이를 1.5배로 확대하고 약간 왼쪽으로 이동, 아래로 이동하여 다리가 섹션 하단에 붙게 */
+    transform: scale(1.5) translateX(-10px) translateY(16px) !important;
     /* max-height 제거 - 인라인 max-height:none 오버라이드 */
     max-height: none !important;
     /* object-fit: contain - 비율 유지하면서 컨테이너에 맞춤 */
@@ -2734,7 +2734,7 @@ textarea::placeholder {
     border: none !important;
   }
 
-  /* 12. signature-image - 모바일에서 싸인 이미지 강제 작게 + 모델 기준 우측 하단 고정 (50px, 5%) */
+  /* 12. signature-image - 모바일에서 싸인 이미지 강제 작게 + 모델 기준 우측 하단 고정 (50px, bottom-0) */
   /* 기본 스타일(width: 240px)과 태블릿 스타일(width: 200px)을 강제로 오버라이드 */
   .signature-image,
   img.signature-image,
@@ -2748,8 +2748,8 @@ textarea::placeholder {
     width: 50px !important;
     max-width: 50px !important;
     height: auto !important;
-    /* bottom: 5% - 모델 이미지 컨테이너 기준 하단 5% (모델의 오른쪽 골반이나 팔 하단 영역) */
-    bottom: 5% !important;
+    /* bottom: 0 - 모델 다리 근처에 붙게 (모델의 오른쪽 다리 하단) */
+    bottom: 0 !important;
     /* right: 5% - 모델 이미지 컨테이너 기준 우측 5% (모델의 오른쪽 하단 구석) */
     right: 5% !important;
     /* transform: none - 중앙 정렬 코드 완전 제거 (left: 50%, translateX(-50%) 등) */
