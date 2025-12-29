@@ -2601,6 +2601,22 @@ textarea::placeholder {
     margin-bottom: 8px !important;
   }
 
+  /* 모바일에서 hero-main-copy-line1 텍스트 변경: "당신의 디지털 자산의 가치를" (한 줄로) */
+  .hero-main-copy-line1 {
+    /* content 속성으로 텍스트 교체 - 모바일에서만 적용 */
+    font-size: 0 !important;
+  }
+
+  .hero-main-copy-line1::before {
+    content: "당신의 디지털 자산의 가치를";
+    font-size: 30px !important;
+    font-weight: 800 !important;
+    color: #1e293b !important;
+    display: block !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
+  }
+
   /* 6. hero-sub-copy-line1 - text-sm */
   .hero-sub-copy-line1 {
     /* text-sm - 모바일에서 서브 텍스트 크기 (0.875rem = 14px) */
