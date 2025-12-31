@@ -1316,39 +1316,43 @@ textarea::placeholder {
   /* text-left - 왼쪽 정렬 */
 }
 
-/* pl-0 ml-0 - 제목의 왼쪽 패딩/마진 제거하여 컨테이너 패딩에서 시작 */
+/* pl-6 sm:pl-8 md:pl-12 - 제목, 본문, 리스트 모두 동일한 왼쪽 패딩 적용 */
 .footer-title {
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 6px;
-  padding-left: 0;
-  /* pl-0 - 제목 왼쪽 패딩 제거 */
+  padding-left: 24px;
+  /* pl-6 - 모바일에서 왼쪽 패딩 24px (1.5rem = 0.25rem * 6) */
   margin-left: 0;
   /* ml-0 - 제목 왼쪽 마진 제거 */
 }
 
-/* pl-0 ml-0 - 본문의 왼쪽 패딩/마진 제거하여 컨테이너 패딩에서 시작 */
+/* pl-6 sm:pl-8 md:pl-12 - 본문의 왼쪽 패딩을 제목과 동일하게 */
 .footer-subtitle {
   font-size: 11px;
   color: var(--text-soft);
   margin-bottom: 8px;
   line-height: 1.6;
-  padding-left: 0;
-  /* pl-0 - 본문 왼쪽 패딩 제거 */
+  padding-left: 24px;
+  /* pl-6 - 모바일에서 왼쪽 패딩 24px (제목과 동일) */
   margin-left: 0;
   /* ml-0 - 본문 왼쪽 마진 제거 */
 }
 
-/* pl-4 sm:pl-6 md:pl-8 - 리스트와 문단 텍스트 시작 위치 통일 */
+/* pl-6 sm:pl-8 md:pl-12 - 리스트와 문단 텍스트 시작 위치 통일 */
+/* list-style-position: outside - 불릿을 텍스트 밖에 배치하여 텍스트 시작 위치 맞춤 */
 .footer-list {
-  list-style: none;
+  list-style: disc;
+  /* list-style: disc - 기본 불릿 스타일 (· 대신 disc 사용) */
+  list-style-position: outside;
+  /* list-style-position: outside - 불릿을 텍스트 밖에 배치 */
   font-size: 11px;
   color: var(--text);
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-left: 16px;
-  /* pl-4 - 모바일에서 왼쪽 패딩 16px (불릿과 텍스트 시작 위치 맞춤) */
+  padding-left: 24px;
+  /* pl-6 - 모바일에서 왼쪽 패딩 24px (제목, 본문과 동일) */
   margin-left: 0;
   /* ml-0 - 리스트 왼쪽 마진 제거 */
 }
@@ -1373,25 +1377,25 @@ textarea::placeholder {
   /* margin: 0 - 카드 마진 제거 */
 }
 
-/* pl-0 ml-0 - 제목의 왼쪽 패딩/마진 제거하여 컨테이너 패딩에서 시작 */
+/* pl-6 sm:pl-8 md:pl-12 - 제목의 왼쪽 패딩을 다른 요소와 동일하게 */
 .footer-card-title {
   font-size: 12px;
   font-weight: 600;
   margin-bottom: 4px;
-  padding-left: 0;
-  /* pl-0 - 제목 왼쪽 패딩 제거 */
+  padding-left: 24px;
+  /* pl-6 - 모바일에서 왼쪽 패딩 24px (제목, 본문, 리스트와 동일) */
   margin-left: 0;
   /* ml-0 - 제목 왼쪽 마진 제거 */
 }
 
-/* pl-4 sm:pl-6 md:pl-8 - 문단 텍스트 시작 위치를 리스트와 맞춤 */
+/* pl-6 sm:pl-8 md:pl-12 - 문단 텍스트 시작 위치를 리스트와 맞춤 */
 .footer-card-text {
   font-size: 11px;
   color: var(--text-soft);
   margin-bottom: 4px;
   line-height: 1.6;
-  padding-left: 16px;
-  /* pl-4 - 모바일에서 왼쪽 패딩 16px (리스트 불릿과 텍스트 시작 위치 맞춤) */
+  padding-left: 24px;
+  /* pl-6 - 모바일에서 문단 텍스트 왼쪽 패딩 24px (제목, 본문, 리스트와 통일) */
   margin-left: 0;
   /* ml-0 - 본문 왼쪽 마진 제거 */
 }
