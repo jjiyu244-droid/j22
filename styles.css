@@ -1338,13 +1338,16 @@ textarea::placeholder {
 }
 
 .brand-certification-img {
-  height: auto;
   width: auto;
+  height: auto;
   max-width: 100%;
   max-height: 200px;
+  min-width: 200px;
   min-height: 80px;
   object-fit: contain;
-  display: block;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   margin: 0 auto;
 }
 
