@@ -1321,47 +1321,40 @@ textarea::placeholder {
   background: transparent;
 }
 
-/* flex flex-row items-center justify-center gap-8 - PC에서 가로 배치, 중앙 정렬, 간격 32px */
+/* flex flex-row items-center justify-center - PC에서 가로 배치, 중앙 정렬, 이미지와 텍스트 수평 중앙정렬 */
 .security-certification-container {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 32px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
+/* 551.PNG 이미지를 왼쪽에 배치, 가로 최대 150px */
 .brand-certification-badge {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 100%;
+  justify-content: flex-start;
+  flex: 0 0 auto;
+  order: 1;
 }
 
+/* max-width: 150px - 이미지 가로 최대 150px로 제한 */
 .brand-certification-img {
   width: auto;
   height: auto;
-  max-width: 100%;
-  max-height: 200px;
-  min-width: 150px;
-  min-height: 60px;
+  max-width: 150px;
+  max-height: 150px;
   object-fit: contain;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  margin: 0 auto;
+  margin: 0;
   background: transparent;
 }
 
-.brand-certification-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 80px;
-}
-
-/* order-2 - 텍스트 박스를 오른쪽에 배치 */
+/* 텍스트 박스를 오른쪽에 배치, 이미지와 수평 중앙정렬 */
 .certification-details {
   background: #F7F9FC;
   border-radius: 12px;
@@ -1370,6 +1363,9 @@ textarea::placeholder {
   max-width: 600px;
   text-align: left;
   order: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .certification-text {
