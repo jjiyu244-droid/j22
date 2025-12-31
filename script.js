@@ -57,7 +57,7 @@ const pools = [
     symbol: 'BTC',
     apr: 3.2,
     monthlyRate: 5.8, // 월 이율 (%)
-    tvl: 120_000_000,
+    tvl: 126_458_143,
     risk: '중간',
     type: 'stable',
     network: '비트코인 메인넷',
@@ -70,7 +70,7 @@ const pools = [
     symbol: 'ETH',
     apr: 6.8,
     monthlyRate: 6.2, // 월 이율 (%)
-    tvl: 95_000_000,
+    tvl: 141_131_457,
     risk: '중간',
     type: 'volatile',
     network: '이더리움 메인넷',
@@ -83,7 +83,7 @@ const pools = [
     symbol: 'XRP',
     apr: 5.4,
     monthlyRate: 6.7, // 월 이율 (%)
-    tvl: 48_000_000,
+    tvl: 81_451_411,
     risk: '낮음',
     type: 'stable',
     network: '리플 네트워크',
@@ -96,7 +96,7 @@ const pools = [
     symbol: 'SOL',
     apr: 7.2,
     monthlyRate: 7.2, // 월 이율 (%) - 해당 이율 적용
-    tvl: 75_000_000,
+    tvl: 79_451_321,
     risk: '중간',
     type: 'volatile',
     network: '솔라나 메인넷',
