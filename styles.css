@@ -1383,13 +1383,13 @@ textarea::placeholder {
   margin-bottom: 4px;
 }
 
-/* 모바일 반응형 - flex-col sm:flex-row - 모바일에서 세로 쌓임 */
+/* 모바일 반응형 - flex-col - 모바일에서 세로 쌓임, 겹치지 않도록 */
 @media (max-width: 768px) {
   .security-certification-section {
     padding: 24px 16px;
   }
 
-  /* flex-col - 모바일에서 세로 배치 (이미지 위, 텍스트 아래) */
+  /* flex-col - 모바일에서 세로 배치 (이미지 위, 텍스트 아래), 겹치지 않도록 */
   .security-certification-container {
     flex-direction: column;
     gap: 20px;
@@ -1403,6 +1403,7 @@ textarea::placeholder {
   }
 
   .brand-certification-img {
+    max-width: 120px;
     max-height: 120px;
     margin: 0 auto;
   }
@@ -1412,6 +1413,7 @@ textarea::placeholder {
     width: 100%;
     max-width: 100%;
     text-align: center;
+    align-items: center;
   }
 
   .certification-text {
@@ -1425,6 +1427,7 @@ textarea::placeholder {
   }
 
   .brand-certification-img {
+    max-width: 100px;
     max-height: 100px;
   }
 
