@@ -3028,13 +3028,17 @@ textarea::placeholder {
   .signature-image,
   img.signature-image,
   img[src="./449.png"],
-  img[src="449.png"] {
-    /* sm:bottom-6 - 640px 이상에서 하단 24px (1.5rem = 0.25rem * 6) */
-    bottom: 24px !important;
-    /* sm:right-6 - 640px 이상에서 우측 24px (1.5rem = 0.25rem * 6) */
+  img[src="449.png"],
+  .person-image img.signature-image,
+  .hero-image-area .signature-image,
+  .person-image .signature-image {
+    /* sm:right-24 - 640px 이상에서 우측 24px (1.5rem = 0.25rem * 6) */
     right: 24px !important;
-    /* sm:w-24 - 640px 이상에서 싸인 크기 (6rem = 96px) - 모바일보다 조금 크게 */
-    width: 96px !important;
+    /* sm:bottom-24 - 640px 이상에서 하단 24px (1.5rem = 0.25rem * 6) */
+    bottom: 24px !important;
+    /* sm:w-100 - 640px 이상에서 싸인 크기 100px */
+    width: 100px !important;
+    max-width: 100px !important;
   }
 }
 
