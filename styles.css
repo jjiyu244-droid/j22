@@ -1286,36 +1286,60 @@ textarea::placeholder {
 }
 
 /* pl-4 sm:pl-8 md:pl-16 - 두 섹션의 텍스트 왼쪽 정렬선 통일 */
+/* max-w-3xl mx-auto px-6 sm:px-8 md:px-16 - 두 섹션 컨테이너의 텍스트 왼쪽 정렬선 통일 */
 .footer-left {
-  padding-left: 16px;
-  /* pl-4 - 모바일에서 왼쪽 패딩 16px (1rem = 0.25rem * 4) */
+  max-width: 48rem;
+  /* max-w-3xl - 최대 너비 48rem (768px) */
+  margin-left: auto;
+  /* mx-auto - 좌우 마진 자동 (중앙 정렬) */
+  margin-right: auto;
+  padding-left: 24px;
+  /* px-6 - 모바일에서 왼쪽 패딩 24px (1.5rem = 0.25rem * 6) */
+  padding-right: 24px;
+  text-align: left;
+  /* text-left - 왼쪽 정렬 */
 }
 
 .footer-right {
   display: flex;
   justify-content: flex-start;
   /* justify-content: flex-start - 왼쪽 정렬로 변경하여 텍스트 정렬선 맞춤 */
-  padding-left: 16px;
-  /* pl-4 - 모바일에서 왼쪽 패딩 16px (footer-left와 동일) */
+  max-width: 48rem;
+  /* max-w-3xl - 최대 너비 48rem (footer-left와 동일) */
+  margin-left: auto;
+  /* mx-auto - 좌우 마진 자동 (중앙 정렬) */
+  margin-right: auto;
+  padding-left: 24px;
+  /* px-6 - 모바일에서 왼쪽 패딩 24px (footer-left와 동일) */
+  padding-right: 24px;
+  text-align: left;
+  /* text-left - 왼쪽 정렬 */
 }
 
+/* pl-0 ml-0 - 제목의 왼쪽 패딩/마진 제거하여 컨테이너 패딩에서 시작 */
 .footer-title {
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 6px;
   padding-left: 0;
-  /* padding-left: 0 - 제목 왼쪽 여백 제거 */
+  /* pl-0 - 제목 왼쪽 패딩 제거 */
+  margin-left: 0;
+  /* ml-0 - 제목 왼쪽 마진 제거 */
 }
 
+/* pl-0 ml-0 - 본문의 왼쪽 패딩/마진 제거하여 컨테이너 패딩에서 시작 */
 .footer-subtitle {
   font-size: 11px;
   color: var(--text-soft);
   margin-bottom: 8px;
   line-height: 1.6;
   padding-left: 0;
-  /* padding-left: 0 - 본문 왼쪽 여백 제거 */
+  /* pl-0 - 본문 왼쪽 패딩 제거 */
+  margin-left: 0;
+  /* ml-0 - 본문 왼쪽 마진 제거 */
 }
 
+/* pl-4 sm:pl-6 md:pl-8 - 리스트와 문단 텍스트 시작 위치 통일 */
 .footer-list {
   list-style: none;
   font-size: 11px;
@@ -1323,41 +1347,53 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding-left: 0;
-  /* padding-left: 0 - 리스트 왼쪽 여백 제거, 불릿과 문단 텍스트 시작 위치 맞춤 */
+  padding-left: 16px;
+  /* pl-4 - 모바일에서 왼쪽 패딩 16px (불릿과 텍스트 시작 위치 맞춤) */
+  margin-left: 0;
+  /* ml-0 - 리스트 왼쪽 마진 제거 */
 }
 
 .footer-list li {
   padding-left: 0;
-  /* padding-left: 0 - 리스트 아이템 왼쪽 여백 제거 */
+  /* pl-0 - 리스트 아이템 왼쪽 패딩 제거 (불릿은 리스트의 padding-left에서 시작) */
+  margin-left: 0;
+  /* ml-0 - 리스트 아이템 왼쪽 마진 제거 */
 }
 
+/* padding 제거하여 컨테이너 패딩만 적용 */
 .footer-card {
   background: rgba(255, 255, 255, 0.03);
   border: none;
   box-shadow: none;
   backdrop-filter: none;
   border-radius: var(--radius-md);
-  padding: 12px 13px;
-  padding-left: 0;
-  /* padding-left: 0 - 카드 왼쪽 패딩 제거하여 텍스트 정렬선 맞춤 */
+  padding: 0;
+  /* padding: 0 - 카드 패딩 제거하여 컨테이너 패딩만 적용 */
+  margin: 0;
+  /* margin: 0 - 카드 마진 제거 */
 }
 
+/* pl-0 ml-0 - 제목의 왼쪽 패딩/마진 제거하여 컨테이너 패딩에서 시작 */
 .footer-card-title {
   font-size: 12px;
   font-weight: 600;
   margin-bottom: 4px;
   padding-left: 0;
-  /* padding-left: 0 - 제목 왼쪽 여백 제거 */
+  /* pl-0 - 제목 왼쪽 패딩 제거 */
+  margin-left: 0;
+  /* ml-0 - 제목 왼쪽 마진 제거 */
 }
 
+/* pl-4 sm:pl-6 md:pl-8 - 문단 텍스트 시작 위치를 리스트와 맞춤 */
 .footer-card-text {
   font-size: 11px;
   color: var(--text-soft);
   margin-bottom: 4px;
   line-height: 1.6;
-  padding-left: 0;
-  /* padding-left: 0 - 본문 왼쪽 여백 제거하여 리스트와 정렬선 맞춤 */
+  padding-left: 16px;
+  /* pl-4 - 모바일에서 왼쪽 패딩 16px (리스트 불릿과 텍스트 시작 위치 맞춤) */
+  margin-left: 0;
+  /* ml-0 - 본문 왼쪽 마진 제거 */
 }
 
 /* Footer Section - bg-gray-50 py-8 - 푸터 전체에 배경색과 여백 */
