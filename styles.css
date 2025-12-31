@@ -1738,6 +1738,13 @@ textarea::placeholder {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* 모바일에서도 두 섹션의 텍스트 왼쪽 정렬선 통일 */
+  .footer-left,
+  .footer-right {
+    padding-left: 16px;
+    /* pl-4 - 모바일에서 왼쪽 패딩 16px 통일 (데스크톱과 동일) */
+  }
+
   /* 모바일에서 동그라미 크기 조정 */
   /* 모바일에서 pre-login-welcome (히어로 섹션) 최소 높이 강제 설정 */
   /* 변경 전: min-height: auto !important → 모바일에서 높이가 0이 되어 히어로 섹션이 비어 보임 */
