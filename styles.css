@@ -2458,14 +2458,14 @@ textarea::placeholder {
     padding-right: 32px;
   }
 
-  .footer-list {
-    padding-left: 24px;
-    /* sm:pl-6 - 640px 이상에서 리스트 왼쪽 패딩 24px */
-  }
-
+  /* sm:pl-8 - 640px 이상에서 제목, 본문, 리스트, 문단 텍스트 모두 동일한 왼쪽 패딩 */
+  .footer-title,
+  .footer-subtitle,
+  .footer-list,
+  .footer-card-title,
   .footer-card-text {
-    padding-left: 24px;
-    /* sm:pl-6 - 640px 이상에서 문단 텍스트 왼쪽 패딩 24px (리스트와 통일) */
+    padding-left: 32px;
+    /* sm:pl-8 - 640px 이상에서 왼쪽 패딩 32px (모든 텍스트 요소 통일) */
   }
 
   .hero-section-container,
@@ -3180,14 +3180,14 @@ textarea::placeholder {
     padding-right: 64px;
   }
 
-  .footer-list {
-    padding-left: 32px;
-    /* md:pl-8 - 768px 이상에서 리스트 왼쪽 패딩 32px */
-  }
-
+  /* md:pl-12 - 768px 이상에서 제목, 본문, 리스트, 문단 텍스트 모두 동일한 왼쪽 패딩 */
+  .footer-title,
+  .footer-subtitle,
+  .footer-list,
+  .footer-card-title,
   .footer-card-text {
-    padding-left: 32px;
-    /* md:pl-8 - 768px 이상에서 문단 텍스트 왼쪽 패딩 32px (리스트와 통일) */
+    padding-left: 48px;
+    /* md:pl-12 - 768px 이상에서 왼쪽 패딩 48px (3rem = 0.25rem * 12, 모든 텍스트 요소 통일) */
   }
 
   /* md:text-6xl - 768px 이상에서 타이틀 크기 (3.75rem = 60px) */
