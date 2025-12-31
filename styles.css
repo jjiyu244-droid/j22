@@ -1285,10 +1285,26 @@ textarea::placeholder {
   gap: 16px;
 }
 
+/* pl-4 sm:pl-8 md:pl-16 - 두 섹션의 텍스트 왼쪽 정렬선 통일 */
+.footer-left {
+  padding-left: 16px;
+  /* pl-4 - 모바일에서 왼쪽 패딩 16px (1rem = 0.25rem * 4) */
+}
+
+.footer-right {
+  display: flex;
+  justify-content: flex-start;
+  /* justify-content: flex-start - 왼쪽 정렬로 변경하여 텍스트 정렬선 맞춤 */
+  padding-left: 16px;
+  /* pl-4 - 모바일에서 왼쪽 패딩 16px (footer-left와 동일) */
+}
+
 .footer-title {
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 6px;
+  padding-left: 0;
+  /* padding-left: 0 - 제목 왼쪽 여백 제거 */
 }
 
 .footer-subtitle {
@@ -1296,6 +1312,8 @@ textarea::placeholder {
   color: var(--text-soft);
   margin-bottom: 8px;
   line-height: 1.6;
+  padding-left: 0;
+  /* padding-left: 0 - 본문 왼쪽 여백 제거 */
 }
 
 .footer-list {
@@ -1305,11 +1323,41 @@ textarea::placeholder {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  padding-left: 0;
+  /* padding-left: 0 - 리스트 왼쪽 여백 제거, 불릿과 문단 텍스트 시작 위치 맞춤 */
 }
 
-.footer-right {
-  display: flex;
-  justify-content: flex-end;
+.footer-list li {
+  padding-left: 0;
+  /* padding-left: 0 - 리스트 아이템 왼쪽 여백 제거 */
+}
+
+.footer-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  border-radius: var(--radius-md);
+  padding: 12px 13px;
+  padding-left: 0;
+  /* padding-left: 0 - 카드 왼쪽 패딩 제거하여 텍스트 정렬선 맞춤 */
+}
+
+.footer-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  padding-left: 0;
+  /* padding-left: 0 - 제목 왼쪽 여백 제거 */
+}
+
+.footer-card-text {
+  font-size: 11px;
+  color: var(--text-soft);
+  margin-bottom: 4px;
+  line-height: 1.6;
+  padding-left: 0;
+  /* padding-left: 0 - 본문 왼쪽 여백 제거하여 리스트와 정렬선 맞춤 */
 }
 
 /* Footer Section - bg-gray-50 py-8 - 푸터 전체에 배경색과 여백 */
