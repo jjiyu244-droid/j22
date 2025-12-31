@@ -3093,8 +3093,8 @@ textarea::placeholder {
   .hero-image-area .signature-image,
   .person-image .signature-image {
     /* PC에서 오른쪽으로 100px 추가 이동 */
-    right: 262px !important;
-    /* right: 262px - 기존 162px + 100px = 262px (오른쪽으로 100px 추가 이동) */
+    right: 62px !important;
+    /* right: 62px - 기존 162px에서 100px 감소 = 62px (오른쪽으로 100px 이동, right 값이 작아지면 오른쪽으로 이동) */
     bottom: 32px !important;
     /* bottom: 32px - 기존 위치 유지 */
     transform: translateY(200px) !important;
