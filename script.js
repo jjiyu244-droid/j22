@@ -1638,7 +1638,7 @@ function renderPools(filter = 'all') {
             <span>TVL</span>
             <span>${formatUSD(pool.tvl)}</span>
           </span>
-          <span>
+          <span style="display:none;">
             <span>Lock-up</span>
             <span>${pool.lockup}</span>
           </span>
