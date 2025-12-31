@@ -2909,7 +2909,7 @@ textarea::placeholder {
     border: none !important;
   }
 
-  /* 12. signature-image - 모바일에서 싸인 이미지 강제 작게 + 모델 기준 우측 하단 고정 (50px, bottom-0) */
+  /* 12. signature-image - 모바일에서 싸인 이미지 강제 작게 + 모델 오른쪽 아래 다리 근처 고정 */
   /* 기본 스타일(width: 240px)과 태블릿 스타일(width: 200px)을 강제로 오버라이드 */
   .signature-image,
   img.signature-image,
@@ -2918,16 +2918,19 @@ textarea::placeholder {
   .person-image img.signature-image,
   .hero-image-area .signature-image,
   .person-image .signature-image {
+    /* 기존 스타일 완전히 초기화하고 새로 적용 */
     position: absolute !important;
-    /* width: 50px - 모바일에서 싸인 크기 적당하게 (기본 240px, 태블릿 200px를 강제 오버라이드) */
-    width: 50px !important;
-    max-width: 50px !important;
+    /* width: 80px - 모바일에서 싸인 크기 적당하게 작게 (기본 240px, 태블릿 200px를 강제 오버라이드) */
+    width: 80px !important;
+    max-width: 80px !important;
     height: auto !important;
-    /* bottom: 0 - 모델 다리 근처에 붙게 (모델의 오른쪽 다리 하단) */
-    bottom: 0 !important;
-    /* right: 5% - 모델 이미지 컨테이너 기준 우측 5% (모델의 오른쪽 하단 구석) */
-    right: 5% !important;
-    /* transform: none - 중앙 정렬 코드 완전 제거 (left: 50%, translateX(-50%) 등) */
+    /* right: 16px - 모델 오른쪽 아래 다리 근처 (모델의 오른쪽 다리 하단) */
+    right: 16px !important;
+    /* bottom: 16px - 모델 다리 근처에 붙게 */
+    bottom: 16px !important;
+    /* z-index: 20 - 모델 위에 겹치게 */
+    z-index: 20 !important;
+    /* transform: none - 중앙 정렬 코드 완전 제거 */
     transform: none !important;
     /* left: auto - left 속성 완전 제거 */
     left: auto !important;
@@ -2935,11 +2938,15 @@ textarea::placeholder {
     top: unset !important;
     /* margin: 0 - 기존 중앙 정렬 마진 제거 */
     margin: 0 !important;
-    /* z-index-10 - 모델 위에 오게 */
-    z-index: 10 !important;
     opacity: 0.85 !important;
     /* mix-blend-mode: multiply - 싸인 배경이 투명하지 않다면 적용하여 자연스럽게 블렌딩 */
     mix-blend-mode: multiply !important;
+  }
+
+  /* 모델 이미지 컨테이너에 position: relative 강제 추가 */
+  .person-image,
+  .hero-image-area {
+    position: relative !important;
   }
 }
 
