@@ -1321,13 +1321,14 @@ textarea::placeholder {
   background: transparent;
 }
 
+/* flex flex-row items-center justify-center gap-8 - PC에서 가로 배치, 중앙 정렬, 간격 32px */
 .security-certification-container {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 32px;
   flex-wrap: wrap;
-  flex-direction: column;
 }
 
 .brand-certification-badge {
@@ -1360,13 +1361,15 @@ textarea::placeholder {
   min-height: 80px;
 }
 
+/* order-2 - 텍스트 박스를 오른쪽에 배치 */
 .certification-details {
   background: #F7F9FC;
   border-radius: 12px;
   padding: 16px 20px;
-  width: 100%;
+  flex: 0 1 auto;
   max-width: 600px;
-  text-align: center;
+  text-align: left;
+  order: 2;
 }
 
 .certification-text {
@@ -1380,22 +1383,35 @@ textarea::placeholder {
   margin-bottom: 4px;
 }
 
-/* 모바일 반응형 */
+/* 모바일 반응형 - flex-col sm:flex-row - 모바일에서 세로 쌓임 */
 @media (max-width: 768px) {
   .security-certification-section {
     padding: 24px 16px;
   }
 
+  /* flex-col - 모바일에서 세로 배치 (이미지 위, 텍스트 아래) */
   .security-certification-container {
+    flex-direction: column;
     gap: 20px;
+    align-items: center;
+  }
+
+  /* 모바일에서 이미지 중앙 정렬 */
+  .brand-certification-badge {
+    justify-content: center;
+    width: 100%;
   }
 
   .brand-certification-img {
-    max-height: 100px;
+    max-height: 120px;
+    margin: 0 auto;
   }
 
   .certification-details {
     padding: 12px 16px;
+    width: 100%;
+    max-width: 100%;
+    text-align: center;
   }
 
   .certification-text {
@@ -1409,7 +1425,7 @@ textarea::placeholder {
   }
 
   .brand-certification-img {
-    max-height: 80px;
+    max-height: 100px;
   }
 
   .certification-text {
