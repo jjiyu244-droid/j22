@@ -3190,11 +3190,12 @@ async function renderAdminDashboard(users) {
     totalUSD += ((u.BTC || 0) * prices.BTC) + ((u.ETH || 0) * prices.ETH) + ((u.XRP || 0) * prices.XRP);
   });
 
-  // APY 정보
-  const poolApy = {
-    BTC: 3.2,
-    ETH: 6.8,
-    XRP: 5.4,
+  // MPY 정보 (월수익률)
+  const poolMpy = {
+    BTC: 4.9,
+    ETH: 5.6,
+    XRP: 5.8,
+    SOL: 6.4,
   };
 
   // 문의 내역 불러오기
@@ -3416,8 +3417,8 @@ async function renderAdminDashboard(users) {
       const usdValue = amount * (prices[symbol] || 0);
       
       if (amount > 0) {
-        const monthlyApy = poolApy[symbol] / 12;
-        const monthlyReward = (amount * monthlyApy) / 100;
+        const mpy = poolMpy[symbol] || 0; // MPY는 이미 월수익률이므로 나눌 필요 없음
+        const monthlyReward = (amount * mpy) / 100;
         
         html += `
           <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
@@ -3435,13 +3436,13 @@ async function renderAdminDashboard(users) {
               기간: ${period}
             </div>
             <div style="font-size: 10px; color: #ffffff; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
-              APY: ${poolApy[symbol]}%<br/>
+              MPY: ${mpy}%<br/>
               예상 월: ${monthlyReward.toFixed(symbol === 'XRP' ? 2 : 6)}
             </div>
             <button 
               class="btn-primary" 
               style="width: 100%; padding: 6px; font-size: 10px;"
-              onclick="handleApproveReward('${u.uid}', '${symbol}', ${amount}, ${monthlyReward}, ${poolApy[symbol]})"
+              onclick="handleApproveReward('${u.uid}', '${symbol}', ${amount}, ${monthlyReward}, ${mpy})"
             >
               리워드 승인
             </button>
@@ -4093,11 +4094,12 @@ async function renderAdminDashboardContent(users, container) {
     totalUSD += ((u.BTC || 0) * prices.BTC) + ((u.ETH || 0) * prices.ETH) + ((u.XRP || 0) * prices.XRP);
   });
 
-  // APY 정보
-  const poolApy = {
-    BTC: 3.2,
-    ETH: 6.8,
-    XRP: 5.4,
+  // MPY 정보 (월수익률)
+  const poolMpy = {
+    BTC: 4.9,
+    ETH: 5.6,
+    XRP: 5.8,
+    SOL: 6.4,
   };
 
   // 문의 내역 불러오기
@@ -4281,8 +4283,8 @@ async function renderAdminDashboardContent(users, container) {
       const usdValue = amount * (prices[symbol] || 0);
       
       if (amount > 0) {
-        const monthlyApy = poolApy[symbol] / 12;
-        const monthlyReward = (amount * monthlyApy) / 100;
+        const mpy = poolMpy[symbol] || 0; // MPY는 이미 월수익률이므로 나눌 필요 없음
+        const monthlyReward = (amount * mpy) / 100;
         
         html += `
           <div style="background: rgba(255,255,255,0.02); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
@@ -4300,13 +4302,13 @@ async function renderAdminDashboardContent(users, container) {
               기간: ${period}
             </div>
             <div style="font-size: 10px; color: #ffffff; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
-              APY: ${poolApy[symbol]}%<br/>
+              MPY: ${mpy}%<br/>
               예상 월: ${monthlyReward.toFixed(symbol === 'XRP' ? 2 : 6)}
             </div>
             <button 
               class="btn-primary" 
               style="width: 100%; padding: 6px; font-size: 10px;"
-              onclick="handleApproveReward('${u.uid}', '${symbol}', ${amount}, ${monthlyReward}, ${poolApy[symbol]})"
+              onclick="handleApproveReward('${u.uid}', '${symbol}', ${amount}, ${monthlyReward}, ${mpy})"
             >
               리워드 승인
             </button>
