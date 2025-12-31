@@ -1287,17 +1287,19 @@ textarea::placeholder {
 
 /* pl-4 sm:pl-8 md:pl-16 - 두 섹션의 텍스트 왼쪽 정렬선 통일 */
 /* max-w-3xl mx-auto px-6 sm:px-8 md:px-16 - 두 섹션 컨테이너의 텍스트 왼쪽 정렬선 통일 */
+/* 중앙에 배치하되 내부는 왼쪽 정렬 */
 .footer-left {
   max-width: 48rem;
   /* max-w-3xl - 최대 너비 48rem (768px) */
   margin-left: auto;
   /* mx-auto - 좌우 마진 자동 (중앙 정렬) */
   margin-right: auto;
-  padding-left: 24px;
-  /* px-6 - 모바일에서 왼쪽 패딩 24px (1.5rem = 0.25rem * 6) */
+  padding-left: 0;
+  /* padding-left: 0 - 컨테이너 패딩 제거 (요소별 패딩으로 통일) */
   padding-right: 24px;
+  /* px-6 - 모바일에서 오른쪽 패딩 24px */
   text-align: left;
-  /* text-left - 왼쪽 정렬 */
+  /* text-left - 왼쪽 정렬 (text-center 제거) */
 }
 
 .footer-right {
@@ -1309,11 +1311,12 @@ textarea::placeholder {
   margin-left: auto;
   /* mx-auto - 좌우 마진 자동 (중앙 정렬) */
   margin-right: auto;
-  padding-left: 24px;
-  /* px-6 - 모바일에서 왼쪽 패딩 24px (footer-left와 동일) */
+  padding-left: 0;
+  /* padding-left: 0 - 컨테이너 패딩 제거 (요소별 패딩으로 통일) */
   padding-right: 24px;
+  /* px-6 - 모바일에서 오른쪽 패딩 24px */
   text-align: left;
-  /* text-left - 왼쪽 정렬 */
+  /* text-left - 왼쪽 정렬 (text-center 제거) */
 }
 
 /* pl-6 sm:pl-8 md:pl-12 - 제목, 본문, 리스트 모두 동일한 왼쪽 패딩 적용 */
@@ -1325,6 +1328,8 @@ textarea::placeholder {
   /* pl-6 - 모바일에서 왼쪽 패딩 24px (1.5rem = 0.25rem * 6) */
   margin-left: 0;
   /* ml-0 - 제목 왼쪽 마진 제거 */
+  text-align: left;
+  /* text-left - 왼쪽 정렬 강제 */
 }
 
 /* pl-6 sm:pl-8 md:pl-12 - 본문의 왼쪽 패딩을 제목과 동일하게 */
@@ -1337,6 +1342,8 @@ textarea::placeholder {
   /* pl-6 - 모바일에서 왼쪽 패딩 24px (제목과 동일) */
   margin-left: 0;
   /* ml-0 - 본문 왼쪽 마진 제거 */
+  text-align: left;
+  /* text-left - 왼쪽 정렬 강제 */
 }
 
 /* pl-6 sm:pl-8 md:pl-12 - 리스트와 문단 텍스트 시작 위치 통일 */
@@ -1348,13 +1355,15 @@ textarea::placeholder {
   /* list-style-position: outside - 불릿을 텍스트 밖에 배치 */
   font-size: 11px;
   color: var(--text);
-  display: flex;
-  flex-direction: column;
+  display: block;
+  /* display: block - flex 대신 block 사용하여 list-style-position 작동 */
   gap: 2px;
   padding-left: 24px;
   /* pl-6 - 모바일에서 왼쪽 패딩 24px (제목, 본문과 동일) */
   margin-left: 0;
   /* ml-0 - 리스트 왼쪽 마진 제거 */
+  text-align: left;
+  /* text-left - 왼쪽 정렬 강제 */
 }
 
 .footer-list li {
@@ -1362,6 +1371,8 @@ textarea::placeholder {
   /* pl-0 - 리스트 아이템 왼쪽 패딩 제거 (불릿은 리스트의 padding-left에서 시작) */
   margin-left: 0;
   /* ml-0 - 리스트 아이템 왼쪽 마진 제거 */
+  text-align: left;
+  /* text-left - 왼쪽 정렬 강제 */
 }
 
 /* padding 제거하여 컨테이너 패딩만 적용 */
@@ -1375,6 +1386,8 @@ textarea::placeholder {
   /* padding: 0 - 카드 패딩 제거하여 컨테이너 패딩만 적용 */
   margin: 0;
   /* margin: 0 - 카드 마진 제거 */
+  text-align: left;
+  /* text-left - 왼쪽 정렬 강제 */
 }
 
 /* pl-6 sm:pl-8 md:pl-12 - 제목의 왼쪽 패딩을 다른 요소와 동일하게 */
@@ -1386,6 +1399,8 @@ textarea::placeholder {
   /* pl-6 - 모바일에서 왼쪽 패딩 24px (제목, 본문, 리스트와 동일) */
   margin-left: 0;
   /* ml-0 - 제목 왼쪽 마진 제거 */
+  text-align: left;
+  /* text-left - 왼쪽 정렬 강제 */
 }
 
 /* pl-6 sm:pl-8 md:pl-12 - 문단 텍스트 시작 위치를 리스트와 맞춤 */
@@ -1398,6 +1413,8 @@ textarea::placeholder {
   /* pl-6 - 모바일에서 문단 텍스트 왼쪽 패딩 24px (제목, 본문, 리스트와 통일) */
   margin-left: 0;
   /* ml-0 - 본문 왼쪽 마진 제거 */
+  text-align: left;
+  /* text-left - 왼쪽 정렬 강제 */
 }
 
 /* Footer Section - bg-gray-50 py-8 - 푸터 전체에 배경색과 여백 */
