@@ -1312,13 +1312,51 @@ textarea::placeholder {
   justify-content: flex-end;
 }
 
-/* Security Certification Section */
-.security-certification-section {
+/* Footer Section - bg-gray-50 py-8 - 푸터 전체에 배경색과 여백 */
+.footer-section {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
   padding: 32px 48px;
-  background: transparent;
+  background: #f9fafb;
+  /* bg-gray-50 - 연한 회색 배경 */
+}
+
+/* Company Information - 회사 정보 텍스트 (상단) */
+/* flex flex-row items-center justify-center - 데스크톱에서 가로 배치, 중앙 정렬 */
+.company-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+  /* text-xs text-gray-600 - 작은 글씨, 회색 */
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* company-info-item - 회사 정보 각 항목 */
+.company-info-item {
+  white-space: nowrap;
+}
+
+/* company-info-separator - | 구분자 */
+.company-info-separator {
+  color: #9ca3af;
+  margin: 0 4px;
+}
+
+/* Security Certification Section - 인증 로고 + 텍스트 박스 (하단) */
+.security-certification-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
 }
 
 /* flex flex-row items-center justify-center - PC에서 가로 배치, 중앙 정렬, 이미지와 텍스트 수평 중앙정렬 */
@@ -1381,8 +1419,25 @@ textarea::placeholder {
 
 /* 모바일 반응형 - flex-col - 모바일에서 세로 쌓임, 겹치지 않도록 */
 @media (max-width: 768px) {
-  .security-certification-section {
+  .footer-section {
     padding: 24px 16px;
+  }
+
+  /* flex-col - 모바일에서 회사 정보 세로 배치 */
+  .company-info {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+  }
+
+  .company-info-separator {
+    display: none;
+    /* 모바일에서 구분자 숨김 */
+  }
+
+  .company-info-item {
+    white-space: normal;
   }
 
   /* flex-col - 모바일에서 세로 배치 (이미지 위, 텍스트 아래), 겹치지 않도록 */
