@@ -2779,7 +2779,7 @@ function updateModalPoolInfo(pool) {
     <div style="display:flex;justify-content:space-between;gap:10px;">
       <div>
         <div style="font-weight:500;font-size:12px;">${pool.symbol} / ${pool.network}</div>
-        <div style="font-size:11px;color:#e5e7eb;">월 이율 ${pool.monthlyRate}% · Lock-up ${pool.lockup}</div>
+        <div style="font-size:11px;color:#e5e7eb;">월 이율 ${pool.monthlyRate}%</div>
       </div>
     </div>
   `;
