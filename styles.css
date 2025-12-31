@@ -1550,15 +1550,22 @@ textarea::placeholder {
 /* 모바일 반응형 - flex-col - 모바일에서 세로 쌓임, 겹치지 않도록 */
 @media (max-width: 768px) {
   .footer-section {
-    padding: 24px 16px;
+    padding: 24px 24px;
+    /* px-6 - 모바일에서 좌우 패딩 24px */
+    max-width: 100%;
+    /* max-width: 100% - 모바일에서 전체 너비 사용 */
   }
 
   /* flex-col - 모바일에서 회사 정보 세로 배치 */
   .company-info {
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
+    /* align-items: flex-start - 왼쪽 정렬 */
     gap: 4px;
-    text-align: center;
+    text-align: left;
+    /* text-left - 왼쪽 정렬 */
+    padding-left: 24px;
+    /* pl-6 - 모바일에서 왼쪽 패딩 24px (다른 텍스트 요소와 통일) */
   }
 
   .company-info-separator {
@@ -1591,14 +1598,22 @@ textarea::placeholder {
 
   .certification-details {
     padding: 12px 16px;
+    padding-left: 24px;
+    /* pl-6 - 모바일에서 왼쪽 패딩 24px (다른 텍스트 요소와 통일) */
     width: 100%;
     max-width: 100%;
-    text-align: center;
-    align-items: center;
+    text-align: left;
+    /* text-left - 왼쪽 정렬 */
+    align-items: flex-start;
+    /* align-items: flex-start - 왼쪽 정렬 */
   }
 
   .certification-text {
     font-size: 12px;
+    padding-left: 0;
+    /* padding-left: 0 - 텍스트 자체 패딩 제거 (컨테이너 패딩 사용) */
+    text-align: left;
+    /* text-left - 왼쪽 정렬 */
   }
 }
 
@@ -2496,6 +2511,21 @@ textarea::placeholder {
 /* 데스크톱 전용 스타일 - 모바일에서는 적용되지 않도록 미디어 쿼리로 분리 */
 /* sm:px-8 - 640px 이상에서 왼쪽 패딩 32px */
 @media (min-width: 641px) {
+  .footer-section {
+    padding: 32px 32px;
+    /* sm:px-8 - 640px 이상에서 좌우 패딩 32px */
+  }
+
+  .company-info {
+    padding-left: 32px;
+    /* sm:pl-8 - 640px 이상에서 왼쪽 패딩 32px (다른 텍스트 요소와 통일) */
+  }
+
+  .certification-details {
+    padding-left: 32px;
+    /* sm:pl-8 - 640px 이상에서 왼쪽 패딩 32px (다른 텍스트 요소와 통일) */
+  }
+
   .footer-left,
   .footer-right {
     padding-left: 0;
@@ -3219,14 +3249,29 @@ textarea::placeholder {
 }
 
 /* md (768px 이상) - 반응형 스타일 추가 */
-/* md:px-16 - 768px 이상에서 왼쪽 패딩 64px */
+/* md:px-12 - 768px 이상에서 좌우 패딩 48px */
 @media (min-width: 768px) {
+  .footer-section {
+    padding: 32px 48px;
+    /* md:px-12 - 768px 이상에서 좌우 패딩 48px */
+  }
+
+  .company-info {
+    padding-left: 48px;
+    /* md:pl-12 - 768px 이상에서 왼쪽 패딩 48px (다른 텍스트 요소와 통일) */
+  }
+
+  .certification-details {
+    padding-left: 48px;
+    /* md:pl-12 - 768px 이상에서 왼쪽 패딩 48px (다른 텍스트 요소와 통일) */
+  }
+
   .footer-left,
   .footer-right {
     padding-left: 0;
     /* padding-left: 0 - 컨테이너 패딩 제거 (요소별 패딩으로 통일) */
-    padding-right: 64px;
-    /* md:px-16 - 768px 이상에서 오른쪽 패딩 64px (1rem * 16) */
+    padding-right: 48px;
+    /* md:px-12 - 768px 이상에서 오른쪽 패딩 48px */
   }
 
   /* md:pl-12 - 768px 이상에서 제목, 본문, 리스트, 문단 텍스트 모두 동일한 왼쪽 패딩 */
