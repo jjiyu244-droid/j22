@@ -1782,16 +1782,18 @@ textarea::placeholder {
     padding-right: 24px;
     max-width: 100%;
     /* max-width: 100% - 모바일에서 전체 너비 사용 */
+    text-align: left;
+    /* text-left - 왼쪽 정렬 강제 */
   }
 
-  .footer-list {
-    padding-left: 16px;
-    /* pl-4 - 모바일에서 리스트 왼쪽 패딩 16px */
-  }
-
+  /* pl-6 - 모바일에서 제목, 본문, 리스트, 문단 텍스트 모두 동일한 왼쪽 패딩 */
+  .footer-title,
+  .footer-subtitle,
+  .footer-list,
+  .footer-card-title,
   .footer-card-text {
-    padding-left: 16px;
-    /* pl-4 - 모바일에서 문단 텍스트 왼쪽 패딩 16px (리스트와 통일) */
+    padding-left: 24px;
+    /* pl-6 - 모바일에서 왼쪽 패딩 24px (모든 텍스트 요소 통일) */
   }
 
   /* 모바일에서 동그라미 크기 조정 */
