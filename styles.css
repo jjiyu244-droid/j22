@@ -1349,6 +1349,15 @@ textarea::placeholder {
   visibility: visible !important;
   opacity: 1 !important;
   margin: 0 auto;
+  background: transparent;
+}
+
+.brand-certification-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 80px;
 }
 
 .certification-details {
