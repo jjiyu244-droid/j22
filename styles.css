@@ -1777,8 +1777,21 @@ textarea::placeholder {
   /* 모바일에서도 두 섹션의 텍스트 왼쪽 정렬선 통일 */
   .footer-left,
   .footer-right {
+    padding-left: 24px;
+    /* px-6 - 모바일에서 왼쪽 패딩 24px 통일 */
+    padding-right: 24px;
+    max-width: 100%;
+    /* max-width: 100% - 모바일에서 전체 너비 사용 */
+  }
+
+  .footer-list {
     padding-left: 16px;
-    /* pl-4 - 모바일에서 왼쪽 패딩 16px 통일 (데스크톱과 동일) */
+    /* pl-4 - 모바일에서 리스트 왼쪽 패딩 16px */
+  }
+
+  .footer-card-text {
+    padding-left: 16px;
+    /* pl-4 - 모바일에서 문단 텍스트 왼쪽 패딩 16px (리스트와 통일) */
   }
 
   /* 모바일에서 동그라미 크기 조정 */
@@ -2430,7 +2443,25 @@ textarea::placeholder {
 }
 
 /* 데스크톱 전용 스타일 - 모바일에서는 적용되지 않도록 미디어 쿼리로 분리 */
+/* sm:px-8 - 640px 이상에서 왼쪽 패딩 32px */
 @media (min-width: 641px) {
+  .footer-left,
+  .footer-right {
+    padding-left: 32px;
+    /* sm:px-8 - 640px 이상에서 왼쪽 패딩 32px (0.5rem * 8) */
+    padding-right: 32px;
+  }
+
+  .footer-list {
+    padding-left: 24px;
+    /* sm:pl-6 - 640px 이상에서 리스트 왼쪽 패딩 24px */
+  }
+
+  .footer-card-text {
+    padding-left: 24px;
+    /* sm:pl-6 - 640px 이상에서 문단 텍스트 왼쪽 패딩 24px (리스트와 통일) */
+  }
+
   .hero-section-container,
   .pre-login-welcome.hero-section-container,
   section.hero-section-container,
@@ -3134,7 +3165,25 @@ textarea::placeholder {
 }
 
 /* md (768px 이상) - 반응형 스타일 추가 */
+/* md:px-16 - 768px 이상에서 왼쪽 패딩 64px */
 @media (min-width: 768px) {
+  .footer-left,
+  .footer-right {
+    padding-left: 64px;
+    /* md:px-16 - 768px 이상에서 왼쪽 패딩 64px (1rem * 16) */
+    padding-right: 64px;
+  }
+
+  .footer-list {
+    padding-left: 32px;
+    /* md:pl-8 - 768px 이상에서 리스트 왼쪽 패딩 32px */
+  }
+
+  .footer-card-text {
+    padding-left: 32px;
+    /* md:pl-8 - 768px 이상에서 문단 텍스트 왼쪽 패딩 32px (리스트와 통일) */
+  }
+
   /* md:text-6xl - 768px 이상에서 타이틀 크기 (3.75rem = 60px) */
   .hero-main-copy-line1,
   .hero-main-copy-line2 {
