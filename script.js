@@ -2690,21 +2690,22 @@ function setupSimulator() {
   simBtn.addEventListener('click', () => {
     const amount = parseFloat($('#simAmount').value || '0');
     const days = parseFloat($('#simDays').value || '0');
-    const apy = parseFloat($('#simApy').value || '0');
+    const mpy = parseFloat($('#simApy').value || '0'); // MPY 값 (ID는 simApy로 유지)
     const resultEl = $('#simResult');
 
-    if (!amount || !days || !apy) {
-      resultEl.textContent = '금액, 기간, APY를 모두 입력해주세요.';
+    if (!amount || !days || !mpy) {
+      resultEl.textContent = '금액, 기간, MPY를 모두 입력해주세요.';
       return;
     }
 
-    const yearFraction = days / 365;
-    const earned = (amount * (apy / 100)) * yearFraction;
+    // 월단위 계산: days를 월로 변환 (30일 = 1개월)
+    const monthFraction = days / 30;
+    const earned = (amount * (mpy / 100)) * monthFraction;
     const total = amount + earned;
 
     resultEl.textContent = `단순 이자 기준, ${days}일 후 예상 리워드는 약 ${earned.toFixed(
       2
-    )} USD이며, 총 잔액은 약 ${total.toFixed(2)} USD 입니다. (복리 효과 미포함)`;
+    )} USD이며, 총 잔액은 약 ${total.toFixed(2)} USD 입니다. (복리 효과 미포함, 월단위 계산)`;
   });
 }
 
