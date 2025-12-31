@@ -1367,8 +1367,8 @@ textarea::placeholder {
 }
 
 .footer-list li {
-  padding-left: 0;
-  /* pl-0 - 리스트 아이템 왼쪽 패딩 제거 (불릿은 리스트의 padding-left에서 시작) */
+  padding-left: 8px;
+  /* pl-2 - 리스트 아이템 왼쪽 패딩 8px (불릿과 텍스트 시작 위치 맞춤) */
   margin-left: 0;
   /* ml-0 - 리스트 아이템 왼쪽 마진 제거 */
   text-align: left;
@@ -1418,13 +1418,20 @@ textarea::placeholder {
 }
 
 /* Footer Section - bg-gray-50 py-8 - 푸터 전체에 배경색과 여백 */
+/* max-w-4xl mx-auto text-left px-6 sm:px-8 md:px-12 - 전체 텍스트 컨테이너 중앙 배치 + 왼쪽 정렬 */
 .footer-section {
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 32px 48px;
+  max-width: 56rem;
+  /* max-w-4xl - 최대 너비 56rem (896px) */
+  margin-left: auto;
+  /* mx-auto - 좌우 마진 자동 (중앙 정렬) */
+  margin-right: auto;
+  padding: 32px 24px;
+  /* px-6 - 모바일에서 좌우 패딩 24px */
   background: #f9fafb;
   /* bg-gray-50 - 연한 회색 배경 */
+  text-align: left;
+  /* text-left - 왼쪽 정렬 */
 }
 
 /* Company Information - 회사 정보 텍스트 (상단) */
@@ -1433,7 +1440,8 @@ textarea::placeholder {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  /* justify-content: flex-start - 왼쪽 정렬로 변경 */
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 32px;
@@ -1441,11 +1449,20 @@ textarea::placeholder {
   font-size: 12px;
   color: #4b5563;
   line-height: 1.6;
+  padding-left: 24px;
+  /* pl-6 - 모바일에서 왼쪽 패딩 24px (다른 텍스트 요소와 통일) */
+  text-align: left;
+  /* text-left - 왼쪽 정렬 */
 }
 
 /* company-info-item - 회사 정보 각 항목 */
+/* pl-6 sm:pl-8 md:pl-12 - 모든 텍스트 요소와 동일한 왼쪽 패딩 */
 .company-info-item {
   white-space: nowrap;
+  padding-left: 0;
+  /* padding-left: 0 - 아이템 자체 패딩 제거 (컨테이너 패딩 사용) */
+  text-align: left;
+  /* text-left - 왼쪽 정렬 */
 }
 
 /* company-info-separator - | 구분자 */
@@ -1498,13 +1515,17 @@ textarea::placeholder {
 }
 
 /* 텍스트 박스를 오른쪽에 배치, 이미지와 수평 중앙정렬 */
+/* pl-6 sm:pl-8 md:pl-12 - 인증 텍스트도 다른 텍스트 요소와 동일한 왼쪽 패딩 */
 .certification-details {
   background: #F7F9FC;
   border-radius: 12px;
   padding: 16px 20px;
+  padding-left: 24px;
+  /* pl-6 - 모바일에서 왼쪽 패딩 24px (다른 텍스트 요소와 통일) */
   flex: 0 1 auto;
   max-width: 600px;
   text-align: left;
+  /* text-left - 왼쪽 정렬 */
   order: 2;
   display: flex;
   flex-direction: column;
@@ -1516,6 +1537,10 @@ textarea::placeholder {
   color: #1e293b;
   line-height: 1.6;
   margin: 0;
+  padding-left: 0;
+  /* padding-left: 0 - 텍스트 자체 패딩 제거 (컨테이너 패딩 사용) */
+  text-align: left;
+  /* text-left - 왼쪽 정렬 */
 }
 
 .certification-text:not(:last-child) {
