@@ -2676,8 +2676,8 @@ textarea::placeholder {
     margin-top: 32px !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
-    /* margin-bottom: -32px - 모델 이미지가 섹션 하단으로 약간 삐져나가게 (잘림 방지) */
-    margin-bottom: -32px !important;
+    /* margin-bottom: 0 - 모델 이미지가 섹션 끝단에 딱 맞게 */
+    margin-bottom: 0 !important;
     padding-bottom: 0 !important;
   }
 
@@ -2716,8 +2716,8 @@ textarea::placeholder {
     max-width: 135vw !important;
     /* height: auto - 높이 자동 조정 (인라인 height:850px 오버라이드) */
     height: auto !important;
-    /* transform: scale(1.5) translateX(-10px) translateY(16px) - 모델 이미지 높이를 1.5배로 확대하고 약간 왼쪽으로 이동, 아래로 이동하여 다리가 섹션 하단에 붙게 */
-    transform: scale(1.5) translateX(-10px) translateY(16px) !important;
+    /* transform: scale(1.5) translateX(-10px) - 모델 이미지 높이를 1.5배로 확대하고 약간 왼쪽으로 이동 (섹션 끝단에 딱 맞게) */
+    transform: scale(1.5) translateX(-10px) !important;
     /* max-height 제거 - 인라인 max-height:none 오버라이드 */
     max-height: none !important;
     /* object-fit: contain - 비율 유지하면서 컨테이너에 맞춤 */
