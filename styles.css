@@ -3065,13 +3065,17 @@ textarea::placeholder {
   .signature-image,
   img.signature-image,
   img[src="./449.png"],
-  img[src="449.png"] {
-    /* md:bottom-8 - 768px 이상에서 하단 32px (2rem = 0.25rem * 8) */
-    bottom: 32px !important;
-    /* md:right-8 - 768px 이상에서 우측 32px (2rem = 0.25rem * 8) */
+  img[src="449.png"],
+  .person-image img.signature-image,
+  .hero-image-area .signature-image,
+  .person-image .signature-image {
+    /* md:right-32 - 768px 이상에서 우측 32px (2rem = 0.25rem * 8) */
     right: 32px !important;
-    /* md:w-32 - 768px 이상에서 싸인 크기 (8rem = 128px) */
-    width: 128px !important;
+    /* md:bottom-32 - 768px 이상에서 하단 32px (2rem = 0.25rem * 8) */
+    bottom: 32px !important;
+    /* md:w-120 - 768px 이상에서 싸인 크기 120px */
+    width: 120px !important;
+    max-width: 120px !important;
   }
 }
 
