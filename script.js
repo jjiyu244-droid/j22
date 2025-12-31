@@ -55,7 +55,7 @@ const pools = [
     id: 'btc-stake',
     name: '비트코인 스테이킹 (BTC)',
     symbol: 'BTC',
-    apr: 3.2,
+    apr: 4.9,
     monthlyRate: 5.8, // 월 이율 (%)
     tvl: 126_458_143,
     risk: '중간',
@@ -68,7 +68,7 @@ const pools = [
     id: 'eth-stake',
     name: '이더리움 스테이킹 (ETH)',
     symbol: 'ETH',
-    apr: 6.8,
+    apr: 5.6,
     monthlyRate: 6.2, // 월 이율 (%)
     tvl: 141_131_457,
     risk: '중간',
@@ -81,7 +81,7 @@ const pools = [
     id: 'xrp-stake',
     name: '리플 스테이킹 (XRP)',
     symbol: 'XRP',
-    apr: 5.4,
+    apr: 5.8,
     monthlyRate: 6.7, // 월 이율 (%)
     tvl: 81_451_411,
     risk: '낮음',
@@ -94,7 +94,7 @@ const pools = [
     id: 'sol-stake',
     name: '솔라나 스테이킹 (SOL)',
     symbol: 'SOL',
-    apr: 7.2,
+    apr: 6.4,
     monthlyRate: 7.2, // 월 이율 (%) - 해당 이율 적용
     tvl: 79_451_321,
     risk: '중간',
@@ -1630,7 +1630,7 @@ function renderPools(filter = 'all') {
           </div>
           <div>
             <div class="pool-apr">${pool.name}</div>
-            <div class="pool-sub">${pool.network} · APY ${pool.apr}%</div>
+            <div class="pool-sub">${pool.network} · MPY ${pool.apr}%</div>
           </div>
         </div>
         <div class="pool-meta">
