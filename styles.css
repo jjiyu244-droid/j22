@@ -1798,9 +1798,10 @@ textarea::placeholder {
   /* 모바일에서도 두 섹션의 텍스트 왼쪽 정렬선 통일 */
   .footer-left,
   .footer-right {
-    padding-left: 24px;
-    /* px-6 - 모바일에서 왼쪽 패딩 24px 통일 */
+    padding-left: 0;
+    /* padding-left: 0 - 컨테이너 패딩 제거 (요소별 패딩으로 통일) */
     padding-right: 24px;
+    /* px-6 - 모바일에서 오른쪽 패딩 24px */
     max-width: 100%;
     /* max-width: 100% - 모바일에서 전체 너비 사용 */
     text-align: left;
@@ -1815,6 +1816,8 @@ textarea::placeholder {
   .footer-card-text {
     padding-left: 24px;
     /* pl-6 - 모바일에서 왼쪽 패딩 24px (모든 텍스트 요소 통일) */
+    text-align: left;
+    /* text-left - 왼쪽 정렬 강제 */
   }
 
   /* 모바일에서 동그라미 크기 조정 */
@@ -2470,9 +2473,10 @@ textarea::placeholder {
 @media (min-width: 641px) {
   .footer-left,
   .footer-right {
-    padding-left: 32px;
-    /* sm:px-8 - 640px 이상에서 왼쪽 패딩 32px (0.5rem * 8) */
+    padding-left: 0;
+    /* padding-left: 0 - 컨테이너 패딩 제거 (요소별 패딩으로 통일) */
     padding-right: 32px;
+    /* sm:px-8 - 640px 이상에서 오른쪽 패딩 32px (0.5rem * 8) */
   }
 
   /* sm:pl-8 - 640px 이상에서 제목, 본문, 리스트, 문단 텍스트 모두 동일한 왼쪽 패딩 */
@@ -2483,6 +2487,8 @@ textarea::placeholder {
   .footer-card-text {
     padding-left: 32px;
     /* sm:pl-8 - 640px 이상에서 왼쪽 패딩 32px (모든 텍스트 요소 통일) */
+    text-align: left;
+    /* text-left - 왼쪽 정렬 강제 */
   }
 
   .hero-section-container,
@@ -3192,9 +3198,10 @@ textarea::placeholder {
 @media (min-width: 768px) {
   .footer-left,
   .footer-right {
-    padding-left: 64px;
-    /* md:px-16 - 768px 이상에서 왼쪽 패딩 64px (1rem * 16) */
+    padding-left: 0;
+    /* padding-left: 0 - 컨테이너 패딩 제거 (요소별 패딩으로 통일) */
     padding-right: 64px;
+    /* md:px-16 - 768px 이상에서 오른쪽 패딩 64px (1rem * 16) */
   }
 
   /* md:pl-12 - 768px 이상에서 제목, 본문, 리스트, 문단 텍스트 모두 동일한 왼쪽 패딩 */
@@ -3205,6 +3212,8 @@ textarea::placeholder {
   .footer-card-text {
     padding-left: 48px;
     /* md:pl-12 - 768px 이상에서 왼쪽 패딩 48px (3rem = 0.25rem * 12, 모든 텍스트 요소 통일) */
+    text-align: left;
+    /* text-left - 왼쪽 정렬 강제 */
   }
 
   /* md:text-6xl - 768px 이상에서 타이틀 크기 (3.75rem = 60px) */
