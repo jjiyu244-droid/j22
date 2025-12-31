@@ -3080,8 +3080,10 @@ textarea::placeholder {
     /* PC에서 오른쪽으로 60px, 아래로 200px 이동 */
     right: 92px !important;
     /* right: 92px - 기존 32px + 60px = 92px (오른쪽으로 60px 이동) */
-    bottom: 232px !important;
-    /* bottom: 232px - 기존 32px + 200px = 232px (아래로 200px 이동) */
+    bottom: 32px !important;
+    /* bottom: 32px - 기존 위치 유지 */
+    transform: translateY(200px) !important;
+    /* transform: translateY(200px) - 아래로 200px 이동 (bottom 값 증가는 위로 올라가므로 transform 사용) */
   }
 }
 
