@@ -3077,9 +3077,9 @@ textarea::placeholder {
   .person-image img.signature-image,
   .hero-image-area .signature-image,
   .person-image .signature-image {
-    /* PC에서 오른쪽으로 60px, 아래로 200px 이동 */
-    right: 92px !important;
-    /* right: 92px - 기존 32px + 60px = 92px (오른쪽으로 60px 이동) */
+    /* PC에서 오른쪽으로 130px (60px + 70px), 아래로 200px 이동 */
+    right: 162px !important;
+    /* right: 162px - 기존 32px + 60px + 70px = 162px (오른쪽으로 130px 이동) */
     bottom: 32px !important;
     /* bottom: 32px - 기존 위치 유지 */
     transform: translateY(200px) !important;
