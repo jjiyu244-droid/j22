@@ -156,30 +156,30 @@
 
         <!-- New Section: 수익이라는 새로운 선물 -->
         <!-- max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 - 전체 너비 컨테이너, 중앙 정렬, 반응형 패딩 -->
-        <!-- grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-16 sm:py-24 - 모바일 세로 배치, 데스크톱 가로 배치 -->
-        <section class="bg-gray-50" style="background: #f9fafb;">
-          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-            <!-- grid grid-cols-1 md:grid-cols-2 gap-8 items-center - 모바일: 세로 배치, 데스크톱: 가로 배치 -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <!-- 왼쪽: 이미지 영역 (모바일에서는 위에 표시) -->
-              <!-- w-full max-w-lg mx-auto rounded-lg shadow-xl - 이미지 스타일 -->
-              <div class="order-2 md:order-1">
+        <!-- py-12 sm:py-20 lg:py-24 - 세로 패딩 반응형 -->
+        <section class="bg-gray-50 new-gift-section" style="background: #f9fafb;">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 lg:py-24">
+            <!-- grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 items-center - 모바일: 세로 배치(grid-cols-1), 태블릿 이상: 가로 배치(md:grid-cols-2) -->
+            <div class="new-gift-container">
+              <!-- 왼쪽: 이미지 영역 (모바일: 위에 표시, PC: 왼쪽) -->
+              <!-- w-full max-w-lg mx-auto md:mx-0 - 모바일: 중앙 정렬, PC: 왼쪽 정렬 -->
+              <div class="new-gift-image">
                 <img 
                   src="./38.png" 
                   alt="코어위브 스테이킹 수익" 
-                  class="w-full max-w-lg mx-auto rounded-lg shadow-xl"
-                  style="width: 100%; max-width: 32rem; margin: 0 auto; border-radius: 0.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);"
+                  class="w-full max-w-lg rounded-lg shadow-xl"
                 />
               </div>
               
-              <!-- 오른쪽: 텍스트 영역 (모바일에서는 아래에 표시) -->
-              <!-- text-4xl sm:text-5xl font-bold text-gray-900 - 제목 스타일 -->
-              <!-- text-lg text-gray-600 leading-relaxed - 서브텍스트 스타일 -->
-              <div class="order-1 md:order-2">
-                <h2 class="text-4xl sm:text-5xl font-bold text-gray-900" style="font-size: 2.25rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem; line-height: 1.2;">
+              <!-- 오른쪽: 텍스트 영역 (모바일: 아래에 표시, PC: 오른쪽) -->
+              <!-- w-full md:w-1/2 text-center md:text-left - 모바일: 전체 너비 중앙 정렬, PC: 절반 너비 왼쪽 정렬 -->
+              <!-- text-3xl sm:text-4xl lg:text-5xl font-bold - 제목 반응형 크기 -->
+              <!-- text-base sm:text-lg leading-relaxed - 본문 반응형 크기 -->
+              <div class="new-gift-text">
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900">
                   수익이라는 새로운 선물
                 </h2>
-                <div class="text-lg text-gray-600 leading-relaxed" style="font-size: 1.125rem; color: #4b5563; line-height: 1.75;">
+                <div class="text-base sm:text-lg leading-relaxed text-gray-600">
                   <p style="margin-bottom: 1rem;">
                     코어위브 스테이킹은 단순한 보상 그 이상입니다.
                   </p>

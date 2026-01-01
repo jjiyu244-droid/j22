@@ -3248,6 +3248,119 @@ textarea::placeholder {
   }
 }
 
+/* New Gift Section: 수익이라는 새로운 선물 섹션 스타일 */
+/* grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 items-center - 모바일: 세로 배치, 태블릿 이상: 가로 배치 */
+.new-gift-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  /* grid-cols-1 - 모바일에서 세로 배치 (1열) */
+  gap: 2rem;
+  /* gap-8 - 모바일에서 간격 2rem */
+  align-items: center;
+  /* items-center - 수직 중앙 정렬 */
+}
+
+/* w-full max-w-lg mx-auto - 모바일: 이미지 중앙 정렬 */
+.new-gift-image {
+  width: 100%;
+  order: 1;
+  /* order-1 - 모바일과 PC 모두 첫 번째 순서 */
+}
+
+.new-gift-image img {
+  width: 100%;
+  max-width: 32rem;
+  /* max-w-lg - 최대 너비 32rem */
+  margin-left: auto;
+  margin-right: auto;
+  /* mx-auto - 모바일에서 중앙 정렬 */
+  border-radius: 0.5rem;
+  /* rounded-lg - 둥근 모서리 */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  /* shadow-xl - 그림자 효과 */
+}
+
+/* w-full text-center - 모바일: 텍스트 전체 너비, 중앙 정렬 */
+.new-gift-text {
+  width: 100%;
+  order: 2;
+  /* order-2 - 모바일과 PC 모두 두 번째 순서 */
+  text-align: center;
+  /* text-center - 모바일에서 중앙 정렬 */
+}
+
+.new-gift-text h2 {
+  font-size: 1.875rem;
+  /* text-3xl - 모바일에서 제목 크기 1.875rem */
+  font-weight: 700;
+  /* font-bold - 굵은 글씨 */
+  color: #111827;
+  /* text-gray-900 - 진한 회색 */
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.new-gift-text div {
+  font-size: 1rem;
+  /* text-base - 모바일에서 본문 크기 1rem */
+  color: #4b5563;
+  /* text-gray-600 - 중간 회색 */
+  line-height: 1.75;
+  /* leading-relaxed - 여유로운 줄 간격 */
+}
+
+/* sm: (640px 이상) - 태블릿 반응형 */
+@media (min-width: 640px) {
+  .new-gift-text h2 {
+    font-size: 2.25rem;
+    /* sm:text-4xl - 640px 이상에서 제목 크기 2.25rem */
+  }
+
+  .new-gift-text div {
+    font-size: 1.125rem;
+    /* sm:text-lg - 640px 이상에서 본문 크기 1.125rem */
+  }
+}
+
+/* md: (768px 이상) - 데스크톱 반응형 */
+/* grid grid-cols-1 md:grid-cols-2 - 태블릿 이상에서 가로 배치 (2열) */
+@media (min-width: 768px) {
+  .new-gift-container {
+    grid-template-columns: 1fr 1fr;
+    /* md:grid-cols-2 - 768px 이상에서 가로 배치 (2열) */
+    gap: 4rem;
+    /* gap-8 - 768px 이상에서 간격 2rem (기본값 유지) */
+  }
+
+  /* md:mx-0 - 768px 이상에서 이미지 왼쪽 정렬 */
+  .new-gift-image img {
+    margin-left: 0;
+    margin-right: 0;
+    /* md:mx-0 - PC에서 왼쪽 정렬 */
+  }
+
+  /* md:w-1/2 md:text-left - 768px 이상에서 텍스트 절반 너비, 왼쪽 정렬 */
+  .new-gift-text {
+    width: 50%;
+    /* md:w-1/2 - PC에서 절반 너비 */
+    text-align: left;
+    /* md:text-left - PC에서 왼쪽 정렬 */
+  }
+}
+
+/* lg: (1024px 이상) - 큰 화면 반응형 */
+@media (min-width: 1024px) {
+  .new-gift-container {
+    gap: 4rem;
+    /* lg:gap-16 - 1024px 이상에서 간격 4rem */
+  }
+
+  .new-gift-text h2 {
+    font-size: 3rem;
+    /* lg:text-5xl - 1024px 이상에서 제목 크기 3rem */
+  }
+}
+
 /* md (768px 이상) - 반응형 스타일 추가 */
 /* md:px-12 - 768px 이상에서 좌우 패딩 48px */
 @media (min-width: 768px) {
