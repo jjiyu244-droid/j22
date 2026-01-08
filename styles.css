@@ -1961,8 +1961,8 @@ textarea::placeholder {
 
   /* 모바일(768px 이하)에서 hero-image-area 상단 여백 추가 (버튼과 모델 이미지 사이 간격 확보) */
   .hero-image-area {
-    /* margin-top: 32px - 버튼과 모델 이미지 사이 충분한 간격 확보 (24px 이상) */
-    margin-top: 32px !important;
+    /* margin-top: 48px - 버튼과 모델 이미지 사이 충분한 간격 확보 (32px → 48px, 글자 크기 증가 반영) */
+    margin-top: 48px !important;
   }
 
   /* 모바일(768px 이하)에서 person-image 상단 마진 초기화 (wrapper에만 margin-top 적용) */
@@ -2496,14 +2496,18 @@ textarea::placeholder {
   box-sizing: border-box;
   /* box-sizing: border-box - padding 포함하여 전체 너비 계산 */
   overflow: hidden;
-  /* overflow: hidden - 데스크톱에서 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 (08ff96e 이전 상태로 복구) */
-  max-height: 70vh;
-  /* max-height: 70vh - 데스크톱에서 섹션이 화면 높이의 70% 이하로 강제 제한하여 컴팩트한 레이아웃 유지 (08ff96e 이전 상태로 복구) */
+  /* overflow: hidden - 데스크톱에서 이미지가 커지거나 위치가 바뀌어도 전체 섹션에 스크롤바가 생기지 않도록 */
+  min-height: auto;
+  /* min-height: auto - 전체 높이 자동 조절 */
+  height: auto;
+  /* height: auto - 콘텐츠에 맞게 자동 높이 조절 */
   display: flex;
   padding: 48px;
   /* padding: 48px - 전체 패딩 설정 */
   padding-top: 40px !important;
   /* padding-top: 40px !important - 화면 상단에 더 가깝게 붙도록 상단 여백 줄임 */
+  padding-bottom: 60px !important;
+  /* padding-bottom: 60px !important - 하단 여백 확대하여 버튼과 이미지 사이 간격 확보 */
   align-items: flex-start !important;
   /* align-items: flex-start !important - 핵심: 전체를 위쪽 기준으로 정렬 */
 }
@@ -2550,9 +2554,10 @@ textarea::placeholder {
   .pre-login-welcome.hero-section-container,
   section.hero-section-container,
   section.pre-login-welcome.hero-section-container {
-    /* 데스크톱에서만 overflow: hidden, max-height: 70vh 적용 */
+    /* 데스크톱에서만 overflow: hidden 적용, 높이는 자동 조절 */
     overflow: hidden;
-    max-height: 70vh;
+    min-height: auto;
+    height: auto;
   }
 }
 
@@ -2604,8 +2609,8 @@ textarea::placeholder {
 /* 변경 전: 하나의 <p> 태그에 <br /> 태그 사용 → 브라우저가 자동으로 줄을 넘김 */
 /* 변경 후: 독립된 <div> 태그로 분리, display: block, white-space: nowrap → 한 줄에 하나씩만 나오게 강제 */
 .hero-main-copy-line1 {
-  font-size: 56px;
-  /* font-size: 56px - 메인 타이틀 크기 확대, 웅장하게 */
+  font-size: 59px;
+  /* font-size: 59px - 메인 타이틀 크기 확대, 웅장하게 */
   font-weight: 800;
   /* font-weight: 800 - 아주 크고 굵게 강조 */
   color: #1e293b;
@@ -2627,8 +2632,8 @@ textarea::placeholder {
 /* 변경 전: 하나의 <p> 태그에 <br /> 태그 사용 → 브라우저가 자동으로 줄을 넘김 */
 /* 변경 후: 독립된 <div> 태그로 분리, display: block, white-space: nowrap → 한 줄에 하나씩만 나오게 강제 */
 .hero-main-copy-line2 {
-  font-size: 56px;
-  /* font-size: 56px - 메인 타이틀 크기 확대, 웅장하게 */
+  font-size: 59px;
+  /* font-size: 59px - 메인 타이틀 크기 확대, 웅장하게 */
   font-weight: 800;
   /* font-weight: 800 - 아주 크고 굵게 강조 */
   color: #1e293b;
@@ -2650,8 +2655,8 @@ textarea::placeholder {
 /* 변경 전: margin-top: 15px → 타이틀과의 간격이 너무 벌어짐 */
 /* 변경 후: margin-top: 12px → 타이틀과 자연스럽게 이어지도록 간격을 좁혀서 배치 */
 .hero-sub-copy-line1 {
-  font-size: 24px;
-  /* font-size: 24px - 타이틀 바로 아래에 배치, 메인 타이틀보다는 작게 */
+  font-size: 26px;
+  /* font-size: 26px - 타이틀 바로 아래에 배치, 메인 타이틀보다는 작게 */
   font-weight: 600;
   /* font-weight: 600 - 적당한 굵기 */
   color: #0052CC;
@@ -2670,8 +2675,8 @@ textarea::placeholder {
 /* 변경 전: margin-top: 10px → 간격이 너무 벌어짐 */
 /* 변경 후: margin-top: 8px → 타이틀과 자연스럽게 이어지도록 간격을 좁혀서 배치 */
 .hero-sub-copy-line2 {
-  font-size: 16px;
-  /* font-size: 16px - 서브 텍스트 크기 축소, 상대적으로 작게 설정하여 시각적 계층 구조 생성 */
+  font-size: 18px;
+  /* font-size: 18px - 서브 텍스트 크기 확대, 상대적으로 작게 설정하여 시각적 계층 구조 생성 */
   font-weight: 400;
   /* font-weight: 400 - 작은 글씨는 가늘게 */
   color: #666;
@@ -2688,10 +2693,10 @@ textarea::placeholder {
 
 /* 서브 카피 3행 스타일 (5번 줄: 복잡한 절차 없이 클릭 한 번으로 극대화된 스테이킹 보상을 경험하실 수 있습니다.) */
 /* 변경 전: 없음 */
-/* 변경 후: font-size: 16px, color: #666 → 서브 텍스트 크기 축소, 색상 부드럽게 조정 */
+/* 변경 후: font-size: 18px, color: #666 → 서브 텍스트 크기 확대, 색상 부드럽게 조정 */
 .hero-sub-copy-line3 {
-  font-size: 16px;
-  /* font-size: 16px - 서브 텍스트 크기 축소 */
+  font-size: 18px;
+  /* font-size: 18px - 서브 텍스트 크기 확대 */
   font-weight: 400;
   /* font-weight: 400 - 작은 글씨는 가늘게 */
   color: #666;
@@ -2716,8 +2721,8 @@ textarea::placeholder {
   /* justify-content: flex-start - 좌측 정렬 유지 */
   align-self: flex-start;
   /* align-self: flex-start - flex-start 정렬 */
-  margin-top: 30px;
-  /* margin-top: 30px - 마지막 문장과 버튼 사이의 간격 유지 */
+  margin-top: 70px;
+  /* margin-top: 70px - 마지막 문장과 버튼 사이의 간격 확대 (30px → 70px, 40px 증가) */
   margin-left: 150px;
   /* margin-left: 150px - 버튼을 우측으로 이동하여 상단 문장의 중앙 지점에 위치 */
 }
@@ -3035,7 +3040,8 @@ textarea::placeholder {
     width: 100% !important;
     justify-content: center !important;
     margin-left: 0 !important;
-    margin-top: 24px !important;
+    margin-top: 40px !important;
+    /* margin-top: 40px - 글자 크기 증가에 따라 버튼 여백 확대 (24px → 40px) */
   }
 
   /* 9. hero-image-area - w-full flex justify-center + relative 강제 + 하단 여백 최소화 + 상단 여백 추가 */
@@ -3053,8 +3059,8 @@ textarea::placeholder {
     /* overflow-visible - overflow-hidden 제거 (잘림 방지) */
     overflow: visible !important;
     padding: 0 !important;
-    /* margin-top: 32px - 버튼과 모델 이미지 사이 충분한 간격 확보 (24px 이상) */
-    margin-top: 32px !important;
+    /* margin-top: 48px - 버튼과 모델 이미지 사이 충분한 간격 확보 (32px → 48px, 글자 크기 증가 반영) */
+    margin-top: 48px !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
     /* margin-bottom: 0 - 모델 이미지가 섹션 끝단에 딱 맞게 */
