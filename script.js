@@ -402,7 +402,7 @@ async function initFirebase() {
           `;
           
           try {
-            // 어드민 확인 (여러 도메인 형식 지원)
+            // 어드민 확인 (Firestore role 필드 확인)
             const adminUsername = 'jjiyu244';
             const adminEmails = [
               `${adminUsername}@corestaker.local`,
@@ -410,13 +410,40 @@ async function initFirebase() {
               `${adminUsername}@gmail.com`
             ];
             const userEmail = user.email ? user.email.toLowerCase() : '';
-            const userIsAdmin = adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
             
-            console.log('🔍 [어드민 체크]', {
-              userEmail,
-              adminEmails,
-              userIsAdmin
-            });
+            // Firestore에서 사용자 정보를 가져와서 role 필드 확인
+            let userIsAdmin = false;
+            try {
+              const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+              const userRef = doc(db, 'users', user.uid);
+              const userSnap = await getDoc(userRef);
+              
+              if (userSnap.exists()) {
+                const userData = userSnap.data();
+                // role 필드가 'admin'이거나 username이 관리자 username이거나 이메일이 관리자 이메일 목록에 있으면 관리자
+                userIsAdmin = userData.role === 'admin' || 
+                             userData.username === adminUsername || 
+                             adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
+                
+                console.log('🔍 [어드민 체크] Firestore 확인:', {
+                  userEmail,
+                  uid: user.uid,
+                  userData: userData,
+                  userIsAdmin
+                });
+              } else {
+                // Firestore에 사용자 문서가 없으면 이메일 기반으로만 체크
+                userIsAdmin = adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
+                console.log('🔍 [어드민 체크] Firestore 문서 없음, 이메일 기반 체크:', {
+                  userEmail,
+                  userIsAdmin
+                });
+              }
+            } catch (error) {
+              console.error('🔍 [어드민 체크] Firestore 조회 실패:', error);
+              // 에러 발생 시 이메일 기반으로만 체크
+              userIsAdmin = adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
+            }
             
             if (!userIsAdmin) {
               // 관리자가 아니면 로그아웃
