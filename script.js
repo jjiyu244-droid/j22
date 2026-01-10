@@ -1186,26 +1186,36 @@ async function setupLogin() {
       return;
     }
     
-    // username 유효성 검사 (영문, 숫자, 언더스코어만 허용)
-    const usernamePattern = /^[A-Za-z0-9_]+$/;
-    if (!usernamePattern.test(username)) {
-      if (statusText) {
-        statusText.textContent = '아이디는 영문, 숫자, 언더스코어(_)만 사용 가능합니다.';
-      }
-      return;
-    }
-    
     // 🔍 [디버깅] 로그인 함수 시작 - 입력받은 원본 아이디값
     console.log('🔐 [로그인 시작] 입력받은 원본 아이디:', username);
     
-    // username을 이메일 형식으로 변환 (단일 형식만 사용: @corestaker.local)
-    let email = usernameToEmail(username);
+    // 입력값이 이메일 형식인지 확인 (@ 포함 여부)
+    const isEmailFormat = username.includes('@');
+    let email = null;
     
-    if (!email) {
-      if (statusText) {
-        statusText.textContent = '아이디는 영문, 숫자, 언더스코어(_)만 사용 가능합니다.';
+    if (isEmailFormat) {
+      // 이메일 형식인 경우: 직접 사용 (관리자 계정 등)
+      email = username.toLowerCase().trim();
+      console.log('🔐 [이메일 형식 감지] 직접 사용:', email);
+    } else {
+      // username 형식인 경우: 유효성 검사 후 이메일로 변환
+      const usernamePattern = /^[A-Za-z0-9_]+$/;
+      if (!usernamePattern.test(username)) {
+        if (statusText) {
+          statusText.textContent = '아이디는 영문, 숫자, 언더스코어(_)만 사용 가능합니다.';
+        }
+        return;
       }
-      return;
+      
+      // username을 이메일 형식으로 변환 (단일 형식만 사용: @corestaker.local)
+      email = usernameToEmail(username);
+      
+      if (!email) {
+        if (statusText) {
+          statusText.textContent = '아이디는 영문, 숫자, 언더스코어(_)만 사용 가능합니다.';
+        }
+        return;
+      }
     }
     
     // 🔍 [디버깅] Firebase Auth 호출 직전 - 실제로 전송되는 credential 정보
@@ -1238,49 +1248,62 @@ async function setupLogin() {
       }
       
       // 🔥 여러 도메인 시도 (기존 계정 호환성)
-      // Firebase Auth에 실제로 존재하는 계정 형식을 찾기 위해 여러 도메인 시도
+      // 이메일 형식이면 직접 시도, username 형식이면 여러 도메인 시도
       let result = null;
       let loginError = null;
       const attemptedEmails = [email]; // 시도한 이메일 추적
       
-      // 1차 시도: @corestaker.local (새 형식)
-      try {
-        console.log('🔐 [로그인 시도 1] @corestaker.local:', email);
-        result = await signInWithEmailAndPassword(currentAuth, email, password);
-        console.log('✅ [로그인 성공] @corestaker.local:', email);
-      } catch (error1) {
-        console.log('⚠️ [로그인 실패 1] @corestaker.local:', error1.code);
-        loginError = error1;
-        
-        // 2차 시도: @gmail.com (관리자 계정 등)
-        if (error1.code === 'auth/user-not-found' || 
-            error1.code === 'auth/wrong-password' || 
-            error1.code === 'auth/invalid-credential') {
-          const emailGmail = `${username.toLowerCase()}@gmail.com`;
-          attemptedEmails.push(emailGmail);
-          try {
-            console.log('🔐 [로그인 시도 2] @gmail.com:', emailGmail);
-            result = await signInWithEmailAndPassword(currentAuth, emailGmail, password);
-            email = emailGmail; // 성공한 이메일로 업데이트
-            console.log('✅ [로그인 성공] @gmail.com:', email);
-          } catch (error2) {
-            console.log('⚠️ [로그인 실패 2] @gmail.com:', error2.code);
-            loginError = error2;
-            
-            // 3차 시도: @temp.com (기존 형식)
-            if (error2.code === 'auth/user-not-found' || 
-                error2.code === 'auth/wrong-password' || 
-                error2.code === 'auth/invalid-credential') {
-              const emailTemp = `${username.toLowerCase()}@temp.com`;
-              attemptedEmails.push(emailTemp);
-              try {
-                console.log('🔐 [로그인 시도 3] @temp.com:', emailTemp);
-                result = await signInWithEmailAndPassword(currentAuth, emailTemp, password);
-                email = emailTemp; // 성공한 이메일로 업데이트
-                console.log('✅ [로그인 성공] @temp.com:', email);
-              } catch (error3) {
-                console.log('⚠️ [로그인 실패 3] @temp.com:', error3.code);
-                loginError = error3;
+      if (isEmailFormat) {
+        // 이메일 형식인 경우: 입력한 이메일만 직접 시도
+        try {
+          console.log('🔐 [로그인 시도] 이메일 형식 직접 시도:', email);
+          result = await signInWithEmailAndPassword(currentAuth, email, password);
+          console.log('✅ [로그인 성공] 이메일:', email);
+        } catch (error) {
+          console.log('⚠️ [로그인 실패] 이메일:', error.code);
+          loginError = error;
+        }
+      } else {
+        // username 형식인 경우: 여러 도메인 시도
+        // 1차 시도: @corestaker.local (새 형식)
+        try {
+          console.log('🔐 [로그인 시도 1] @corestaker.local:', email);
+          result = await signInWithEmailAndPassword(currentAuth, email, password);
+          console.log('✅ [로그인 성공] @corestaker.local:', email);
+        } catch (error1) {
+          console.log('⚠️ [로그인 실패 1] @corestaker.local:', error1.code);
+          loginError = error1;
+          
+          // 2차 시도: @gmail.com (관리자 계정 등)
+          if (error1.code === 'auth/user-not-found' || 
+              error1.code === 'auth/wrong-password' || 
+              error1.code === 'auth/invalid-credential') {
+            const emailGmail = `${username.toLowerCase()}@gmail.com`;
+            attemptedEmails.push(emailGmail);
+            try {
+              console.log('🔐 [로그인 시도 2] @gmail.com:', emailGmail);
+              result = await signInWithEmailAndPassword(currentAuth, emailGmail, password);
+              email = emailGmail; // 성공한 이메일로 업데이트
+              console.log('✅ [로그인 성공] @gmail.com:', email);
+            } catch (error2) {
+              console.log('⚠️ [로그인 실패 2] @gmail.com:', error2.code);
+              loginError = error2;
+              
+              // 3차 시도: @temp.com (기존 형식)
+              if (error2.code === 'auth/user-not-found' || 
+                  error2.code === 'auth/wrong-password' || 
+                  error2.code === 'auth/invalid-credential') {
+                const emailTemp = `${username.toLowerCase()}@temp.com`;
+                attemptedEmails.push(emailTemp);
+                try {
+                  console.log('🔐 [로그인 시도 3] @temp.com:', emailTemp);
+                  result = await signInWithEmailAndPassword(currentAuth, emailTemp, password);
+                  email = emailTemp; // 성공한 이메일로 업데이트
+                  console.log('✅ [로그인 성공] @temp.com:', email);
+                } catch (error3) {
+                  console.log('⚠️ [로그인 실패 3] @temp.com:', error3.code);
+                  loginError = error3;
+                }
               }
             }
           }
