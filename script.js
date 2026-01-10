@@ -3486,7 +3486,7 @@ async function renderAdminDashboard(users) {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
           <div>
             <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #ffffff;">
-              회원 #${idx + 1} · ${getEmailDisplayName(u.email)}
+              ${getEmailDisplayName(u.email)}
             </div>
             <div style="font-size: 11px; color: #ffffff;">
               UID: ${u.uid.substring(0, 16)}...
@@ -4555,7 +4555,7 @@ async function renderAdminDashboardContent(users, container) {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
           <div>
             <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #ffffff;">
-              회원 #${idx + 1} · ${getEmailDisplayName(u.email)}
+              ${getEmailDisplayName(u.email)}
             </div>
             <div style="font-size: 11px; color: #ffffff;">
               UID: ${u.uid.substring(0, 16)}...
