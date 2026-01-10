@@ -3525,7 +3525,7 @@ async function renderAdminDashboard(users) {
             </div>
             <div style="font-size: 10px; color: #ffffff; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
               MPY: ${mpy}%<br/>
-              예상 월: ${monthlyReward.toFixed(symbol === 'XRP' ? 2 : 6)}
+              월: ${monthlyReward.toFixed(symbol === 'XRP' ? 2 : 6)}
             </div>
             <button 
               class="btn-primary" 
@@ -4594,7 +4594,7 @@ async function renderAdminDashboardContent(users, container) {
             </div>
             <div style="font-size: 10px; color: #ffffff; margin-bottom: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
               MPY: ${mpy}%<br/>
-              예상 월: ${monthlyReward.toFixed(symbol === 'XRP' ? 2 : 6)}
+              월: ${monthlyReward.toFixed(symbol === 'XRP' ? 2 : 6)}
             </div>
             <button 
               class="btn-primary" 
