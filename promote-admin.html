@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 권한 승격 도우미</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.find {
+            background: #2196F3;
+        }
+        button.find:hover {
+            background: #0b7dda;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+        .info {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ffeaa7;
+        }
+        .user-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #b3d9ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>관리자 권한 승격 도우미</h1>
+        
+        <div class="info">
+            <strong>사용 방법:</strong><br>
+            1. 먼저 <code>jjiu151@temp.com</code>으로 로그인하세요.<br>
+            2. 아래 "현재 로그인한 사용자 확인" 버튼을 클릭하세요.<br>
+            3. "관리자 권한 부여" 버튼을 클릭하세요.
+        </div>
+
+        <div id="userInfo" class="user-info" style="display: none;">
+            <strong>현재 로그인한 사용자:</strong><br>
+            <span id="userEmail"></span><br>
+            <span id="userUid"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="email">또는 이메일 주소로 직접 입력:</label>
+            <input type="email" id="email" value="jjiu151@temp.com" placeholder="jjiu151@temp.com">
+        </div>
+
+        <button class="find" onclick="findUserByEmail()">이메일로 사용자 찾기</button>
+        <button onclick="checkCurrentUser()">현재 로그인한 사용자 확인</button>
+        <button onclick="promoteToAdmin()">관리자 권한 부여</button>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js';
+        import { 
+            getFirestore, 
+            collection, 
+            query, 
+            where, 
+            getDocs,
+            doc,
+            getDoc,
+            setDoc,
+            updateDoc
+        } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: 'AIzaSyBvb8p8PFmeIh3ZVyWqWk1RQLBZyAUpfk4',
+            authDomain: 'j22j22.firebaseapp.com',
+            projectId: 'j22j22',
+            storageBucket: 'j22j22.firebasestorage.app',
+            messagingSenderId: '874202688810',
+            appId: '1:874202688810:web:d384f6ea7cc4dcfb0b4253',
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let targetUid = null;
+
+        window.checkCurrentUser = function() {
+            const user = auth.currentUser;
+            if (user) {
+                targetUid = user.uid;
+                document.getElementById('userEmail').textContent = `이메일: ${user.email}`;
+                document.getElementById('userUid').textContent = `UID: ${user.uid}`;
+                document.getElementById('userInfo').style.display = 'block';
+                showMessage(`✅ 현재 로그인한 사용자: ${user.email} (UID: ${user.uid})`, 'success');
+            } else {
+                showMessage('❌ 로그인한 사용자가 없습니다. 먼저 jjiu151@temp.com으로 로그인해주세요.', 'error');
+            }
+        };
+
+        window.findUserByEmail = async function() {
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const messageDiv = document.getElementById('message');
+
+            if (!email) {
+                showMessage('이메일 주소를 입력해주세요.', 'error');
+                return;
+            }
+
+            try {
+                messageDiv.textContent = '사용자 찾는 중...';
+                messageDiv.className = 'message info';
+                messageDiv.style.display = 'block';
+
+                // Firestore에서 이메일로 사용자 찾기 (users 컬렉션에서 email 필드로 검색)
+                // 주의: Firestore 쿼리는 인덱스가 필요할 수 있습니다
+                const usersRef = collection(db, 'users');
+                const q = query(usersRef, where('email', '==', email));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const userDoc = querySnapshot.docs[0];
+                    targetUid = userDoc.id;
+                    const userData = userDoc.data();
+                    
+                    document.getElementById('userEmail').textContent = `이메일: ${email}`;
+                    document.getElementById('userUid').textContent = `UID: ${targetUid}`;
+                    document.getElementById('userInfo').style.display = 'block';
+                    
+                    showMessage(`✅ 사용자를 찾았습니다! UID: ${targetUid}`, 'success');
+                } else {
+                    // Firestore에 사용자 문서가 없을 수 있음
+                    // Firebase Auth에서 직접 찾기 시도
+                    showMessage('⚠️ Firestore에서 사용자를 찾을 수 없습니다. Firebase Auth에 계정이 있는지 확인하고, 먼저 로그인을 시도해주세요. 로그인 후 Firestore에 사용자 문서가 자동으로 생성됩니다.', 'error');
+                }
+            } catch (error) {
+                console.error('사용자 찾기 오류:', error);
+                if (error.code === 'failed-precondition') {
+                    showMessage('❌ Firestore 인덱스가 필요합니다. Firebase Console → Firestore → Indexes에서 인덱스를 생성해주세요.', 'error');
+                } else {
+                    showMessage(`❌ 오류: ${error.message}`, 'error');
+                }
+            }
+        };
+
+        window.promoteToAdmin = async function() {
+            const messageDiv = document.getElementById('message');
+
+            // UID가 없으면 현재 로그인한 사용자 확인
+            if (!targetUid) {
+                const user = auth.currentUser;
+                if (user) {
+                    targetUid = user.uid;
+                } else {
+                    showMessage('❌ 사용자 UID를 찾을 수 없습니다. 먼저 "현재 로그인한 사용자 확인" 또는 "이메일로 사용자 찾기"를 실행해주세요.', 'error');
+                    return;
+                }
+            }
+
+            try {
+                messageDiv.textContent = '관리자 권한 부여 중...';
+                messageDiv.className = 'message info';
+                messageDiv.style.display = 'block';
+
+                const userRef = doc(db, 'users', targetUid);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    // 기존 문서 업데이트
+                    await updateDoc(userRef, {
+                        role: 'admin',
+                        username: 'jjiu151' // username도 설정
+                    });
+                    showMessage(`✅ 관리자 권한이 부여되었습니다! UID: ${targetUid}`, 'success');
+                } else {
+                    // 문서가 없으면 생성
+                    const user = auth.currentUser;
+                    await setDoc(userRef, {
+                        email: user ? user.email : 'jjiu151@temp.com',
+                        username: 'jjiu151',
+                        role: 'admin',
+                        createdAt: new Date()
+                    });
+                    showMessage(`✅ 사용자 문서를 생성하고 관리자 권한을 부여했습니다! UID: ${targetUid}`, 'success');
+                }
+
+                console.log('✅ 관리자 권한 부여 완료:', targetUid);
+            } catch (error) {
+                console.error('관리자 권한 부여 오류:', error);
+                showMessage(`❌ 오류: ${error.message}`, 'error');
+            }
+        };
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+        }
+
+        // 페이지 로드 시 현재 사용자 확인
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                targetUid = user.uid;
+                document.getElementById('userEmail').textContent = `이메일: ${user.email}`;
+                document.getElementById('userUid').textContent = `UID: ${user.uid}`;
+                document.getElementById('userInfo').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

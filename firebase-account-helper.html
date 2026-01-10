@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase 계정 생성/비밀번호 재설정 도우미</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.reset {
+            background: #ff9800;
+        }
+        button.reset:hover {
+            background: #e68900;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Firebase 계정 도우미</h1>
+        
+        <div class="info">
+            <strong>주의사항:</strong><br>
+            - 계정 생성은 Firebase Authentication 설정에 따라 실패할 수 있습니다.<br>
+            - 가장 확실한 방법은 Firebase Console에서 직접 계정을 생성하는 것입니다.<br>
+            - 비밀번호 재설정 이메일은 Firebase 이메일 설정이 활성화되어 있어야 전송됩니다.
+        </div>
+
+        <div class="form-group">
+            <label for="email">이메일 주소:</label>
+            <input type="email" id="email" value="jjiyu244@gmail.com" placeholder="jjiyu244@gmail.com">
+        </div>
+
+        <div class="form-group">
+            <label for="password">비밀번호 (계정 생성 시 사용):</label>
+            <input type="password" id="password" placeholder="최소 6자 이상">
+        </div>
+
+        <button onclick="createAccount()">계정 생성 시도</button>
+        <button class="reset" onclick="sendPasswordReset()">비밀번호 재설정 이메일 전송</button>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js';
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword,
+            sendPasswordResetEmail 
+        } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js';
+
+        const firebaseConfig = {
+            apiKey: 'AIzaSyBvb8p8PFmeIh3ZVyWqWk1RQLBZyAUpfk4',
+            authDomain: 'j22j22.firebaseapp.com',
+            projectId: 'j22j22',
+            storageBucket: 'j22j22.firebasestorage.app',
+            messagingSenderId: '874202688810',
+            appId: '1:874202688810:web:d384f6ea7cc4dcfb0b4253',
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        window.createAccount = async function() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+
+            if (!email || !password) {
+                showMessage('이메일과 비밀번호를 모두 입력해주세요.', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('비밀번호는 최소 6자 이상이어야 합니다.', 'error');
+                return;
+            }
+
+            try {
+                messageDiv.textContent = '계정 생성 중...';
+                messageDiv.className = 'message';
+                messageDiv.style.display = 'block';
+
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                showMessage(`✅ 계정 생성 성공! UID: ${userCredential.user.uid}`, 'success');
+                console.log('계정 생성 성공:', userCredential.user);
+            } catch (error) {
+                let errorMsg = '계정 생성 실패: ';
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMsg += '이미 존재하는 이메일입니다. Firebase Console에서 비밀번호를 직접 변경하거나 재설정 이메일을 전송해주세요.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg += '유효하지 않은 이메일 형식입니다.';
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    errorMsg += '이메일/비밀번호 인증이 활성화되지 않았습니다. Firebase Console → Authentication → Sign-in method에서 활성화해주세요.';
+                } else {
+                    errorMsg += error.message;
+                }
+                showMessage(errorMsg, 'error');
+                console.error('계정 생성 오류:', error);
+            }
+        };
+
+        window.sendPasswordReset = async function() {
+            const email = document.getElementById('email').value.trim();
+            const messageDiv = document.getElementById('message');
+
+            if (!email) {
+                showMessage('이메일 주소를 입력해주세요.', 'error');
+                return;
+            }
+
+            try {
+                messageDiv.textContent = '비밀번호 재설정 이메일 전송 중...';
+                messageDiv.className = 'message';
+                messageDiv.style.display = 'block';
+
+                await sendPasswordResetEmail(auth, email);
+                showMessage('✅ 비밀번호 재설정 이메일이 전송되었습니다. 이메일을 확인해주세요. (스팸 폴더도 확인해주세요)', 'success');
+            } catch (error) {
+                let errorMsg = '비밀번호 재설정 이메일 전송 실패: ';
+                if (error.code === 'auth/user-not-found') {
+                    errorMsg += '해당 이메일 계정이 Firebase에 없습니다. 먼저 계정을 생성해주세요.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg += '유효하지 않은 이메일 형식입니다.';
+                } else {
+                    errorMsg += error.message;
+                }
+                showMessage(errorMsg, 'error');
+                console.error('비밀번호 재설정 오류:', error);
+            }
+        };
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

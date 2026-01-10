@@ -1334,7 +1334,7 @@ async function setupLogin() {
         성공한_이메일: result.user.email
       });
       
-      // 어드민 페이지에서 로그인 성공 후 관리자 계정인지 확인 (여러 도메인 형식 지원)
+      // 어드민 페이지에서 로그인 성공 후 관리자 계정인지 확인 (Firestore role 필드 확인)
       if (isAdminPage) {
         const adminUsername = 'jjiyu244'; // 관리자 username
         const adminEmails = [
@@ -1343,13 +1343,41 @@ async function setupLogin() {
           `${adminUsername}@gmail.com`
         ];
         const userEmail = result.user.email.toLowerCase();
-        const isAdmin = adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
         
-        console.log('🔍 [로그인 후 어드민 체크]', {
-          userEmail,
-          adminEmails,
-          isAdmin
-        });
+        // Firestore에서 사용자 정보를 가져와서 role 필드 확인
+        let isAdmin = false;
+        try {
+          const { doc, getDoc, getFirestore } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+          const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db) || getFirestore();
+          const userRef = doc(firestoreDb, 'users', result.user.uid);
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            // role 필드가 'admin'이거나 username이 관리자 username이거나 이메일이 관리자 이메일 목록에 있으면 관리자
+            isAdmin = userData.role === 'admin' || 
+                     userData.username === adminUsername || 
+                     adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
+            
+            console.log('🔍 [로그인 후 어드민 체크] Firestore 확인:', {
+              userEmail,
+              uid: result.user.uid,
+              userData: userData,
+              isAdmin
+            });
+          } else {
+            // Firestore에 사용자 문서가 없으면 이메일 기반으로만 체크
+            isAdmin = adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
+            console.log('🔍 [로그인 후 어드민 체크] Firestore 문서 없음, 이메일 기반 체크:', {
+              userEmail,
+              isAdmin
+            });
+          }
+        } catch (error) {
+          console.error('🔍 [로그인 후 어드민 체크] Firestore 조회 실패:', error);
+          // 에러 발생 시 이메일 기반으로만 체크
+          isAdmin = adminEmails.some(adminEmail => adminEmail.toLowerCase() === userEmail);
+        }
         
         if (!isAdmin) {
           // 관리자가 아니면 로그아웃
@@ -1358,7 +1386,7 @@ async function setupLogin() {
           if (statusText) {
             statusText.innerHTML = `
               <span style="color: #ef4444;">❌ 관리자 계정만 로그인할 수 있습니다.</span><br/>
-              <span style="color: #ffffff; font-size: 12px;">허용된 계정: ${adminUsername}</span>
+              <span style="color: #ffffff; font-size: 12px;">Firestore에서 role 필드가 'admin'으로 설정되어 있어야 합니다.</span>
             `;
           }
           return;
