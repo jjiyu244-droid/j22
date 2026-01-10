@@ -414,8 +414,9 @@ async function initFirebase() {
             // Firestore에서 사용자 정보를 가져와서 role 필드 확인
             let userIsAdmin = false;
             try {
-              const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
-              const userRef = doc(db, 'users', user.uid);
+              const { doc, getDoc, getFirestore } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+              const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db) || getFirestore();
+              const userRef = doc(firestoreDb, 'users', user.uid);
               const userSnap = await getDoc(userRef);
               
               if (userSnap.exists()) {
@@ -3308,8 +3309,13 @@ async function renderAdminDashboard(users) {
             <tbody>
               ${pendingRequests.map((req) => {
                 const dateStr = req.createdAt?.toDate ? req.createdAt.toDate().toLocaleDateString('ko-KR') : '날짜 없음';
+                // 이스케이프 처리
+                const safeId = (req.id || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const safeUserId = (req.userId || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const safeSymbol = (req.symbol || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const safeEmail = (req.userEmail || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 return `
-                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);" data-request-id="${safeId}">
                     <td style="padding: 12px; white-space: nowrap; color: #ffffff;">${req.userEmail || '이메일 없음'}</td>
                     <td style="padding: 12px; font-weight: 600; white-space: nowrap; color: #ffffff;">${req.symbol}</td>
                     <td style="padding: 12px; text-align: right; font-weight: 600; white-space: nowrap; color: #ffffff;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
@@ -3318,15 +3324,19 @@ async function renderAdminDashboard(users) {
                     <td style="padding: 12px; text-align: center; white-space: nowrap;">
                       <button 
                         class="btn-primary" 
+                        data-request-id="${safeId}"
+                        data-action="approve"
                         style="padding: 8px 16px; font-size: 13px; margin-right: 8px; min-height: 44px; touch-action: manipulation;"
-                        onclick="handleApproveStakingRequest('${req.id}', '${req.userId}', '${req.symbol}', ${req.amount}, '${req.userEmail || ''}')"
+                        onclick="handleApproveStakingRequest('${safeId}', '${safeUserId}', '${safeSymbol}', ${req.amount}, '${safeEmail}')"
                       >
                         승인
                       </button>
                       <button 
                         class="btn-outline" 
+                        data-request-id="${safeId}"
+                        data-action="reject"
                         style="padding: 8px 16px; font-size: 13px; min-height: 44px; touch-action: manipulation;"
-                        onclick="handleRejectStakingRequest('${req.id}')"
+                        onclick="handleRejectStakingRequest('${safeId}')"
                       >
                         거절
                       </button>
@@ -3600,6 +3610,200 @@ async function renderAdminDashboard(users) {
 
   container.innerHTML = html;
 }
+
+// 스테이킹 신청 승인 처리 (전역 함수로 노출)
+window.handleApproveStakingRequest = async function(requestId, userId, symbol, amount, userEmail) {
+  // 중복 클릭 방지 - 버튼 찾기
+  let approveBtn = null;
+  try {
+    // onclick 속성으로 버튼 찾기
+    const allButtons = document.querySelectorAll('button');
+    for (const btn of allButtons) {
+      if (btn.onclick && btn.onclick.toString().includes(`handleApproveStakingRequest('${requestId}'`)) {
+        approveBtn = btn;
+        break;
+      }
+    }
+    // 대안: data 속성으로 찾기 (향후 개선 가능)
+    if (!approveBtn) {
+      approveBtn = document.querySelector(`button[data-request-id="${requestId}"][data-action="approve"]`);
+    }
+  } catch (e) {
+    console.warn('버튼 찾기 실패:', e);
+  }
+
+  if (approveBtn && approveBtn.disabled) {
+    console.log('이미 처리 중인 요청입니다.');
+    return;
+  }
+
+  if (!confirm(`${userEmail || userId}님의 ${symbol} 스테이킹 ${amount.toFixed(symbol === 'XRP' ? 2 : 4)} 신청을 승인하시겠습니까?`)) {
+    return;
+  }
+
+  // 버튼 비활성화
+  if (approveBtn) {
+    approveBtn.disabled = true;
+    approveBtn.textContent = '처리 중...';
+    approveBtn.style.opacity = '0.6';
+    approveBtn.style.cursor = 'not-allowed';
+  }
+
+  try {
+    const { doc, getDoc, updateDoc, setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+    const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db);
+    if (!firestoreDb) {
+      throw new Error('Firestore가 초기화되지 않았습니다.');
+    }
+
+    // 1. 스테이킹 신청 문서 업데이트
+    const requestRef = doc(firestoreDb, 'staking_requests', requestId);
+    const requestSnap = await getDoc(requestRef);
+    
+    if (!requestSnap.exists()) {
+      throw new Error('스테이킹 신청 문서를 찾을 수 없습니다.');
+    }
+
+    await updateDoc(requestRef, {
+      status: 'approved',
+      approvedAt: serverTimestamp(),
+      approvedBy: currentUser?.email || 'admin'
+    });
+
+    // 2. userStakes 컬렉션에 스테이킹 추가
+    const userStakesRef = doc(firestoreDb, 'userStakes', userId);
+    const userStakesSnap = await getDoc(userStakesRef);
+    
+    const currentStakes = userStakesSnap.exists() ? userStakesSnap.data() : {};
+    const currentAmount = currentStakes[symbol] || 0;
+    const newAmount = currentAmount + amount;
+
+    // 기존 stakeStartDates 유지
+    const stakeStartDates = currentStakes.stakeStartDates || {};
+    
+    // 처음 스테이킹을 시작하는 경우 시작일 설정
+    if (currentAmount === 0 && newAmount > 0 && !stakeStartDates[symbol]) {
+      stakeStartDates[symbol] = serverTimestamp();
+    }
+
+    await setDoc(userStakesRef, {
+      ...currentStakes,
+      [symbol]: newAmount,
+      email: userEmail || currentStakes.email || '',
+      stakeStartDates: stakeStartDates,
+      lastUpdated: serverTimestamp()
+    }, { merge: true });
+
+    console.log('✅ 스테이킹 신청 승인 완료:', { requestId, userId, symbol, amount });
+
+    // 3. UI 즉시 업데이트
+    const users = await loadAllUserStakes();
+    const adminPageContent = $('#adminPageContent');
+    if (adminPageContent) {
+      await renderAdminDashboardContent(users, adminPageContent);
+    } else {
+      await renderAdminDashboard(users);
+    }
+
+    alert('✅ 스테이킹 신청이 승인되었습니다.');
+  } catch (error) {
+    console.error('❌ 스테이킹 신청 승인 오류:', error);
+    alert('❌ 승인 처리 중 오류가 발생했습니다: ' + error.message);
+    
+    // 버튼 다시 활성화
+    if (approveBtn) {
+      approveBtn.disabled = false;
+      approveBtn.textContent = '승인';
+      approveBtn.style.opacity = '1';
+      approveBtn.style.cursor = 'pointer';
+    }
+  }
+};
+
+// 스테이킹 신청 거절 처리 (전역 함수로 노출)
+window.handleRejectStakingRequest = async function(requestId) {
+  // 중복 클릭 방지 - 버튼 찾기
+  let rejectBtn = null;
+  try {
+    // onclick 속성으로 버튼 찾기
+    const allButtons = document.querySelectorAll('button');
+    for (const btn of allButtons) {
+      if (btn.onclick && btn.onclick.toString().includes(`handleRejectStakingRequest('${requestId}'`)) {
+        rejectBtn = btn;
+        break;
+      }
+    }
+    // 대안: data 속성으로 찾기 (향후 개선 가능)
+    if (!rejectBtn) {
+      rejectBtn = document.querySelector(`button[data-request-id="${requestId}"][data-action="reject"]`);
+    }
+  } catch (e) {
+    console.warn('버튼 찾기 실패:', e);
+  }
+
+  if (rejectBtn && rejectBtn.disabled) {
+    console.log('이미 처리 중인 요청입니다.');
+    return;
+  }
+
+  if (!confirm('이 스테이킹 신청을 거절하시겠습니까?')) {
+    return;
+  }
+
+  // 버튼 비활성화
+  if (rejectBtn) {
+    rejectBtn.disabled = true;
+    rejectBtn.textContent = '처리 중...';
+    rejectBtn.style.opacity = '0.6';
+    rejectBtn.style.cursor = 'not-allowed';
+  }
+
+  try {
+    const { doc, getDoc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+    const firestoreDb = db || window.db || (window.__firebase && window.__firebase.db);
+    if (!firestoreDb) {
+      throw new Error('Firestore가 초기화되지 않았습니다.');
+    }
+
+    // 스테이킹 신청 문서 업데이트
+    const requestRef = doc(firestoreDb, 'staking_requests', requestId);
+    const requestSnap = await getDoc(requestRef);
+    
+    if (!requestSnap.exists()) {
+      throw new Error('스테이킹 신청 문서를 찾을 수 없습니다.');
+    }
+
+    await updateDoc(requestRef, {
+      status: 'rejected',
+      rejectedAt: serverTimestamp(),
+      rejectedBy: currentUser?.email || 'admin'
+    });
+
+    console.log('✅ 스테이킹 신청 거절 완료:', { requestId });
+
+    // UI 즉시 업데이트
+    const users = await loadAllUserStakes();
+    const adminPageContent = $('#adminPageContent');
+    if (adminPageContent) {
+      await renderAdminDashboardContent(users, adminPageContent);
+    } else {
+      await renderAdminDashboard(users);
+    }
+
+    alert('✅ 스테이킹 신청이 거절되었습니다.');
+  } catch (error) {
+    console.error('❌ 스테이킹 신청 거절 오류:', error);
+    alert('❌ 거절 처리 중 오류가 발생했습니다: ' + error.message);
+    
+    // 버튼 다시 활성화
+    if (rejectBtn) {
+      rejectBtn.disabled = false;
+      rejectBtn.textContent = '거절';
+      rejectBtn.style.opacity = '1';
+      rejectBtn.style.cursor = 'pointer';
+    }
+  }
+};
 
 // 리워드 승인 처리 (전역 함수로 노출)
 window.handleApproveReward = async function(userId, symbol, stakedAmount, rewardAmount, apy) {
@@ -4212,8 +4416,13 @@ async function renderAdminDashboardContent(users, container) {
             <tbody>
               ${pendingRequests.map((req) => {
                 const dateStr = req.createdAt?.toDate ? req.createdAt.toDate().toLocaleDateString('ko-KR') : '날짜 없음';
+                // 이스케이프 처리
+                const safeId = (req.id || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const safeUserId = (req.userId || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const safeSymbol = (req.symbol || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const safeEmail = (req.userEmail || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 return `
-                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);" data-request-id="${safeId}">
                     <td style="padding: 12px; white-space: nowrap; color: #ffffff;">${req.userEmail || '이메일 없음'}</td>
                     <td style="padding: 12px; font-weight: 600; white-space: nowrap; color: #ffffff;">${req.symbol}</td>
                     <td style="padding: 12px; text-align: right; font-weight: 600; white-space: nowrap; color: #ffffff;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
@@ -4222,15 +4431,19 @@ async function renderAdminDashboardContent(users, container) {
                     <td style="padding: 12px; text-align: center; white-space: nowrap;">
                       <button 
                         class="btn-primary" 
+                        data-request-id="${safeId}"
+                        data-action="approve"
                         style="padding: 8px 16px; font-size: 13px; margin-right: 8px; min-height: 44px; touch-action: manipulation;"
-                        onclick="handleApproveStakingRequest('${req.id}', '${req.userId}', '${req.symbol}', ${req.amount}, '${req.userEmail || ''}')"
+                        onclick="handleApproveStakingRequest('${safeId}', '${safeUserId}', '${safeSymbol}', ${req.amount}, '${safeEmail}')"
                       >
                         승인
                       </button>
                       <button 
                         class="btn-outline" 
+                        data-request-id="${safeId}"
+                        data-action="reject"
                         style="padding: 8px 16px; font-size: 13px; min-height: 44px; touch-action: manipulation;"
-                        onclick="handleRejectStakingRequest('${req.id}')"
+                        onclick="handleRejectStakingRequest('${safeId}')"
                       >
                         거절
                       </button>

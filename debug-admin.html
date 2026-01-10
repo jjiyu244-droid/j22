@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 권한 진단 도구</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .info-box {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #b3d9ff;
+        }
+        .error-box {
+            background: #ffe7e7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ffb3b3;
+        }
+        .success-box {
+            background: #e7ffe7;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #b3ffb3;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #4CAF50;
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 관리자 권한 진단 도구</h1>
+        
+        <div class="info-box">
+            <strong>사용 방법:</strong><br>
+            1. 먼저 <code>jjiyu1@corestaker.local</code> 계정으로 로그인하세요.<br>
+            2. 아래 "진단 시작" 버튼을 클릭하세요.<br>
+            3. 결과를 확인하고 필요한 조치를 취하세요.
+        </div>
+
+        <button onclick="runDiagnostics()">🔍 진단 시작</button>
+        <button onclick="fixUserDocument()">🔧 Firestore 문서 수정</button>
+
+        <div id="results"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js';
+        import { 
+            getFirestore, 
+            collection,
+            getDocs,
+            doc,
+            getDoc,
+            setDoc,
+            updateDoc,
+            query,
+            where
+        } from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: 'AIzaSyBvb8p8PFmeIh3ZVyWqWk1RQLBZyAUpfk4',
+            authDomain: 'j22j22.firebaseapp.com',
+            projectId: 'j22j22',
+            storageBucket: 'j22j22.firebasestorage.app',
+            messagingSenderId: '874202688810',
+            appId: '1:874202688810:web:d384f6ea7cc4dcfb0b4253',
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.runDiagnostics = async function() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="info-box">진단 중...</div>';
+
+            const diagnostics = [];
+
+            // 1. 현재 로그인한 사용자 확인
+            const user = auth.currentUser;
+            if (!user) {
+                resultsDiv.innerHTML = `
+                    <div class="error-box">
+                        <h3>❌ 로그인하지 않았습니다</h3>
+                        <p>먼저 jjiyu1@corestaker.local 계정으로 로그인해주세요.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            diagnostics.push({
+                title: '1. Firebase Auth 사용자 정보',
+                status: 'success',
+                data: {
+                    email: user.email,
+                    uid: user.uid,
+                    emailVerified: user.emailVerified
+                }
+            });
+
+            // 2. Firestore에서 UID로 사용자 문서 찾기
+            try {
+                const userRef = doc(db, 'users', user.uid);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    const userData = userSnap.data();
+                    diagnostics.push({
+                        title: '2. Firestore 사용자 문서 (UID로 찾기)',
+                        status: 'success',
+                        data: {
+                            documentId: userSnap.id,
+                            exists: true,
+                            data: userData,
+                            role: userData.role,
+                            username: userData.username,
+                            email: userData.email
+                        }
+                    });
+
+                    // role 확인
+                    if (userData.role === 'admin') {
+                        diagnostics.push({
+                            title: '3. 관리자 권한 확인',
+                            status: 'success',
+                            data: {
+                                role: userData.role,
+                                message: '✅ role 필드가 "admin"으로 설정되어 있습니다!'
+                            }
+                        });
+                    } else {
+                        diagnostics.push({
+                            title: '3. 관리자 권한 확인',
+                            status: 'error',
+                            data: {
+                                role: userData.role || '(없음)',
+                                message: '❌ role 필드가 "admin"이 아닙니다. "admin"으로 설정해야 합니다.'
+                            }
+                        });
+                    }
+                } else {
+                    diagnostics.push({
+                        title: '2. Firestore 사용자 문서 (UID로 찾기)',
+                        status: 'error',
+                        data: {
+                            documentId: user.uid,
+                            exists: false,
+                            message: '❌ UID로 문서를 찾을 수 없습니다. 문서를 생성해야 합니다.'
+                        }
+                    });
+                }
+            } catch (error) {
+                diagnostics.push({
+                    title: '2. Firestore 사용자 문서 조회',
+                    status: 'error',
+                    data: {
+                        error: error.message,
+                        code: error.code
+                    }
+                });
+            }
+
+            // 3. 이메일로 사용자 문서 찾기 (다른 문서 ID일 수 있음)
+            try {
+                const usersRef = collection(db, 'users');
+                const q = query(usersRef, where('email', '==', user.email));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const foundDocs = querySnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        data: doc.data()
+                    }));
+
+                    diagnostics.push({
+                        title: '4. 이메일로 찾은 문서들',
+                        status: querySnapshot.docs.some(d => d.id === user.uid) ? 'success' : 'error',
+                        data: {
+                            documents: foundDocs,
+                            message: querySnapshot.docs.some(d => d.id === user.uid) 
+                                ? '✅ 이메일로 찾은 문서 중 UID와 일치하는 문서가 있습니다.'
+                                : '⚠️ 이메일로 찾은 문서의 ID가 현재 UID와 다릅니다!'
+                        }
+                    });
+                } else {
+                    diagnostics.push({
+                        title: '4. 이메일로 찾은 문서들',
+                        status: 'error',
+                        data: {
+                            message: '❌ 이메일로 문서를 찾을 수 없습니다.'
+                        }
+                    });
+                }
+            } catch (error) {
+                diagnostics.push({
+                    title: '4. 이메일로 문서 검색',
+                    status: 'error',
+                    data: {
+                        error: error.message,
+                        code: error.code,
+                        note: error.code === 'failed-precondition' ? '인덱스가 필요할 수 있습니다.' : ''
+                    }
+                });
+            }
+
+            // 결과 표시
+            let html = '<h2>진단 결과</h2>';
+            diagnostics.forEach((diag, index) => {
+                const boxClass = diag.status === 'success' ? 'success-box' : 'error-box';
+                html += `
+                    <div class="step">
+                        <h3>${diag.title}</h3>
+                        <div class="${boxClass}">
+                            <pre>${JSON.stringify(diag.data, null, 2)}</pre>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // 권장 사항
+            html += `
+                <div class="info-box">
+                    <h3>📋 권장 조치사항:</h3>
+                    <ol>
+                        <li>Firestore의 <code>users</code> 컬렉션에서 문서 ID가 <strong>UID와 일치</strong>하는지 확인하세요.</li>
+                        <li>문서의 <code>role</code> 필드가 정확히 <strong>"admin"</strong> (따옴표 포함)으로 설정되어 있는지 확인하세요.</li>
+                        <li>문서 ID가 UID와 다르다면, 올바른 문서를 수정하거나 새 문서를 생성해야 합니다.</li>
+                        <li>위의 "Firestore 문서 수정" 버튼을 클릭하여 자동으로 수정할 수 있습니다.</li>
+                    </ol>
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+        };
+
+        window.fixUserDocument = async function() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert('먼저 로그인해주세요.');
+                return;
+            }
+
+            try {
+                const userRef = doc(db, 'users', user.uid);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    // 기존 문서 업데이트
+                    await updateDoc(userRef, {
+                        role: 'admin',
+                        email: user.email,
+                        username: 'jjiyu1'
+                    });
+                    alert('✅ 사용자 문서가 업데이트되었습니다!\nrole: admin\n페이지를 새로고침하세요.');
+                } else {
+                    // 새 문서 생성
+                    await setDoc(userRef, {
+                        email: user.email,
+                        username: 'jjiyu1',
+                        role: 'admin',
+                        createdAt: new Date()
+                    });
+                    alert('✅ 사용자 문서가 생성되었습니다!\nrole: admin\n페이지를 새로고침하세요.');
+                }
+            } catch (error) {
+                alert('❌ 오류: ' + error.message);
+                console.error(error);
+            }
+        };
+
+        // 페이지 로드 시 현재 사용자 확인
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log('현재 로그인한 사용자:', user.email, user.uid);
+            }
+        });
+    </script>
+</body>
+</html>
