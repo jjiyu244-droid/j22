@@ -242,6 +242,14 @@ function usernameToEmail(username) {
   }
   return `${cleanUsername}@corestaker.local`;
 }
+
+// 이메일에서 "@" 앞부분만 추출하는 함수 (어드민 페이지 표시용)
+function getEmailDisplayName(email) {
+  if (!email) return '이메일 없음';
+  const atIndex = email.indexOf('@');
+  if (atIndex === -1) return email; // "@"가 없으면 그대로 반환
+  return email.substring(0, atIndex); // "@" 앞부분만 반환
+}
 let userStakes = {
   BTC: 0,
   ETH: 0,
@@ -2391,7 +2399,7 @@ window.viewInquiryDetail = async function(inquiryId) {
           </div>
           <div style="margin-bottom: 20px;">
             <strong style="color: #ffffff; font-size: 12px;">이메일</strong>
-            <p style="margin-top: 4px; color: #ffffff;">${inquiry.email || inquiry.userEmail || '이메일 없음'}</p>
+            <p style="margin-top: 4px; color: #ffffff;">${getEmailDisplayName(inquiry.email || inquiry.userEmail)}</p>
           </div>
           <div style="margin-bottom: 20px;">
             <strong style="color: #ffffff; font-size: 12px;">제목</strong>
@@ -3316,7 +3324,7 @@ async function renderAdminDashboard(users) {
                 const safeEmail = (req.userEmail || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 return `
                   <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);" data-request-id="${safeId}">
-                    <td style="padding: 12px; white-space: nowrap; color: #ffffff;">${req.userEmail || '이메일 없음'}</td>
+                    <td style="padding: 12px; white-space: nowrap; color: #ffffff;">${getEmailDisplayName(req.userEmail)}</td>
                     <td style="padding: 12px; font-weight: 600; white-space: nowrap; color: #ffffff;">${req.symbol}</td>
                     <td style="padding: 12px; text-align: right; font-weight: 600; white-space: nowrap; color: #ffffff;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
                     <td style="padding: 12px; color: #ffffff; white-space: nowrap;">${req.network}</td>
@@ -3420,7 +3428,7 @@ async function renderAdminDashboard(users) {
         return `
               <tr style="border-top: 1px solid rgba(255,255,255,0.05);">
                 <td style="padding: 10px; color: #ffffff;">${dateStr}</td>
-                <td style="padding: 10px; color: #ffffff;">${inq.email || inq.userEmail || '-'}</td>
+                <td style="padding: 10px; color: #ffffff;">${getEmailDisplayName(inq.email || inq.userEmail)}</td>
                 <td style="padding: 10px; font-weight: 500; color: #ffffff;">${inq.subject || '-'}</td>
                 <td style="padding: 10px; text-align: center;">
                   <span style="background: ${statusColor}; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 600;">
@@ -3478,7 +3486,7 @@ async function renderAdminDashboard(users) {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
           <div>
             <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #ffffff;">
-              회원 #${idx + 1} · ${u.email || '이메일 없음'}
+              회원 #${idx + 1} · ${getEmailDisplayName(u.email)}
             </div>
             <div style="font-size: 11px; color: #ffffff;">
               UID: ${u.uid.substring(0, 16)}...
@@ -3637,7 +3645,7 @@ window.handleApproveStakingRequest = async function(requestId, userId, symbol, a
     return;
   }
 
-  if (!confirm(`${userEmail || userId}님의 ${symbol} 스테이킹 ${amount.toFixed(symbol === 'XRP' ? 2 : 4)} 신청을 승인하시겠습니까?`)) {
+  if (!confirm(`${getEmailDisplayName(userEmail) || userId}님의 ${symbol} 스테이킹 ${amount.toFixed(symbol === 'XRP' ? 2 : 4)} 신청을 승인하시겠습니까?`)) {
     return;
   }
 
@@ -4423,7 +4431,7 @@ async function renderAdminDashboardContent(users, container) {
                 const safeEmail = (req.userEmail || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 return `
                   <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);" data-request-id="${safeId}">
-                    <td style="padding: 12px; white-space: nowrap; color: #ffffff;">${req.userEmail || '이메일 없음'}</td>
+                    <td style="padding: 12px; white-space: nowrap; color: #ffffff;">${getEmailDisplayName(req.userEmail)}</td>
                     <td style="padding: 12px; font-weight: 600; white-space: nowrap; color: #ffffff;">${req.symbol}</td>
                     <td style="padding: 12px; text-align: right; font-weight: 600; white-space: nowrap; color: #ffffff;">${req.amount.toFixed(req.symbol === 'XRP' ? 2 : 4)}</td>
                     <td style="padding: 12px; color: #ffffff; white-space: nowrap;">${req.network}</td>
@@ -4547,7 +4555,7 @@ async function renderAdminDashboardContent(users, container) {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
           <div>
             <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #ffffff;">
-              회원 #${idx + 1} · ${u.email || '이메일 없음'}
+              회원 #${idx + 1} · ${getEmailDisplayName(u.email)}
             </div>
             <div style="font-size: 11px; color: #ffffff;">
               UID: ${u.uid.substring(0, 16)}...
